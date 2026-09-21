@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -31,10 +32,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -61,9 +68,14 @@ fun PantryScreen(
         ForkfulLogger.logLifecycle("PantryScreen", "ON_CREATE")
     }
 
+    var searchQuery by remember { mutableStateOf("") }
+
     val pantryItems = MockData.samplePantryItems
     val expiringSoon = pantryItems.filter { item ->
         item.daysUntilExpiry != null && item.daysUntilExpiry <= 2
+    }
+    val visibleItems = pantryItems.filter { item ->
+        item.name.contains(searchQuery, ignoreCase = true)
     }
 
     val scrollState = rememberScrollState()
@@ -144,11 +156,26 @@ fun PantryScreen(
                         tint = TextMuted
                     )
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = "Search or add an item",
-                        color = TextMuted,
-                        fontSize = 15.sp
-                    )
+                    Box(modifier = Modifier.weight(1f)) {
+                        if (searchQuery.isEmpty()) {
+                            Text(
+                                text = "Search or add an item",
+                                color = TextMuted,
+                                fontSize = 15.sp
+                            )
+                        }
+                        BasicTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            singleLine = true,
+                            textStyle = TextStyle(
+                                color = TextCharcoal,
+                                fontSize = 15.sp
+                            ),
+                            cursorBrush = SolidColor(ForestGreen),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             }
 
@@ -198,28 +225,36 @@ fun PantryScreen(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    pantryItems.forEach { item ->
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(PureWhite)
-                                .border(1.dp, Color(0xFFECE7DE), RoundedCornerShape(16.dp))
-                                .clickable {
-                                    ForkfulLogger.logAction("PANTRY_ITEM", "Clicked ${item.name}")
-                                }
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
-                            Text(
-                                text = item.name,
-                                fontSize = 13.sp,
-                                color = TextCharcoal,
-                                fontFamily = FontFamily.Monospace
-                            )
+                if (visibleItems.isEmpty()) {
+                    Text(
+                        text = "No pantry items match \"$searchQuery\"",
+                        color = TextMuted,
+                        fontSize = 14.sp
+                    )
+                } else {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        visibleItems.forEach { item ->
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(PureWhite)
+                                    .border(1.dp, Color(0xFFECE7DE), RoundedCornerShape(16.dp))
+                                    .clickable {
+                                        ForkfulLogger.logAction("PANTRY_ITEM", "Clicked ${item.name}")
+                                    }
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = item.name,
+                                    fontSize = 13.sp,
+                                    color = TextCharcoal,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
                         }
                     }
                 }

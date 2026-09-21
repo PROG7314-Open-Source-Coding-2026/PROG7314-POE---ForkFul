@@ -17,7 +17,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
@@ -33,8 +35,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -46,6 +49,7 @@ import com.emeris.forkful.core.designsystem.ForestGreen
 import com.emeris.forkful.core.designsystem.MintLight
 import com.emeris.forkful.core.designsystem.PureWhite
 import com.emeris.forkful.core.designsystem.TextCharcoal
+import com.emeris.forkful.core.designsystem.TextMuted
 import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.data.repository.MockData
 import com.emeris.forkful.domain.model.Recipe
@@ -62,13 +66,18 @@ fun RecipeBoxScreen(
     }
 
     var selectedTab by remember { mutableStateOf("All") }
+    var searchQuery by remember { mutableStateOf("") }
+    var showSearch by remember { mutableStateOf(false) }
     val tabs = listOf("All", "Saved", "Cooked")
 
-    val displayedRecipes = remember(selectedTab) {
-        when (selectedTab) {
+    val displayedRecipes = remember(selectedTab, searchQuery) {
+        val tabRecipes = when (selectedTab) {
             "Saved" -> MockData.sampleRecipes.filter { it.isSaved }
             "Cooked" -> MockData.sampleRecipes.filter { it.isCooked }
             else -> MockData.sampleRecipes
+        }
+        tabRecipes.filter { recipe ->
+            recipe.title.contains(searchQuery, ignoreCase = true)
         }
     }
 
@@ -109,18 +118,52 @@ fun RecipeBoxScreen(
                     fontWeight = FontWeight.Normal
                 )
 
-                IconButton(onClick = { ForkfulLogger.logAction("RECIPE_BOX", "Search tapped") }) {
+                IconButton(
+                    onClick = {
+                        showSearch = !showSearch
+                        if (!showSearch) searchQuery = ""
+                    }
+                ) {
                     Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
+                        imageVector = if (showSearch) Icons.Default.Close else Icons.Default.Search,
+                        contentDescription = if (showSearch) "Close search" else "Search",
                         tint = ForestGreen
                     )
                 }
             }
 
+            if (showSearch) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 4.dp)
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(PureWhite)
+                        .border(1.dp, BorderLight, RoundedCornerShape(24.dp))
+                        .padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    if (searchQuery.isEmpty()) {
+                        Text(
+                            text = "Search saved recipes",
+                            color = TextMuted,
+                            fontSize = 15.sp
+                        )
+                    }
+                    BasicTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        singleLine = true,
+                        textStyle = TextStyle(color = TextCharcoal, fontSize = 15.sp),
+                        cursorBrush = SolidColor(ForestGreen),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+
             Row(
-                modifier = Modifier
-                    .padding(horizontal = 20.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 tabs.forEach { tab ->
@@ -147,19 +190,38 @@ fun RecipeBoxScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(displayedRecipes) { recipe ->
-                    RecipeGridCard(
-                        recipe = recipe,
-                        onClick = { onRecipeSelected(recipe.id) }
+            if (displayedRecipes.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (searchQuery.isNotBlank()) {
+                            "No recipes match \"$searchQuery\""
+                        } else {
+                            "No recipes in $selectedTab yet"
+                        },
+                        color = TextMuted,
+                        fontSize = 15.sp
                     )
+                }
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(displayedRecipes) { recipe ->
+                        RecipeGridCard(
+                            recipe = recipe,
+                            onClick = { onRecipeSelected(recipe.id) }
+                        )
+                    }
                 }
             }
         }
@@ -193,9 +255,9 @@ fun RecipeGridCard(
 
                 val badgeText = when {
                     recipe.isCooked -> "Cooked"
-                    recipe.id == "r1" -> "Saved today"
+                    recipe.isSaved -> "Saved"
                     recipe.matchPercentage > 90 -> "${recipe.matchPercentage}% match"
-                    else -> "Saved"
+                    else -> "Recipe"
                 }
 
                 Box(

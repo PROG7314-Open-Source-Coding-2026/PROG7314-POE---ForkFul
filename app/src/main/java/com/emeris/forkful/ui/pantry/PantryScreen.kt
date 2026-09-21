@@ -48,6 +48,7 @@ import com.emeris.forkful.core.designsystem.PureWhite
 import com.emeris.forkful.core.designsystem.TextCharcoal
 import com.emeris.forkful.core.designsystem.TextMuted
 import com.emeris.forkful.core.logging.ForkfulLogger
+import com.emeris.forkful.data.repository.MockData
 import com.emeris.forkful.ui.components.ForkfulBottomBar
 import com.emeris.forkful.ui.navigation.Screen
 
@@ -58,6 +59,11 @@ fun PantryScreen(
 ) {
     LaunchedEffect(Unit) {
         ForkfulLogger.logLifecycle("PantryScreen", "ON_CREATE")
+    }
+
+    val pantryItems = MockData.samplePantryItems
+    val expiringSoon = pantryItems.filter { item ->
+        item.daysUntilExpiry != null && item.daysUntilExpiry <= 2
     }
 
     val scrollState = rememberScrollState()
@@ -160,34 +166,21 @@ fun PantryScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(AlertPinkBackground)
-                            .padding(horizontal = 14.dp, vertical = 8.dp)
-                    ) {
-                        Text(
-                            text = "Spinach - 1d",
-                            color = AlertPinkText,
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(AlertPinkBackground)
-                            .padding(horizontal = 14.dp, vertical = 8.dp)
-                    ) {
-                        Text(
-                            text = "Milk - 2d",
-                            color = AlertPinkText,
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                    expiringSoon.forEach { item ->
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(AlertPinkBackground)
+                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = "${item.name} - ${item.daysUntilExpiry}d",
+                                color = AlertPinkText,
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
             }
@@ -210,26 +203,19 @@ fun PantryScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    val pantryItems = listOf(
-                        "Mozzarella", "Flatbread", "Tomatoes", "Olive Oil",
-                        "Garlic", "Basil", "Balsamic Glaze", "Salt",
-                        "Black Pepper", "Onions", "Pasta", "Eggs",
-                        "Flour", "Sugar", "Butter"
-                    )
-
-                    pantryItems.forEach { ingredient ->
+                    pantryItems.forEach { item ->
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(16.dp))
                                 .background(PureWhite)
                                 .border(1.dp, Color(0xFFECE7DE), RoundedCornerShape(16.dp))
                                 .clickable {
-                                    ForkfulLogger.logAction("PANTRY_ITEM", "Clicked $ingredient")
+                                    ForkfulLogger.logAction("PANTRY_ITEM", "Clicked ${item.name}")
                                 }
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
                         ) {
                             Text(
-                                text = ingredient,
+                                text = item.name,
                                 fontSize = 13.sp,
                                 color = TextCharcoal,
                                 fontFamily = FontFamily.Monospace

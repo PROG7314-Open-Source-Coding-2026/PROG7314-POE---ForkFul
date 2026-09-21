@@ -2,6 +2,7 @@ package com.emeris.forkful.ui.recipedetail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
@@ -30,6 +32,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,6 +70,7 @@ fun RecipeDetailScreen(
 
     val recipe = MockData.sampleRecipes.find { it.id == recipeId } ?: MockData.sampleRecipes.first()
     val pantryOwnedCount = recipe.ingredients.count { it.inPantry }
+    var isSaved by remember(recipeId) { mutableStateOf(recipe.isSaved) }
 
     Scaffold(
         bottomBar = {
@@ -86,7 +93,7 @@ fun RecipeDetailScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = recipe.category,
                         fontFamily = FontFamily.Serif,
@@ -111,7 +118,11 @@ fun RecipeDetailScreen(
                 }
             }
 
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
                 item {
                     AsyncImage(
                         model = recipe.imageUrl,
@@ -160,13 +171,24 @@ fun RecipeDetailScreen(
                                 modifier = Modifier
                                     .size(44.dp)
                                     .clip(CircleShape)
-                                    .border(1.dp, BorderLight, CircleShape),
+                                    .border(
+                                        1.dp,
+                                        if (isSaved) ForestGreen else BorderLight,
+                                        CircleShape
+                                    )
+                                    .clickable {
+                                        isSaved = !isSaved
+                                        ForkfulLogger.logAction(
+                                            "RECIPE_DETAIL",
+                                            if (isSaved) "Saved ${recipe.title}" else "Unsaved ${recipe.title}"
+                                        )
+                                    },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.FavoriteBorder,
-                                    contentDescription = "Save",
-                                    tint = TextMuted
+                                    imageVector = if (isSaved) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                    contentDescription = if (isSaved) "Unsave recipe" else "Save recipe",
+                                    tint = if (isSaved) ForestGreen else TextMuted
                                 )
                             }
                         }
@@ -327,7 +349,7 @@ fun RecipeDetailScreen(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(30.dp))
+                    Spacer(modifier = Modifier.height(40.dp))
                 }
             }
         }

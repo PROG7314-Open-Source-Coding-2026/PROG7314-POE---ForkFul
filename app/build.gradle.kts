@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.emeris.forkful"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.emeris.forkful"

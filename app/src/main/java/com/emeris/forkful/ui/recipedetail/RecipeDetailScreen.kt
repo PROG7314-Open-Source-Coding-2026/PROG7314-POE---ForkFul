@@ -63,6 +63,7 @@ fun RecipeDetailScreen(
     }
 
     val recipe = MockData.sampleRecipes.find { it.id == recipeId } ?: MockData.sampleRecipes.first()
+    val pantryOwnedCount = recipe.ingredients.count { it.inPantry }
 
     Scaffold(
         bottomBar = {
@@ -87,16 +88,17 @@ fun RecipeDetailScreen(
             ) {
                 Column {
                     Text(
-                        text = "Italian night",
+                        text = recipe.category,
                         fontFamily = FontFamily.Serif,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = ForestGreen
                     )
                     Text(
-                        text = "12 dishes in this stack",
+                        text = recipe.description,
                         fontSize = 12.sp,
-                        color = TextMuted
+                        color = TextMuted,
+                        maxLines = 1
                     )
                 }
 
@@ -178,7 +180,7 @@ fun RecipeDetailScreen(
                                 .padding(horizontal = 10.dp, vertical = 5.dp)
                         ) {
                             Text(
-                                text = "Pantry: ${recipe.inPantryCount} of ${recipe.totalIngredientsCount} in your pantry",
+                                text = "Pantry: $pantryOwnedCount of ${recipe.ingredients.size} in your pantry",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = ForestGreen
@@ -251,15 +253,24 @@ fun RecipeDetailScreen(
                                 modifier = Modifier
                                     .size(28.dp)
                                     .clip(CircleShape)
-                                    .background(MintLight),
+                                    .background(
+                                        if (ingredient.inPantry) MintLight else Color(0xFFE8E2D6)
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = if (ingredient.inPantry) Color.Transparent else BorderLight,
+                                        shape = CircleShape
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    tint = ForestGreen,
-                                    modifier = Modifier.size(16.dp)
-                                )
+                                if (ingredient.inPantry) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "In pantry",
+                                        tint = ForestGreen,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
                             }
 
                             Spacer(modifier = Modifier.width(14.dp))
@@ -272,7 +283,11 @@ fun RecipeDetailScreen(
                                     color = TextCharcoal
                                 )
                                 Text(
-                                    text = ingredient.quantity,
+                                    text = if (ingredient.inPantry) {
+                                        ingredient.quantity
+                                    } else {
+                                        "${ingredient.quantity}  •  missing"
+                                    },
                                     fontSize = 13.sp,
                                     color = TextMuted
                                 )

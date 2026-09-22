@@ -19,16 +19,15 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,9 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -54,10 +51,12 @@ import com.emeris.forkful.core.designsystem.PureWhite
 import com.emeris.forkful.core.designsystem.TextCharcoal
 import com.emeris.forkful.core.designsystem.TextMuted
 import com.emeris.forkful.core.logging.ForkfulLogger
-import com.emeris.forkful.data.repository.MockData
 import com.emeris.forkful.domain.model.Recipe
+import com.emeris.forkful.domain.model.RecipeBoxFilter
+import com.emeris.forkful.ui.components.ErrorState
 import com.emeris.forkful.ui.components.ForkfulBottomBar
-import com.emeris.forkful.ui.components.rememberPressPop
+import com.emeris.forkful.ui.components.LoadingState
+import com.emeris.forkful.ui.di.containerViewModel
 import com.emeris.forkful.ui.navigation.Screen
 
 @Composable
@@ -69,23 +68,10 @@ fun RecipeBoxScreen(
         ForkfulLogger.logLifecycle("RecipeBoxScreen", "ON_CREATE")
     }
 
-    var selectedTab by remember { mutableStateOf("All") }
-    var searchQuery by remember { mutableStateOf("") }
-    var showSearch by remember { mutableStateOf(false) }
-    val tabs = listOf("All", "Saved", "Cooked")
-    val searchShape = RoundedCornerShape(24.dp)
-    val tabShape = RoundedCornerShape(20.dp)
+    val viewModel = containerViewModel { RecipeBoxViewModel(it.recipeRepository) }
+    val uiState by viewModel.state.collectAsState()
 
-    val displayedRecipes = remember(selectedTab, searchQuery) {
-        val tabRecipes = when (selectedTab) {
-            "Saved" -> MockData.sampleRecipes.filter { it.isSaved }
-            "Cooked" -> MockData.sampleRecipes.filter { it.isCooked }
-            else -> MockData.sampleRecipes
-        }
-        tabRecipes.filter { recipe ->
-            recipe.title.contains(searchQuery, ignoreCase = true)
-        }
-    }
+    var isSearchVisible by remember { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
@@ -108,12 +94,7 @@ fun RecipeBoxScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val menuPop = rememberPressPop(0.88f)
-                IconButton(
-                    onClick = { ForkfulLogger.logAction("DRAWER", "Menu tapped") },
-                    modifier = menuPop.modifier,
-                    interactionSource = menuPop.interactionSource
-                ) {
+                IconButton(onClick = { ForkfulLogger.logAction("DRAWER", "Menu tapped") }) {
                     Icon(
                         imageVector = Icons.Default.Menu,
                         contentDescription = "Menu",
@@ -129,83 +110,80 @@ fun RecipeBoxScreen(
                     fontWeight = FontWeight.Normal
                 )
 
-                val searchPop = rememberPressPop(0.88f)
-                IconButton(
-                    onClick = {
-                        showSearch = !showSearch
-                        if (!showSearch) searchQuery = ""
-                    },
-                    modifier = searchPop.modifier,
-                    interactionSource = searchPop.interactionSource
-                ) {
+                IconButton(onClick = {
+                    isSearchVisible = !isSearchVisible
+                    if (isSearchVisible) ForkfulLogger.logAction("RECIPE_BOX", "Search opened")
+                }) {
                     Icon(
-                        imageVector = if (showSearch) Icons.Default.Close else Icons.Default.Search,
-                        contentDescription = if (showSearch) "Close search" else "Search",
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
                         tint = ForestGreen
                     )
                 }
             }
 
-            if (showSearch) {
-                Box(
+            if (isSearchVisible) {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp, vertical = 4.dp)
-                        .shadow(8.dp, searchShape, spotColor = Color(0x33000000))
-                        .clip(searchShape)
+                        .height(46.dp)
+                        .clip(RoundedCornerShape(23.dp))
                         .background(PureWhite)
-                        .border(1.dp, BorderLight, searchShape)
-                        .height(48.dp)
-                        .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.CenterStart
+                        .border(1.dp, BorderLight, RoundedCornerShape(23.dp))
+                        .padding(horizontal = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (searchQuery.isEmpty()) {
-                        Text(
-                            text = "Search saved recipes",
-                            color = TextMuted,
-                            fontSize = 15.sp
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                        tint = TextMuted,
+                        modifier = Modifier.height(18.dp)
+                    )
+                    Spacer(modifier = Modifier.padding(8.dp))
                     BasicTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
+                        value = uiState.searchQuery,
+                        onValueChange = viewModel::onSearchInput,
+                        textStyle = TextStyle(fontSize = 14.sp, color = TextCharcoal),
                         singleLine = true,
-                        textStyle = TextStyle(color = TextCharcoal, fontSize = 15.sp),
-                        cursorBrush = SolidColor(ForestGreen),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.weight(1f),
+                        decorationBox = { innerTextField ->
+                            Box(contentAlignment = Alignment.CenterStart) {
+                                if (uiState.searchQuery.isEmpty()) {
+                                    Text(text = "Search your recipes...", color = TextMuted, fontSize = 14.sp)
+                                }
+                                innerTextField()
+                            }
+                        }
                     )
                 }
             }
 
             Row(
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                modifier = Modifier
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                tabs.forEach { tab ->
-                    val isTabSelected = selectedTab == tab
-                    val pop = rememberPressPop(0.94f)
+                listOf(
+                    RecipeBoxFilter.ALL to "All",
+                    RecipeBoxFilter.SAVED to "Saved",
+                    RecipeBoxFilter.COOKED to "Cooked"
+                ).forEach { (filter, label) ->
+                    val isTabSelected = uiState.filter == filter
                     Box(
-                        modifier = pop.modifier
-                            .shadow(
-                                elevation = if (isTabSelected) 8.dp else 3.dp,
-                                shape = tabShape,
-                                spotColor = Color(0x33000000)
-                            )
-                            .clip(tabShape)
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
                             .background(if (isTabSelected) ForestGreen else PureWhite)
                             .border(
                                 width = 1.dp,
                                 color = if (isTabSelected) ForestGreen else BorderLight,
-                                shape = tabShape
+                                shape = RoundedCornerShape(20.dp)
                             )
-                            .clickable(
-                                interactionSource = pop.interactionSource,
-                                indication = ripple(color = ForestGreen)
-                            ) { selectedTab = tab }
+                            .clickable { viewModel.setFilter(filter) }
                             .padding(horizontal = 20.dp, vertical = 8.dp)
                     ) {
                         Text(
-                            text = tab,
+                            text = label,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
                             color = if (isTabSelected) PureWhite else TextCharcoal
@@ -214,33 +192,39 @@ fun RecipeBoxScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            if (displayedRecipes.isEmpty()) {
-                Box(
+            when {
+                uiState.isLoading -> LoadingState("Opening your Recipe Box...")
+                uiState.errorMessage != null -> ErrorState(
+                    message = uiState.errorMessage.orEmpty(),
+                    onRetry = viewModel::load
+                )
+                uiState.displayedRecipes.isEmpty() -> Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(32.dp),
+                        .fillMaxWidth()
+                        .weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (searchQuery.isNotBlank()) {
-                            "No recipes match \"$searchQuery\""
-                        } else {
-                            "No recipes in $selectedTab yet"
+                        text = when (uiState.filter) {
+                            RecipeBoxFilter.COOKED -> "Nothing cooked yet.\nSwipe right to start collecting recipes."
+                            RecipeBoxFilter.SAVED -> "No saved recipes yet.\nYour right-swipes will land here."
+                            else -> "Your Recipe Box is empty.\nSwipe right on recipes you love."
                         },
+                        fontSize = 14.sp,
                         color = TextMuted,
-                        fontSize = 15.sp
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
                 }
-            } else {
-                LazyVerticalGrid(
+                else -> LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.weight(1f)
                 ) {
-                    items(displayedRecipes) { recipe ->
+                    items(uiState.displayedRecipes) { recipe ->
                         RecipeGridCard(
                             recipe = recipe,
                             onClick = { onRecipeSelected(recipe.id) }
@@ -257,19 +241,12 @@ fun RecipeGridCard(
     recipe: Recipe,
     onClick: () -> Unit
 ) {
-    val cardShape = RoundedCornerShape(16.dp)
-    val pop = rememberPressPop(0.97f)
-
     Box(
-        modifier = pop.modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .shadow(10.dp, cardShape, spotColor = Color(0x33000000))
-            .clip(cardShape)
+            .clip(RoundedCornerShape(16.dp))
             .background(PureWhite)
-            .clickable(
-                interactionSource = pop.interactionSource,
-                indication = ripple(color = ForestGreen)
-            ) { onClick() }
+            .clickable { onClick() }
     ) {
         Column {
             Box(
@@ -288,13 +265,12 @@ fun RecipeGridCard(
                     recipe.isCooked -> "Cooked"
                     recipe.isSaved -> "Saved"
                     recipe.matchPercentage > 90 -> "${recipe.matchPercentage}% match"
-                    else -> "Recipe"
+                    else -> recipe.category
                 }
 
                 Box(
                     modifier = Modifier
                         .padding(8.dp)
-                        .shadow(4.dp, RoundedCornerShape(8.dp), spotColor = Color(0x33000000))
                         .clip(RoundedCornerShape(8.dp))
                         .background(MintLight.copy(alpha = 0.95f))
                         .padding(horizontal = 8.dp, vertical = 4.dp)

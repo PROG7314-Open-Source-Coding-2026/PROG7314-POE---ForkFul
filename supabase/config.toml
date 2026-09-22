@@ -1,0 +1,33 @@
+# Minimal Supabase CLI configuration for the Forkful POE.
+# Replace project_id with your own project reference after `supabase link`.
+project_id = "forkful-poe"
+
+[functions.auth-sso]
+verify_jwt = true
+
+[functions.recipes-deck]
+verify_jwt = true
+
+[functions.recipe-detail]
+verify_jwt = true
+
+[functions.swipes]
+verify_jwt = true
+
+[functions.recipe-box]
+verify_jwt = true
+
+[functions.pantry]
+verify_jwt = true
+
+[functions.pantry-match]
+verify_jwt = true
+
+[functions.groceries]
+verify_jwt = true
+
+[functions.groceries-item]
+verify_jwt = true
+
+[functions.user-preferences]
+verify_jwt = true

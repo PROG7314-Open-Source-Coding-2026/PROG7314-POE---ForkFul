@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -25,25 +24,19 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
@@ -59,46 +52,28 @@ import com.emeris.forkful.core.designsystem.PureWhite
 import com.emeris.forkful.core.designsystem.TextCharcoal
 import com.emeris.forkful.core.designsystem.TextMuted
 import com.emeris.forkful.core.logging.ForkfulLogger
-import com.emeris.forkful.data.repository.MockData
+import com.emeris.forkful.ui.components.ErrorState
 import com.emeris.forkful.ui.components.ForkfulBottomBar
-import com.emeris.forkful.ui.components.rememberPressPop
+import com.emeris.forkful.ui.components.LoadingState
+import com.emeris.forkful.ui.di.containerViewModel
 import com.emeris.forkful.ui.navigation.Screen
 
 @Composable
 fun RecipeDetailScreen(
     recipeId: String,
     onClose: () -> Unit,
-    onNavigateTo: (String) -> Unit
+    onNavigateTo: (String) -> Unit,
+    onStartCooking: (String) -> Unit
 ) {
     LaunchedEffect(recipeId) {
         ForkfulLogger.logLifecycle("RecipeDetailScreen", "ID: $recipeId")
     }
 
-    val recipe = MockData.sampleRecipes.find { it.id == recipeId } ?: MockData.sampleRecipes.first()
-    val pantryOwnedCount = recipe.ingredients.count { it.inPantry }
-    val missingIngredients = recipe.ingredients.filter { !it.inPantry }
+    val viewModel = containerViewModel { RecipeDetailViewModel(it.recipeRepository) }
+    val uiState by viewModel.state.collectAsState()
 
-    var isSaved by remember(recipeId) { mutableStateOf(recipe.isSaved) }
-    var isCooked by remember(recipeId) { mutableStateOf(recipe.isCooked) }
-    var isCooking by remember(recipeId) { mutableStateOf(false) }
-    var currentStep by remember(recipeId) { mutableStateOf(0) }
-    var showMissingDialog by remember { mutableStateOf(false) }
-
-    val cardShape = RoundedCornerShape(14.dp)
-
-    fun startCooking() {
-        currentStep = 0
-        isCooking = true
-        showMissingDialog = false
-        ForkfulLogger.logAction("COOKING_SESSION", "Started for ${recipe.title}")
-    }
-
-    fun onStartCookingClicked() {
-        if (missingIngredients.isNotEmpty()) {
-            showMissingDialog = true
-        } else {
-            startCooking()
-        }
+    LaunchedEffect(recipeId) {
+        viewModel.load(recipeId)
     }
 
     Scaffold(
@@ -110,498 +85,301 @@ fun RecipeDetailScreen(
         },
         containerColor = CreamBackground
     ) { innerPadding ->
-        if (isCooking) {
-            val closePop = rememberPressPop(0.88f)
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(20.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+        when {
+            uiState.isLoading -> LoadingState("Plating your recipe...")
+            uiState.errorMessage != null -> ErrorState(
+                message = uiState.errorMessage.orEmpty(),
+                onRetry = { viewModel.load(recipeId) }
+            )
+            else -> {
+                val recipe = uiState.recipe ?: return@Scaffold
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
                 ) {
-                    Text(
-                        text = "Cooking",
-                        fontFamily = FontFamily.Serif,
-                        fontSize = 24.sp,
-                        color = ForestGreen
-                    )
-                    IconButton(
-                        onClick = { isCooking = false },
-                        modifier = closePop.modifier,
-                        interactionSource = closePop.interactionSource
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close cooking",
-                            tint = TextCharcoal
-                        )
-                    }
-                }
-
-                Text(
-                    text = recipe.title,
-                    fontSize = 16.sp,
-                    color = TextMuted
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "Step ${currentStep + 1} of ${recipe.steps.size}",
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextMuted
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                LazyColumn(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    itemsIndexed(recipe.steps) { index, step ->
-                        val isCurrent = index == currentStep
-                        val pop = rememberPressPop(0.97f)
-                        Box(
-                            modifier = pop.modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 6.dp)
-                                .shadow(
-                                    elevation = if (isCurrent) 10.dp else 4.dp,
-                                    shape = cardShape,
-                                    spotColor = Color(0x33000000)
-                                )
-                                .clip(cardShape)
-                                .background(if (isCurrent) MintLight else PureWhite)
-                                .border(1.dp, if (isCurrent) ForestGreen else BorderLight, cardShape)
-                                .clickable(
-                                    interactionSource = pop.interactionSource,
-                                    indication = ripple(color = ForestGreen)
-                                ) { currentStep = index }
-                                .padding(16.dp)
-                        ) {
-                            Row(verticalAlignment = Alignment.Top) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(28.dp)
-                                        .shadow(2.dp, CircleShape)
-                                        .clip(CircleShape)
-                                        .background(if (isCurrent) ForestGreen else Color(0xFFE8E2D6)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "${index + 1}",
-                                        color = if (isCurrent) PureWhite else TextCharcoal,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 13.sp
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Text(
-                                    text = step,
-                                    fontSize = 16.sp,
-                                    color = TextCharcoal
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Button(
-                    onClick = {
-                        if (currentStep < recipe.steps.lastIndex) {
-                            currentStep += 1
-                        } else {
-                            isCooked = true
-                            isCooking = false
-                            ForkfulLogger.logAction("COOKING_SESSION", "Finished ${recipe.title}")
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(54.dp),
-                    shape = RoundedCornerShape(27.dp),
-                    elevation = ButtonDefaults.buttonElevation(
-                        defaultElevation = 8.dp,
-                        pressedElevation = 2.dp
-                    ),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = ForestGreen,
-                        contentColor = PureWhite
-                    )
-                ) {
-                    Text(
-                        text = if (currentStep < recipe.steps.lastIndex) "Next step" else "Finish cooking",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
-        } else {
-            val closePop = rememberPressPop(0.88f)
-            val heartPop = rememberPressPop(0.88f)
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = recipe.category,
-                            fontFamily = FontFamily.Serif,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = ForestGreen
-                        )
-                        Text(
-                            text = recipe.description,
-                            fontSize = 12.sp,
-                            color = TextMuted,
-                            maxLines = 1
-                        )
-                    }
-
-                    IconButton(
-                        onClick = onClose,
-                        modifier = closePop.modifier,
-                        interactionSource = closePop.interactionSource
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close",
-                            tint = TextCharcoal
-                        )
-                    }
-                }
-
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                ) {
-                    item {
-                        AsyncImage(
-                            model = recipe.imageUrl,
-                            contentDescription = recipe.title,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(240.dp),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-
-                    item {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .shadow(
-                                    10.dp,
-                                    RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-                                    spotColor = Color(0x33000000)
-                                )
-                                .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
-                                .background(PureWhite)
-                                .padding(24.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.CenterHorizontally)
-                                    .width(42.dp)
-                                    .height(4.dp)
-                                    .clip(RoundedCornerShape(2.dp))
-                                    .background(Color(0xFFE2DDD2))
+                        Column {
+                            Text(
+                                text = recipe.category,
+                                fontFamily = FontFamily.Serif,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = ForestGreen
                             )
+                            Text(
+                                text = "${recipe.totalIngredientsCount} ingredients",
+                                fontSize = 12.sp,
+                                color = TextMuted
+                            )
+                        }
 
-                            Spacer(modifier = Modifier.height(18.dp))
+                        IconButton(onClick = onClose) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Close",
+                                tint = TextCharcoal
+                            )
+                        }
+                    }
 
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        item {
+                            AsyncImage(
+                                model = recipe.imageUrl,
+                                contentDescription = recipe.title,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(240.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+                                    .background(PureWhite)
+                                    .padding(24.dp)
                             ) {
-                                Text(
-                                    text = recipe.title,
-                                    fontFamily = FontFamily.Serif,
-                                    fontSize = 26.sp,
-                                    fontWeight = FontWeight.Normal,
-                                    color = TextCharcoal,
-                                    modifier = Modifier.weight(1f)
-                                )
-
-                                Box(
-                                    modifier = heartPop.modifier
-                                        .size(48.dp)
-                                        .shadow(8.dp, CircleShape, spotColor = Color(0x33000000))
-                                        .clip(CircleShape)
-                                        .background(if (isSaved) ForestGreen else PureWhite)
-                                        .border(
-                                            1.dp,
-                                            if (isSaved) ForestGreen else BorderLight,
-                                            CircleShape
-                                        )
-                                        .clickable(
-                                            interactionSource = heartPop.interactionSource,
-                                            indication = ripple(color = ForestGreen, bounded = true)
-                                        ) {
-                                            isSaved = !isSaved
-                                            ForkfulLogger.logAction(
-                                                "RECIPE_DETAIL",
-                                                if (isSaved) "Saved ${recipe.title}" else "Unsaved ${recipe.title}"
-                                            )
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = if (isSaved) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                        contentDescription = if (isSaved) "Unsave recipe" else "Save recipe",
-                                        tint = if (isSaved) PureWhite else ForestGreen
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Box(
                                     modifier = Modifier
-                                        .shadow(2.dp, RoundedCornerShape(12.dp))
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(MintLight)
-                                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                                        .align(Alignment.CenterHorizontally)
+                                        .width(42.dp)
+                                        .height(4.dp)
+                                        .clip(RoundedCornerShape(2.dp))
+                                        .background(Color(0xFFE2DDD2))
+                                )
+
+                                Spacer(modifier = Modifier.height(18.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "Pantry: $pantryOwnedCount of ${recipe.ingredients.size}",
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = ForestGreen
+                                        text = recipe.title,
+                                        fontFamily = FontFamily.Serif,
+                                        fontSize = 26.sp,
+                                        fontWeight = FontWeight.Normal,
+                                        color = TextCharcoal,
+                                        modifier = Modifier.weight(1f)
                                     )
-                                }
 
-                                if (isCooked) {
+                                    val saveClickModifier = if (recipe.isSaved) {
+                                        Modifier
+                                    } else {
+                                        Modifier.clickable { viewModel.toggleSave() }
+                                    }
+
                                     Box(
                                         modifier = Modifier
-                                            .shadow(2.dp, RoundedCornerShape(12.dp))
+                                            .size(44.dp)
+                                            .clip(CircleShape)
+                                            .border(1.dp, BorderLight, CircleShape)
+                                            .then(saveClickModifier),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = if (recipe.isSaved) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                            contentDescription = "Save",
+                                            tint = if (recipe.isSaved) Color(0xFFD9534F) else TextMuted
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Box(
+                                        modifier = Modifier
                                             .clip(RoundedCornerShape(12.dp))
-                                            .background(ForestGreen)
+                                            .background(MintLight)
                                             .padding(horizontal = 10.dp, vertical = 5.dp)
                                     ) {
                                         Text(
-                                            text = "Cooked",
+                                            text = "Pantry: ${recipe.inPantryCount} of ${recipe.totalIngredientsCount} in your pantry",
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = PureWhite
+                                            color = ForestGreen
+                                        )
+                                    }
+                                    if (recipe.isCooked) {
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .background(Color(0xFFE8F0E9))
+                                                .padding(horizontal = 10.dp, vertical = 5.dp)
+                                        ) {
+                                            Text(
+                                                text = "Cooked",
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = ForestGreen
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(20.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceAround,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = "CAL: ${recipe.calories} KCAL",
+                                            fontFamily = FontFamily.Monospace,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = TextCharcoal
+                                        )
+                                    }
+                                    Box(modifier = Modifier.width(1.dp).height(24.dp).background(BorderLight))
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = "PRO: ${recipe.proteinGrams}G PRO",
+                                            fontFamily = FontFamily.Monospace,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = TextCharcoal
+                                        )
+                                    }
+                                    Box(modifier = Modifier.width(1.dp).height(24.dp).background(BorderLight))
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = "TIME: ${recipe.prepTimeMinutes} MIN",
+                                            fontFamily = FontFamily.Monospace,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = TextCharcoal
                                         )
                                     }
                                 }
+
+                                Spacer(modifier = Modifier.height(24.dp))
+
+                                Text(
+                                    text = "Ingredients",
+                                    fontFamily = FontFamily.Serif,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = TextCharcoal
+                                )
+
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Items you already have are highlighted",
+                                    fontSize = 12.sp,
+                                    color = TextMuted
+                                )
+
+                                Spacer(modifier = Modifier.height(14.dp))
                             }
-
-                            Spacer(modifier = Modifier.height(20.dp))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceAround,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(
-                                        text = "CAL: ${recipe.calories} KCAL",
-                                        fontFamily = FontFamily.Monospace,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = TextCharcoal
-                                    )
-                                }
-                                Box(modifier = Modifier.width(1.dp).height(24.dp).background(BorderLight))
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(
-                                        text = "PRO: ${recipe.proteinGrams}G PRO",
-                                        fontFamily = FontFamily.Monospace,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = TextCharcoal
-                                    )
-                                }
-                                Box(modifier = Modifier.width(1.dp).height(24.dp).background(BorderLight))
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(
-                                        text = "TIME: ${recipe.prepTimeMinutes} MIN",
-                                        fontFamily = FontFamily.Monospace,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = TextCharcoal
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(24.dp))
-
-                            Text(
-                                text = "Ingredients",
-                                fontFamily = FontFamily.Serif,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Normal,
-                                color = TextCharcoal
-                            )
-
-                            Spacer(modifier = Modifier.height(14.dp))
                         }
-                    }
 
-                    items(recipe.ingredients) { ingredient ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 24.dp, vertical = 6.dp)
-                                .shadow(4.dp, cardShape, spotColor = Color(0x26000000))
-                                .clip(cardShape)
-                                .background(Color(0xFFF9F6F0))
-                                .padding(16.dp)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(28.dp)
-                                        .shadow(2.dp, CircleShape)
-                                        .clip(CircleShape)
-                                        .background(
-                                            if (ingredient.inPantry) MintLight else Color(0xFFE8E2D6)
-                                        )
-                                        .border(
-                                            width = 1.dp,
-                                            color = if (ingredient.inPantry) Color.Transparent else BorderLight,
-                                            shape = CircleShape
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    if (ingredient.inPantry) {
+                        items(recipe.ingredients) { ingredient ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 24.dp, vertical = 6.dp)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(if (ingredient.inPantry) Color(0xFFF1F6EF) else Color(0xFFF9F6F0))
+                                    .padding(16.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(28.dp)
+                                            .clip(CircleShape)
+                                            .background(if (ingredient.inPantry) MintLight else Color(0xFFECE7DC)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
                                         Icon(
                                             imageVector = Icons.Default.Check,
-                                            contentDescription = "In pantry",
-                                            tint = ForestGreen,
+                                            contentDescription = null,
+                                            tint = if (ingredient.inPantry) ForestGreen else TextMuted,
                                             modifier = Modifier.size(16.dp)
                                         )
                                     }
-                                }
 
-                                Spacer(modifier = Modifier.width(14.dp))
+                                    Spacer(modifier = Modifier.width(14.dp))
 
-                                Column {
-                                    Text(
-                                        text = ingredient.name,
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 15.sp,
-                                        color = TextCharcoal
-                                    )
-                                    Text(
-                                        text = if (ingredient.inPantry) {
-                                            ingredient.quantity
-                                        } else {
-                                            "${ingredient.quantity}  •  missing"
-                                        },
-                                        fontSize = 13.sp,
-                                        color = TextMuted
-                                    )
-                                }
-                            }
-                        }
-                    }
+                                    Column {
+                                        Text(
+                                            text = ingredient.name,
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 15.sp,
+                                            color = TextCharcoal
+                                        )
+                                        Text(
+                                            text = ingredient.quantity,
+                                            fontSize = 13.sp,
+                                            color = TextMuted
+                                        )
+                                    }
 
-                    item {
-                        Spacer(modifier = Modifier.height(20.dp))
-                        Box(modifier = Modifier.padding(horizontal = 24.dp)) {
-                            Button(
-                                onClick = { onStartCookingClicked() },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp),
-                                shape = RoundedCornerShape(28.dp),
-                                elevation = ButtonDefaults.buttonElevation(
-                                    defaultElevation = 8.dp,
-                                    pressedElevation = 2.dp
-                                ),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = ForestGreen,
-                                    contentColor = PureWhite
-                                )
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.PlayArrow,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = if (isCooked) "Cook again" else "Start cooking",
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
+                                    if (ingredient.inPantry) {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                        Text(
+                                            text = "IN PANTRY",
+                                            fontFamily = FontFamily.Monospace,
+                                            fontSize = 9.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = ForestGreen
+                                        )
+                                    }
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(40.dp))
+
+                        item {
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Box(modifier = Modifier.padding(horizontal = 24.dp)) {
+                                Button(
+                                    onClick = {
+                                        ForkfulLogger.logAction("COOKING_SESSION", "Started for ${recipe.title}")
+                                        onStartCooking(recipe.id)
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(54.dp),
+                                    shape = RoundedCornerShape(27.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = ForestGreen,
+                                        contentColor = PureWhite
+                                    )
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.PlayArrow,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = if (recipe.isCooked) "Cook again" else "Start cooking",
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(30.dp))
+                        }
                     }
                 }
             }
         }
-    }
-
-    if (showMissingDialog) {
-        val missingNames = missingIngredients.joinToString(", ") { it.name }
-        val missingCount = missingIngredients.size
-        val titleText = if (missingCount == 1) {
-            "You are missing 1 ingredient"
-        } else {
-            "You are missing $missingCount ingredients"
-        }
-
-        AlertDialog(
-            onDismissRequest = { showMissingDialog = false },
-            title = {
-                Text(
-                    text = titleText,
-                    fontFamily = FontFamily.Serif
-                )
-            },
-            text = {
-                Text(
-                    text = "Missing: $missingNames.\n\nDo you want to cook this recipe anyway?"
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = { startCooking() },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = ForestGreen,
-                        contentColor = PureWhite
-                    ),
-                    elevation = ButtonDefaults.buttonElevation(
-                        defaultElevation = 4.dp,
-                        pressedElevation = 8.dp
-                    )
-                ) {
-                    Text("Continue cooking")
-                }
-            },
-            dismissButton = {
-                OutlinedButton(onClick = { showMissingDialog = false }) {
-                    Text("Not now", color = TextCharcoal)
-                }
-            }
-        )
     }
 }

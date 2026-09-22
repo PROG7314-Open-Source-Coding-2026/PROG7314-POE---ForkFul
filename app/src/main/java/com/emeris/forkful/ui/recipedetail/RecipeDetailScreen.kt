@@ -42,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
@@ -80,6 +81,8 @@ fun RecipeDetailScreen(
     var isCooking by remember(recipeId) { mutableStateOf(false) }
     var currentStep by remember(recipeId) { mutableStateOf(0) }
     var showMissingDialog by remember { mutableStateOf(false) }
+
+    val cardShape = RoundedCornerShape(14.dp)
 
     fun startCooking() {
         currentStep = 0
@@ -159,9 +162,14 @@ fun RecipeDetailScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 6.dp)
-                                .clip(RoundedCornerShape(14.dp))
+                                .shadow(
+                                    elevation = if (isCurrent) 8.dp else 3.dp,
+                                    shape = cardShape,
+                                    spotColor = Color(0x33000000)
+                                )
+                                .clip(cardShape)
                                 .background(if (isCurrent) MintLight else PureWhite)
-                                .border(1.dp, BorderLight, RoundedCornerShape(14.dp))
+                                .border(1.dp, if (isCurrent) ForestGreen else BorderLight, cardShape)
                                 .clickable { currentStep = index }
                                 .padding(16.dp)
                         ) {
@@ -169,6 +177,7 @@ fun RecipeDetailScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(28.dp)
+                                        .shadow(2.dp, CircleShape)
                                         .clip(CircleShape)
                                         .background(if (isCurrent) ForestGreen else Color(0xFFE8E2D6)),
                                     contentAlignment = Alignment.Center
@@ -205,8 +214,13 @@ fun RecipeDetailScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(54.dp),
+                        .height(54.dp)
+                        .shadow(8.dp, RoundedCornerShape(27.dp)),
                     shape = RoundedCornerShape(27.dp),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 4.dp,
+                        pressedElevation = 8.dp
+                    ),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = ForestGreen,
                         contentColor = PureWhite
@@ -277,6 +291,11 @@ fun RecipeDetailScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .shadow(
+                                    10.dp,
+                                    RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+                                    spotColor = Color(0x33000000)
+                                )
                                 .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
                                 .background(PureWhite)
                                 .padding(24.dp)
@@ -309,7 +328,9 @@ fun RecipeDetailScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(44.dp)
+                                        .shadow(4.dp, CircleShape, spotColor = Color(0x33000000))
                                         .clip(CircleShape)
+                                        .background(PureWhite)
                                         .border(
                                             1.dp,
                                             if (isSaved) ForestGreen else BorderLight,
@@ -337,6 +358,7 @@ fun RecipeDetailScreen(
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Box(
                                     modifier = Modifier
+                                        .shadow(2.dp, RoundedCornerShape(12.dp))
                                         .clip(RoundedCornerShape(12.dp))
                                         .background(MintLight)
                                         .padding(horizontal = 10.dp, vertical = 5.dp)
@@ -352,6 +374,7 @@ fun RecipeDetailScreen(
                                 if (isCooked) {
                                     Box(
                                         modifier = Modifier
+                                            .shadow(2.dp, RoundedCornerShape(12.dp))
                                             .clip(RoundedCornerShape(12.dp))
                                             .background(ForestGreen)
                                             .padding(horizontal = 10.dp, vertical = 5.dp)
@@ -423,7 +446,8 @@ fun RecipeDetailScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 24.dp, vertical = 6.dp)
-                                .clip(RoundedCornerShape(14.dp))
+                                .shadow(4.dp, cardShape, spotColor = Color(0x26000000))
+                                .clip(cardShape)
                                 .background(Color(0xFFF9F6F0))
                                 .padding(16.dp)
                         ) {
@@ -431,6 +455,7 @@ fun RecipeDetailScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(28.dp)
+                                        .shadow(2.dp, CircleShape)
                                         .clip(CircleShape)
                                         .background(
                                             if (ingredient.inPantry) MintLight else Color(0xFFE8E2D6)
@@ -482,8 +507,13 @@ fun RecipeDetailScreen(
                                 onClick = { onStartCookingClicked() },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(54.dp),
+                                    .height(54.dp)
+                                    .shadow(8.dp, RoundedCornerShape(27.dp)),
                                 shape = RoundedCornerShape(27.dp),
+                                elevation = ButtonDefaults.buttonElevation(
+                                    defaultElevation = 4.dp,
+                                    pressedElevation = 8.dp
+                                ),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = ForestGreen,
                                     contentColor = PureWhite

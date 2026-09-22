@@ -35,6 +35,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
@@ -69,6 +71,8 @@ fun RecipeBoxScreen(
     var searchQuery by remember { mutableStateOf("") }
     var showSearch by remember { mutableStateOf(false) }
     val tabs = listOf("All", "Saved", "Cooked")
+    val searchShape = RoundedCornerShape(24.dp)
+    val tabShape = RoundedCornerShape(20.dp)
 
     val displayedRecipes = remember(selectedTab, searchQuery) {
         val tabRecipes = when (selectedTab) {
@@ -137,10 +141,11 @@ fun RecipeBoxScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp, vertical = 4.dp)
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(24.dp))
+                        .shadow(6.dp, searchShape, spotColor = Color(0x33000000))
+                        .clip(searchShape)
                         .background(PureWhite)
-                        .border(1.dp, BorderLight, RoundedCornerShape(24.dp))
+                        .border(1.dp, BorderLight, searchShape)
+                        .height(48.dp)
                         .padding(horizontal = 16.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
@@ -170,12 +175,17 @@ fun RecipeBoxScreen(
                     val isTabSelected = selectedTab == tab
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
+                            .shadow(
+                                elevation = if (isTabSelected) 6.dp else 2.dp,
+                                shape = tabShape,
+                                spotColor = Color(0x33000000)
+                            )
+                            .clip(tabShape)
                             .background(if (isTabSelected) ForestGreen else PureWhite)
                             .border(
                                 width = 1.dp,
                                 color = if (isTabSelected) ForestGreen else BorderLight,
-                                shape = RoundedCornerShape(20.dp)
+                                shape = tabShape
                             )
                             .clickable { selectedTab = tab }
                             .padding(horizontal = 20.dp, vertical = 8.dp)
@@ -233,10 +243,13 @@ fun RecipeGridCard(
     recipe: Recipe,
     onClick: () -> Unit
 ) {
+    val cardShape = RoundedCornerShape(16.dp)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .shadow(8.dp, cardShape, spotColor = Color(0x33000000))
+            .clip(cardShape)
             .background(PureWhite)
             .clickable { onClick() }
     ) {
@@ -263,6 +276,7 @@ fun RecipeGridCard(
                 Box(
                     modifier = Modifier
                         .padding(8.dp)
+                        .shadow(4.dp, RoundedCornerShape(8.dp), spotColor = Color(0x33000000))
                         .clip(RoundedCornerShape(8.dp))
                         .background(MintLight.copy(alpha = 0.95f))
                         .padding(horizontal = 8.dp, vertical = 4.dp)

@@ -375,7 +375,7 @@ The recommended development environment is the latest stable version of Android 
 ### 1. Clone the Repository
 
 ```bash
-git clone <YOUR-GITHUB-REPOSITORY-URL>
+git clone https://github.com/PROG7314-Open-Source-Coding-2026/PROG7314-POE---ForkFul.git
 ```
 
 Then open the project in **Android Studio**.

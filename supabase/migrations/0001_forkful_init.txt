@@ -1,0 +1,143 @@
+-- ============================================================================
+-- Forkful POE - initial schema (Planning & Design document section 7)
+-- Run in the Supabase SQL editor (see SETUP.md step 3).
+-- ============================================================================
+
+create extension if not exists "pgcrypto";
+
+-- ----------------------------------------------------------------------------
+-- users: one row per authenticated account, keyed by the Supabase auth UUID.
+-- ----------------------------------------------------------------------------
+create table if not exists public.users (
+    user_id                 uuid primary key references auth.users (id) on delete cascade,
+    email                   varchar not null unique,
+    display_name            varchar,
+    preferred_language      varchar default 'en' not null,
+    dietary_tags            text[] default '{}',
+    theme                   varchar(10) default 'light',
+    onboarded               boolean default false,
+    notifications_enabled   boolean default true,
+    biometric_lock_enabled  boolean default false,
+    created_at              timestamptz default now() not null
+);
+
+-- ----------------------------------------------------------------------------
+-- recipes: the seeded catalogue served by the swipe engine.
+-- rating / difficulty / protein_grams extend the section 7 schema to power
+-- the Explore filter row (FR-11) and nutrition panels (section 4 mock-ups).
+-- ----------------------------------------------------------------------------
+create table if not exists public.recipes (
+    recipe_id           uuid primary key default gen_random_uuid(),
+    title               varchar not null,
+    description         text,
+    prep_time_minutes   integer default 0,
+    cook_time_minutes   integer default 0,
+    calories            integer default 0,
+    protein_grams       integer default 0,
+    image_url           text,
+    cuisine_type        varchar,
+    difficulty          varchar(12) default 'Easy',
+    rating              numeric(2, 1) default 4.5,
+    dietary_tags        text[] default '{}',
+    instructions        jsonb default '[]',
+    created_at          timestamptz default now()
+);
+
+-- ----------------------------------------------------------------------------
+-- recipe_tags: (mood profile, tag) pairs joined against user_taste_profiles
+-- to compute the deck ranking (Planning section 7).
+-- ----------------------------------------------------------------------------
+create table if not exists public.recipe_tags (
+    recipe_tag_id       uuid primary key default gen_random_uuid(),
+    recipe_id           uuid not null references public.recipes (recipe_id) on delete cascade,
+    mood_profile_key    varchar not null,
+    tag_name            varchar not null
+);
+create index if not exists recipe_tags_recipe_idx on public.recipe_tags (recipe_id);
+create index if not exists recipe_tags_mood_idx on public.recipe_tags (mood_profile_key, tag_name);
+
+-- ----------------------------------------------------------------------------
+-- ingredients: recipe rows matched against user_pantry by the Capture Fridge
+-- algorithm and grouped by aisle in the grocery list.
+-- ----------------------------------------------------------------------------
+create table if not exists public.ingredients (
+    ingredient_id       uuid primary key default gen_random_uuid(),
+    recipe_id           uuid not null references public.recipes (recipe_id) on delete cascade,
+    name                varchar not null,
+    quantity            numeric,
+    unit                varchar,
+    aisle_category      varchar
+);
+create index if not exists ingredients_recipe_idx on public.ingredients (recipe_id);
+
+-- ----------------------------------------------------------------------------
+-- user_pantry: the Capture Fridge stock (FR-17 .. FR-19).
+-- ----------------------------------------------------------------------------
+create table if not exists public.user_pantry (
+    pantry_item_id      uuid primary key default gen_random_uuid(),
+    user_id             uuid not null references public.users (user_id) on delete cascade,
+    ingredient_name     varchar not null,
+    quantity            numeric,
+    unit                varchar,
+    expiry_date         date,
+    created_at          timestamptz default now()
+);
+create index if not exists user_pantry_user_idx on public.user_pantry (user_id);
+
+-- ----------------------------------------------------------------------------
+-- user_taste_profiles: one row per (user, mood, tag); every swipe adjusts
+-- the point balance (FR-03, FR-07, FR-08).
+-- ----------------------------------------------------------------------------
+create table if not exists public.user_taste_profiles (
+    profile_id          uuid primary key default gen_random_uuid(),
+    user_id             uuid not null references public.users (user_id) on delete cascade,
+    mood_profile_key    varchar not null,
+    tag_name            varchar not null,
+    points              integer default 0 not null
+);
+create index if not exists taste_profiles_user_mood_idx
+    on public.user_taste_profiles (user_id, mood_profile_key);
+
+-- ----------------------------------------------------------------------------
+-- user_swipes: swipe events; cooked_at supports the Recipe Box Cooked filter.
+-- ----------------------------------------------------------------------------
+create table if not exists public.user_swipes (
+    swipe_id            uuid primary key default gen_random_uuid(),
+    user_id             uuid not null references public.users (user_id) on delete cascade,
+    recipe_id           uuid not null references public.recipes (recipe_id) on delete cascade,
+    mood_profile_key    varchar not null,
+    direction           varchar not null check (direction in ('RIGHT', 'LEFT')),
+    cooked_at           timestamptz,
+    swiped_at           timestamptz default now() not null,
+    unique (user_id, recipe_id)
+);
+create index if not exists user_swipes_user_idx on public.user_swipes (user_id);
+
+-- ----------------------------------------------------------------------------
+-- grocery_items: Smart Grocery Aggregator output, populated on RIGHT swipes
+-- minus pantry stock (FR-21 .. FR-24).
+-- ----------------------------------------------------------------------------
+create table if not exists public.grocery_items (
+    item_id             uuid primary key default gen_random_uuid(),
+    user_id             uuid not null references public.users (user_id) on delete cascade,
+    ingredient_name     varchar not null,
+    quantity            numeric,
+    unit                varchar,
+    aisle_category      varchar,
+    is_checked          boolean default false,
+    created_at          timestamptz default now()
+);
+create index if not exists grocery_items_user_idx on public.grocery_items (user_id);
+
+-- ----------------------------------------------------------------------------
+-- Row Level Security: all client traffic goes through Edge Functions using
+-- the service-role key, so tables are locked to the service role only.
+-- ----------------------------------------------------------------------------
+alter table public.users               enable row level security;
+alter table public.recipes             enable row level security;
+alter table public.recipe_tags         enable row level security;
+alter table public.ingredients         enable row level security;
+alter table public.user_pantry         enable row level security;
+alter table public.user_taste_profiles enable row level security;
+alter table public.user_swipes         enable row level security;
+alter table public.grocery_items       enable row level security;

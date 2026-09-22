@@ -1,0 +1,356 @@
+-- ============================================================================
+-- Forkful POE - seed catalogue (14 recipes across every mood profile).
+-- Run after 0001_forkful_init.sql (see SETUP.md step 3).
+-- Each recipe carries an identity tag in its own mood (e.g. tag "italian" in
+-- mood "italian") so onboarding seed points lift the whole cuisine deck.
+-- ============================================================================
+
+-- Wipe any previous seed so the script is idempotent.
+delete from public.grocery_items;
+delete from public.user_swipes;
+delete from public.user_taste_profiles;
+delete from public.user_pantry;
+delete from public.recipe_tags;
+delete from public.ingredients;
+delete from public.recipes;
+
+insert into public.recipes
+    (title, description, prep_time_minutes, cook_time_minutes, calories, protein_grams, image_url, cuisine_type, difficulty, rating, dietary_tags, instructions)
+values
+    ('Margherita Flatbread',
+     'A quick classic featuring fresh basil, sweet tomatoes and creamy mozzarella on a crispy base.',
+     20, 10, 480, 19,
+     'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?q=80&w=800&auto=format&fit=crop',
+     'Italian', 'Easy', 4.9, '{Vegetarian}',
+     '["Preheat the oven to 220 C.","Spread the crushed tomatoes over the flatbread.","Tear the mozzarella and scatter it evenly.","Bake for 10 minutes until the cheese bubbles.","Finish with fresh basil, olive oil and cracked pepper."]'),
+
+    ('Creamy Tuscan Chicken',
+     'Pan-seared chicken breasts folded through a garlicky cream sauce with spinach and sun-dried tomatoes.',
+     30, 15, 560, 41,
+     'https://images.unsplash.com/photo-1532550907401-a500c9a57435?q=80&w=800&auto=format&fit=crop',
+     'Italian', 'Medium', 4.7, '{}',
+     '["Season and sear the chicken until golden, then rest.","Fry garlic and sun-dried tomatoes in the same pan.","Deglaze with cream and simmer until thick.","Stir in spinach until just wilted.","Return the chicken, spoon the sauce over and serve."]'),
+
+    ('Tomato Bredie',
+     'Traditional slow-cooked South African mutton and tomato stew infused with warming cinnamon.',
+     25, 95, 540, 32,
+     'https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=800&auto=format&fit=crop',
+     'Comfort', 'Medium', 4.7, '{Halaal}',
+     '["Brown the mutton cubes in a heavy pot.","Soften onions, then add chopped tomatoes and cinnamon.","Cover and simmer gently for 90 minutes.","Add quartered potatoes for the last 30 minutes.","Season and serve with rice."]'),
+
+    ('Peri-Peri Chicken Bowls',
+     'Flame-grilled peri-peri marinated chicken over turmeric rice with a crisp avocado salsa.',
+     25, 20, 510, 42,
+     'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop',
+     'Braai', 'Medium', 4.8, '{}',
+     '["Marinate the chicken in peri-peri sauce for 20 minutes.","Grill over high coals until charred and cooked through.","Simmer rice with turmeric and salt.","Dice avocado with sweetcorn and lime.","Build the bowls and drizzle with extra peri-peri."]'),
+
+    ('Braaibroodjie',
+     'The legendary South African braai sandwich: gooey cheese, tomato, onion and chutney grilled over coals.',
+     10, 8, 430, 16,
+     'https://images.unsplash.com/photo-1529059997568-3d847b1154c0?q=80&w=800&auto=format&fit=crop',
+     'Braai', 'Easy', 4.8, '{Vegetarian}',
+     '["Butter the outsides of thick bread slices.","Layer cheese, tomato, onion and chutney inside.","Wrap in foil and toast over medium coals.","Turn every 2 minutes until golden.","Unwrap, slice and serve hot."]'),
+
+    ('Beet & Feta Risotto',
+     'Earthy roasted beetroot stirred through creamy arborio rice with tangy crumbled feta.',
+     40, 25, 420, 14,
+     'https://images.unsplash.com/photo-1595295333158-4742f28fbd85?q=80&w=800&auto=format&fit=crop',
+     'Italian', 'Hard', 4.6, '{Vegetarian}',
+     '["Roast the beetroot until tender, then puree half.","Sweat shallots and toast the arborio rice.","Add warm stock a ladle at a time, stirring.","Fold in the beetroot puree and crumbled feta.","Rest for 2 minutes and serve immediately."]'),
+
+    ('Chicken Chow Mein',
+     'Fast wok-fried noodles with chicken and crunchy vegetables in a salty-sweet soy glaze.',
+     20, 10, 490, 35,
+     'https://images.unsplash.com/photo-1585032226651-759b368d7246?q=80&w=800&auto=format&fit=crop',
+     'Asian', 'Easy', 4.6, '{}',
+     '["Cook the egg noodles and toss with a little oil.","Stir-fry chicken strips until just cooked.","Add cabbage, carrot and spring onion to the wok.","Push aside and scramble is not needed - add noodles and sauce.","Toss everything over high heat and serve."]'),
+
+    ('Thai Green Vegetable Curry',
+     'Fragrant coconut curry loaded with greens, finished with basil and lime.',
+     15, 20, 380, 11,
+     'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?q=80&w=800&auto=format&fit=crop',
+     'Asian', 'Easy', 4.5, '{Vegan}',
+     '["Fry the green curry paste until fragrant.","Add coconut milk and bring to a gentle simmer.","Add broccoli, beans and baby corn.","Simmer until tender, then season with soy and lime.","Finish with fresh basil and serve with jasmine rice."]'),
+
+    ('Black Bean & Corn Tacos',
+     'Smoky spiced black beans with charred corn, quick slaw and avocado in warm tortillas.',
+     15, 12, 400, 15,
+     'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?q=80&w=800&auto=format&fit=crop',
+     'Mexican', 'Easy', 4.6, '{Vegan}',
+     '["Warm the tortillas in a dry pan.","Fry onion with cumin and smoked paprika.","Add black beans and corn, mash lightly.","Toss cabbage with lime and a pinch of salt.","Fill the tacos and top with avocado."]'),
+
+    ('Chicken Enchiladas',
+     'Rolled tortillas stuffed with shredded chicken, blanketed in a rich red sauce and melted cheese.',
+     30, 25, 580, 38,
+     'https://images.unsplash.com/photo-1565122932893-18b4dbd7c786?q=80&w=800&auto=format&fit=crop',
+     'Mexican', 'Medium', 4.7, '{}',
+     '["Mix shredded chicken with half the enchilada sauce.","Roll the filling into tortillas and pack into a dish.","Pour over the remaining sauce and cheese.","Bake at 190 C for 20 minutes.","Rest 5 minutes, then serve with coriander."]'),
+
+    ('Roast Veg & Quinoa Bowl',
+     'Charred seasonal vegetables over protein-packed quinoa with a lemon-tahini drizzle.',
+     15, 30, 360, 13,
+     'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800&auto=format&fit=crop',
+     'Healthy', 'Easy', 4.5, '{Vegan,Gluten-Free}',
+     '["Cook the quinoa in vegetable stock.","Roast butternut, peppers and onions at 200 C.","Whisk tahini with lemon juice and water.","Layer quinoa, vegetables and greens in a bowl.","Drizzle with the tahini dressing."]'),
+
+    ('Butternut Soup',
+     'Silky South African butternut soup with a hint of nutmeg and a swirl of cream.',
+     15, 35, 240, 7,
+     'https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=800&auto=format&fit=crop',
+     'Healthy', 'Easy', 4.6, '{Vegetarian,Gluten-Free}',
+     '["Sweat onion and garlic until translucent.","Add cubed butternut and vegetable stock.","Simmer until the butternut is soft.","Blend until silky and season with nutmeg.","Serve with a swirl of cream."]'),
+
+    ('Malva Pudding',
+     'Beloved South African sticky apricot pudding drenched in hot cream sauce.',
+     20, 40, 520, 6,
+     'https://images.unsplash.com/photo-1488477181946-6428a0291777?q=80&w=800&auto=format&fit=crop',
+     'Sweets', 'Medium', 4.9, '{Vegetarian}',
+     '["Beat butter and sugar until pale and fluffy.","Beat in egg, apricot jam and milk.","Fold in the dry ingredients gently.","Bake at 170 C for 40 minutes.","Pour the hot cream sauce over the warm pudding."]'),
+
+    ('Dark Chocolate Mousse',
+     'Three-ingredient indulgent mousse topped with berries - make it ahead and chill.',
+     15, 5, 340, 5,
+     'https://images.unsplash.com/photo-1504372248769-4b8ba1ddd3b7?q=80&w=800&auto=format&fit=crop',
+     'Sweets', 'Easy', 4.7, '{Vegetarian,Gluten-Free}',
+     '["Melt the dark chocolate over a water bath.","Whip the cream to soft peaks.","Fold the chocolate into the cream gently.","Spoon into glasses and chill for 2 hours.","Top with berries before serving."]');
+
+-- ----------------------------------------------------------------------------
+-- Tags: (mood, tag) pairs; the identity tag matches the mood key exactly.
+-- ----------------------------------------------------------------------------
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'italian', k
+from public.recipes r
+cross join lateral (values ('italian')) as t(k)
+where r.cuisine_type = 'Italian';
+
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'asian', 'asian'
+from public.recipes where cuisine_type = 'Asian';
+
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'mexican', 'mexican'
+from public.recipes where cuisine_type = 'Mexican';
+
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'braai', 'braai'
+from public.recipes where cuisine_type = 'Braai';
+
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'comfort', 'comfort'
+from public.recipes where cuisine_type = 'Comfort';
+
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'healthy', 'healthy'
+from public.recipes where cuisine_type = 'Healthy';
+
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'sweets', 'sweets'
+from public.recipes where cuisine_type = 'Sweets';
+
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'vegan', 'vegan'
+from public.recipes where 'Vegan' = any (dietary_tags);
+
+-- Flavour tags in each recipe's own cuisine mood
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'italian', 'cheese' from public.recipes where title = 'Margherita Flatbread';
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'italian', 'cream' from public.recipes where title = 'Creamy Tuscan Chicken';
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'italian', 'beetroot' from public.recipes where title = 'Beet & Feta Risotto';
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'comfort', 'stew' from public.recipes where title = 'Tomato Bredie';
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'braai', 'chicken' from public.recipes where title = 'Peri-Peri Chicken Bowls';
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'braai', 'spicy' from public.recipes where title = 'Peri-Peri Chicken Bowls';
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'braai', 'cheese' from public.recipes where title = 'Braaibroodjie';
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'asian', 'noodles' from public.recipes where title = 'Chicken Chow Mein';
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'asian', 'coconut' from public.recipes where title = 'Thai Green Vegetable Curry';
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'mexican', 'beans' from public.recipes where title = 'Black Bean & Corn Tacos';
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'mexican', 'cheese' from public.recipes where title = 'Chicken Enchiladas';
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'healthy', 'greens' from public.recipes where title = 'Roast Veg & Quinoa Bowl';
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'healthy', 'comfort' from public.recipes where title = 'Butternut Soup';
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'sweets', 'dessert' from public.recipes where title = 'Malva Pudding';
+insert into public.recipe_tags (recipe_id, mood_profile_key, tag_name)
+select recipe_id, 'sweets', 'chocolate' from public.recipes where title = 'Dark Chocolate Mousse';
+
+-- ----------------------------------------------------------------------------
+-- Ingredients with aisle categories
+-- ----------------------------------------------------------------------------
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Flatbread base', 1, 'piece', 'Bakery'),
+    ('Tomatoes', 400, 'g', 'Produce'),
+    ('Mozzarella', 125, 'g', 'Dairy'),
+    ('Fresh basil', 1, 'bunch', 'Produce'),
+    ('Olive oil', 1, 'tbsp', 'Pantry')
+) as i(name, qty, u, aisle)
+where r.title = 'Margherita Flatbread';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Chicken breasts', 500, 'g', 'Butchery'),
+    ('Double cream', 200, 'ml', 'Dairy'),
+    ('Spinach', 100, 'g', 'Produce'),
+    ('Sun-dried tomatoes', 100, 'g', 'Pantry'),
+    ('Garlic', 2, 'cloves', 'Produce')
+) as i(name, qty, u, aisle)
+where r.title = 'Creamy Tuscan Chicken';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Stewing mutton', 700, 'g', 'Butchery'),
+    ('Ripe tomatoes', 6, 'large', 'Produce'),
+    ('Onions', 2, 'large', 'Produce'),
+    ('Potatoes', 4, 'medium', 'Produce'),
+    ('Cinnamon stick', 1, 'piece', 'Spices'),
+    ('Chilli flakes', 1, 'tsp', 'Spices')
+) as i(name, qty, u, aisle)
+where r.title = 'Tomato Bredie';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Chicken thighs', 600, 'g', 'Butchery'),
+    ('Peri-peri sauce', 80, 'ml', 'Pantry'),
+    ('Basmati rice', 300, 'g', 'Dry Goods'),
+    ('Avocado', 2, 'ripe', 'Produce'),
+    ('Sweetcorn', 150, 'g', 'Produce')
+) as i(name, qty, u, aisle)
+where r.title = 'Peri-Peri Chicken Bowls';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('White bread', 8, 'slices', 'Bakery'),
+    ('Cheddar cheese', 200, 'g', 'Dairy'),
+    ('Tomatoes', 2, 'large', 'Produce'),
+    ('Onions', 1, 'large', 'Produce'),
+    ('Fruit chutney', 60, 'g', 'Pantry')
+) as i(name, qty, u, aisle)
+where r.title = 'Braaibroodjie';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Arborio rice', 300, 'g', 'Dry Goods'),
+    ('Beetroot', 3, 'medium', 'Produce'),
+    ('Feta cheese', 120, 'g', 'Dairy'),
+    ('Vegetable stock', 900, 'ml', 'Pantry'),
+    ('Shallots', 2, 'small', 'Produce')
+) as i(name, qty, u, aisle)
+where r.title = 'Beet & Feta Risotto';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Egg noodles', 250, 'g', 'Dry Goods'),
+    ('Chicken breast', 400, 'g', 'Butchery'),
+    ('Cabbage', 200, 'g', 'Produce'),
+    ('Soy sauce', 45, 'ml', 'Pantry'),
+    ('Spring onion', 4, 'stalks', 'Produce')
+) as i(name, qty, u, aisle)
+where r.title = 'Chicken Chow Mein';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Green curry paste', 50, 'g', 'Pantry'),
+    ('Coconut milk', 400, 'ml', 'Pantry'),
+    ('Broccoli', 1, 'head', 'Produce'),
+    ('Green beans', 150, 'g', 'Produce'),
+    ('Jasmine rice', 300, 'g', 'Dry Goods')
+) as i(name, qty, u, aisle)
+where r.title = 'Thai Green Vegetable Curry';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Black beans', 400, 'g', 'Dry Goods'),
+    ('Sweetcorn', 200, 'g', 'Produce'),
+    ('Corn tortillas', 8, 'pieces', 'Bakery'),
+    ('Avocado', 1, 'ripe', 'Produce'),
+    ('Cabbage', 150, 'g', 'Produce')
+) as i(name, qty, u, aisle)
+where r.title = 'Black Bean & Corn Tacos';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Chicken breast', 500, 'g', 'Butchery'),
+    ('Corn tortillas', 8, 'pieces', 'Bakery'),
+    ('Enchilada sauce', 400, 'ml', 'Pantry'),
+    ('Cheddar cheese', 200, 'g', 'Dairy'),
+    ('Coriander', 1, 'bunch', 'Produce')
+) as i(name, qty, u, aisle)
+where r.title = 'Chicken Enchiladas';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Quinoa', 200, 'g', 'Dry Goods'),
+    ('Butternut', 1, 'small', 'Produce'),
+    ('Red peppers', 2, 'large', 'Produce'),
+    ('Tahini', 40, 'g', 'Pantry'),
+    ('Lemons', 2, 'whole', 'Produce')
+) as i(name, qty, u, aisle)
+where r.title = 'Roast Veg & Quinoa Bowl';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Butternut', 1, 'large', 'Produce'),
+    ('Onions', 1, 'large', 'Produce'),
+    ('Vegetable stock', 1000, 'ml', 'Pantry'),
+    ('Cream', 60, 'ml', 'Dairy'),
+    ('Nutmeg', 1, 'pinch', 'Spices')
+) as i(name, qty, u, aisle)
+where r.title = 'Butternut Soup';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Flour', 200, 'g', 'Dry Goods'),
+    ('Sugar', 150, 'g', 'Dry Goods'),
+    ('Butter', 100, 'g', 'Dairy'),
+    ('Eggs', 2, 'whole', 'Dairy'),
+    ('Apricot jam', 100, 'g', 'Pantry'),
+    ('Cream', 125, 'ml', 'Dairy')
+) as i(name, qty, u, aisle)
+where r.title = 'Malva Pudding';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Dark chocolate', 200, 'g', 'Baking'),
+    ('Cream', 300, 'ml', 'Dairy'),
+    ('Berries', 150, 'g', 'Produce')
+) as i(name, qty, u, aisle)
+where r.title = 'Dark Chocolate Mousse';

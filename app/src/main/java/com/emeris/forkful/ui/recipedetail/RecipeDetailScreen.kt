@@ -72,6 +72,7 @@ fun RecipeDetailScreen(
     val recipe = MockData.sampleRecipes.find { it.id == recipeId } ?: MockData.sampleRecipes.first()
     val pantryOwnedCount = recipe.ingredients.count { it.inPantry }
     var isSaved by remember(recipeId) { mutableStateOf(recipe.isSaved) }
+    var isCooked by remember(recipeId) { mutableStateOf(recipe.isCooked) }
     var isCooking by remember(recipeId) { mutableStateOf(false) }
     var currentStep by remember(recipeId) { mutableStateOf(0) }
 
@@ -177,6 +178,7 @@ fun RecipeDetailScreen(
                         if (currentStep < recipe.steps.lastIndex) {
                             currentStep += 1
                         } else {
+                            isCooked = true
                             isCooking = false
                             ForkfulLogger.logAction("COOKING_SESSION", "Finished ${recipe.title}")
                         }
@@ -312,18 +314,36 @@ fun RecipeDetailScreen(
 
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MintLight)
-                                    .padding(horizontal = 10.dp, vertical = 5.dp)
-                            ) {
-                                Text(
-                                    text = "Pantry: $pantryOwnedCount of ${recipe.ingredients.size} in your pantry",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = ForestGreen
-                                )
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(MintLight)
+                                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                                ) {
+                                    Text(
+                                        text = "Pantry: $pantryOwnedCount of ${recipe.ingredients.size}",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = ForestGreen
+                                    )
+                                }
+
+                                if (isCooked) {
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(ForestGreen)
+                                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                                    ) {
+                                        Text(
+                                            text = "Cooked",
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = PureWhite
+                                        )
+                                    }
+                                }
                             }
 
                             Spacer(modifier = Modifier.height(20.dp))
@@ -461,7 +481,7 @@ fun RecipeDetailScreen(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = "Start cooking",
+                                        text = if (isCooked) "Cook again" else "Start cooking",
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.SemiBold
                                     )

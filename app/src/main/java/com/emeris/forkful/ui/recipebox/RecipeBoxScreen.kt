@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
@@ -26,6 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -46,10 +49,14 @@ import com.emeris.forkful.core.designsystem.ForestGreen
 import com.emeris.forkful.core.designsystem.MintLight
 import com.emeris.forkful.core.designsystem.PureWhite
 import com.emeris.forkful.core.designsystem.TextCharcoal
+import com.emeris.forkful.core.designsystem.TextMuted
 import com.emeris.forkful.core.logging.ForkfulLogger
-import com.emeris.forkful.data.repository.MockData
 import com.emeris.forkful.domain.model.Recipe
+import com.emeris.forkful.domain.model.RecipeBoxFilter
+import com.emeris.forkful.ui.components.ErrorState
 import com.emeris.forkful.ui.components.ForkfulBottomBar
+import com.emeris.forkful.ui.components.LoadingState
+import com.emeris.forkful.ui.di.containerViewModel
 import com.emeris.forkful.ui.navigation.Screen
 
 @Composable
@@ -61,16 +68,10 @@ fun RecipeBoxScreen(
         ForkfulLogger.logLifecycle("RecipeBoxScreen", "ON_CREATE")
     }
 
-    var selectedTab by remember { mutableStateOf("All") }
-    val tabs = listOf("All", "Saved", "Cooked")
+    val viewModel = containerViewModel { RecipeBoxViewModel(it.recipeRepository) }
+    val uiState by viewModel.state.collectAsState()
 
-    val displayedRecipes = remember(selectedTab) {
-        when (selectedTab) {
-            "Saved" -> MockData.sampleRecipes.filter { it.isSaved }
-            "Cooked" -> MockData.sampleRecipes.filter { it.isCooked }
-            else -> MockData.sampleRecipes
-        }
-    }
+    var isSearchVisible by remember { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
@@ -109,11 +110,51 @@ fun RecipeBoxScreen(
                     fontWeight = FontWeight.Normal
                 )
 
-                IconButton(onClick = { ForkfulLogger.logAction("RECIPE_BOX", "Search tapped") }) {
+                IconButton(onClick = {
+                    isSearchVisible = !isSearchVisible
+                    if (isSearchVisible) ForkfulLogger.logAction("RECIPE_BOX", "Search opened")
+                }) {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
                         tint = ForestGreen
+                    )
+                }
+            }
+
+            if (isSearchVisible) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 4.dp)
+                        .height(46.dp)
+                        .clip(RoundedCornerShape(23.dp))
+                        .background(PureWhite)
+                        .border(1.dp, BorderLight, RoundedCornerShape(23.dp))
+                        .padding(horizontal = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                        tint = TextMuted,
+                        modifier = Modifier.height(18.dp)
+                    )
+                    Spacer(modifier = Modifier.padding(8.dp))
+                    BasicTextField(
+                        value = uiState.searchQuery,
+                        onValueChange = viewModel::onSearchInput,
+                        textStyle = TextStyle(fontSize = 14.sp, color = TextCharcoal),
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                        decorationBox = { innerTextField ->
+                            Box(contentAlignment = Alignment.CenterStart) {
+                                if (uiState.searchQuery.isEmpty()) {
+                                    Text(text = "Search your recipes...", color = TextMuted, fontSize = 14.sp)
+                                }
+                                innerTextField()
+                            }
+                        }
                     )
                 }
             }
@@ -123,8 +164,12 @@ fun RecipeBoxScreen(
                     .padding(horizontal = 20.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                tabs.forEach { tab ->
-                    val isTabSelected = selectedTab == tab
+                listOf(
+                    RecipeBoxFilter.ALL to "All",
+                    RecipeBoxFilter.SAVED to "Saved",
+                    RecipeBoxFilter.COOKED to "Cooked"
+                ).forEach { (filter, label) ->
+                    val isTabSelected = uiState.filter == filter
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(20.dp))
@@ -134,11 +179,11 @@ fun RecipeBoxScreen(
                                 color = if (isTabSelected) ForestGreen else BorderLight,
                                 shape = RoundedCornerShape(20.dp)
                             )
-                            .clickable { selectedTab = tab }
+                            .clickable { viewModel.setFilter(filter) }
                             .padding(horizontal = 20.dp, vertical = 8.dp)
                     ) {
                         Text(
-                            text = tab,
+                            text = label,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
                             color = if (isTabSelected) PureWhite else TextCharcoal
@@ -149,17 +194,42 @@ fun RecipeBoxScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(displayedRecipes) { recipe ->
-                    RecipeGridCard(
-                        recipe = recipe,
-                        onClick = { onRecipeSelected(recipe.id) }
+            when {
+                uiState.isLoading -> LoadingState("Opening your Recipe Box...")
+                uiState.errorMessage != null -> ErrorState(
+                    message = uiState.errorMessage.orEmpty(),
+                    onRetry = viewModel::load
+                )
+                uiState.displayedRecipes.isEmpty() -> Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = when (uiState.filter) {
+                            RecipeBoxFilter.COOKED -> "Nothing cooked yet.\nSwipe right to start collecting recipes."
+                            RecipeBoxFilter.SAVED -> "No saved recipes yet.\nYour right-swipes will land here."
+                            else -> "Your Recipe Box is empty.\nSwipe right on recipes you love."
+                        },
+                        fontSize = 14.sp,
+                        color = TextMuted,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
+                }
+                else -> LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    items(uiState.displayedRecipes) { recipe ->
+                        RecipeGridCard(
+                            recipe = recipe,
+                            onClick = { onRecipeSelected(recipe.id) }
+                        )
+                    }
                 }
             }
         }
@@ -193,9 +263,9 @@ fun RecipeGridCard(
 
                 val badgeText = when {
                     recipe.isCooked -> "Cooked"
-                    recipe.id == "r1" -> "Saved today"
+                    recipe.isSaved -> "Saved"
                     recipe.matchPercentage > 90 -> "${recipe.matchPercentage}% match"
-                    else -> "Saved"
+                    else -> recipe.category
                 }
 
                 Box(

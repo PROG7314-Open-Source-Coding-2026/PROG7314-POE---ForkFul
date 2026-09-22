@@ -22,5 +22,6 @@ data class Recipe(
     val isSaved: Boolean = false,
     val isCooked: Boolean = false,
     val tags: List<String> = emptyList(),
-    val ingredients: List<Ingredient> = emptyList()
+    val ingredients: List<Ingredient> = emptyList(),
+    val instructions: List<String> = emptyList()
 )

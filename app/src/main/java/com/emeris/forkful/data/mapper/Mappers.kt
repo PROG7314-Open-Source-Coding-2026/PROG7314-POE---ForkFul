@@ -39,6 +39,7 @@ fun RecipeDeckItemDto.toDomain(): Recipe = Recipe(
     category = cuisineType ?: "Other",
     isSaved = isSaved,
     isCooked = isCooked,
+    dietaryTags = dietaryTags,
     tags = tags,
     ingredients = emptyList()
 )

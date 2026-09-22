@@ -16,34 +16,31 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-//Explore UI state
 data class ExploreUiState(
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
     val feed: List<Recipe> = emptyList(),
     val searchQuery: String = "",
+    val selectedCuisine: String? = null,
     val maxPrepTime: Int? = null,
     val minRating: Double? = null,
     val difficulty: String? = null,
     val savedMessage: String? = null
 ) {
     val hasActiveFilters: Boolean
-        get() = maxPrepTime != null || minRating != null || difficulty != null || searchQuery.isNotBlank()
+        get() = selectedCuisine != null || maxPrepTime != null || minRating != null || difficulty != null || searchQuery.isNotBlank()
 }
 
-//Explore ViewModel
 @OptIn(FlowPreview::class)
 class ExploreViewModel(
     private val recipeRepository: RecipeRepository
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(ExploreUiState())
     val state: StateFlow<ExploreUiState> = _state.asStateFlow()
 
     private val searchInput = MutableStateFlow("")
 
     val moodShelves = ChoiceCatalog.moodShelves
-    val cuisineRow = ChoiceCatalog.cuisines.take(5)
     val prepTimeOptions = ChoiceCatalog.prepTimeOptions
     val difficultyOptions = ChoiceCatalog.difficultyOptions
 
@@ -65,21 +62,41 @@ class ExploreViewModel(
         viewModelScope.launch {
             recipeRepository.getDeck(
                 DeckQuery(
-                    mood = null,
-                    limit = 6,
+                    mood = snapshot.selectedCuisine,
+                    limit = 50,
                     maxPrepTime = snapshot.maxPrepTime,
                     minRating = snapshot.minRating,
                     difficulty = snapshot.difficulty,
                     search = snapshot.searchQuery.takeIf { it.isNotBlank() }
                 )
             ).onSuccess { feed ->
-                _state.update { it.copy(isLoading = false, feed = feed) }
+                val filteredFeed = if (snapshot.selectedCuisine != null) {
+                    val target = snapshot.selectedCuisine.lowercase().trim()
+                    feed.filter { recipe ->
+                        if (target == "vegan") {
+                            recipe.dietaryTags.any { it.equals("vegan", ignoreCase = true) } ||
+                                    recipe.tags.any { it.contains("vegan", ignoreCase = true) }
+                        } else {
+                            recipe.category.lowercase().trim() == target
+                        }
+                    }
+                } else {
+                    feed
+                }
+                _state.update { it.copy(isLoading = false, feed = filteredFeed) }
             }.onFailure { error ->
                 _state.update {
                     it.copy(isLoading = false, errorMessage = error.message ?: "Could not load matches")
                 }
             }
         }
+    }
+
+    fun toggleCuisine(cuisineKey: String) {
+        _state.update {
+            it.copy(selectedCuisine = if (it.selectedCuisine == cuisineKey) null else cuisineKey)
+        }
+        loadFeed()
     }
 
     fun onSearchInput(query: String) {
@@ -102,18 +119,24 @@ class ExploreViewModel(
     }
 
     fun clearFilters() {
-        _state.update { it.copy(maxPrepTime = null, minRating = null, difficulty = null) }
+        _state.update {
+            it.copy(
+                selectedCuisine = null,
+                maxPrepTime = null,
+                minRating = null,
+                difficulty = null,
+                searchQuery = ""
+            )
+        }
         loadFeed()
     }
 
-    //Save recipe bookmark
     fun saveRecipe(recipe: Recipe) {
         viewModelScope.launch {
             recipeRepository.recordSwipe(
                 recipeId = recipe.id,
                 direction = SwipeDirection.RIGHT,
-                moodProfileKey = recipe.category.lowercase().replace(Regex("[^a-z]"), "")
-                    .takeIf { it.isNotBlank() } ?: "comfort"
+                moodProfileKey = recipe.category.lowercase().replace(Regex("[^a-z]"), "").ifBlank { "comfort" }
             ).onSuccess {
                 _state.update { current ->
                     current.copy(

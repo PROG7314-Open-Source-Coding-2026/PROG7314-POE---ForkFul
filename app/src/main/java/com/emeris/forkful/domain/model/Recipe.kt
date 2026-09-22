@@ -21,6 +21,7 @@ data class Recipe(
     val category: String,
     val isSaved: Boolean = false,
     val isCooked: Boolean = false,
+    val dietaryTags: List<String> = emptyList(),
     val tags: List<String> = emptyList(),
     val ingredients: List<Ingredient> = emptyList(),
     val instructions: List<String> = emptyList()

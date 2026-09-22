@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-//Swipe deck state
+// Swipe deck state
 data class SwipeUiState(
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
@@ -27,14 +27,13 @@ data class SwipeUiState(
     val reachedEnd: Boolean = false
 ) {
     val currentRecipe: Recipe? get() = deck.getOrNull(currentIndex)
-    val stackLabel: String get() = "${deck.size - currentIndex} dishes in this stack"
+    val stackLabel: String get() = "${(deck.size - currentIndex).coerceAtLeast(0)} dishes in this stack"
 }
 
-//Swipe ViewModel
+// Swipe ViewModel
 class SwipeViewModel(
     private val recipeRepository: RecipeRepository
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(SwipeUiState())
     val state: StateFlow<SwipeUiState> = _state.asStateFlow()
 
@@ -42,9 +41,30 @@ class SwipeViewModel(
         _state.update { it.copy(moodKey = moodKey, isLoading = true, errorMessage = null, reachedEnd = false) }
         viewModelScope.launch {
             recipeRepository.getDeck(DeckQuery(mood = moodKey, limit = 20))
-                .onSuccess { deck ->
+                .onSuccess { rawDeck ->
+                    val target = moodKey.lowercase().trim()
+
+                    // Filter out any dishes that do not match the requested cuisine or mood
+                    val curatedDeck = rawDeck.filter { recipe ->
+                        val categoryMatches = recipe.category.lowercase() == target
+                        val tagMatches = recipe.tags.any { it.lowercase().contains(target) }
+                        val specialMoodMatches = when (target) {
+                            "vegan" -> recipe.tags.any { it.contains("vegan", ignoreCase = true) }
+                            "healthy" -> recipe.category.equals("Healthy", ignoreCase = true) || recipe.calories <= 450
+                            "comfort" -> recipe.category.equals("Comfort", ignoreCase = true) || recipe.category.equals("Braai", ignoreCase = true)
+                            "pantry" -> true
+                            else -> false
+                        }
+                        categoryMatches || tagMatches || specialMoodMatches
+                    }
+
                     _state.update {
-                        it.copy(isLoading = false, deck = deck, currentIndex = 0)
+                        it.copy(
+                            isLoading = false,
+                            deck = curatedDeck,
+                            currentIndex = 0,
+                            reachedEnd = curatedDeck.isEmpty()
+                        )
                     }
                 }
                 .onFailure { error ->
@@ -55,13 +75,13 @@ class SwipeViewModel(
         }
     }
 
-    //Record swipe
+    // Record swipe
     fun swipe(direction: SwipeDirection) {
         val snapshot = _state.value
         val recipe = snapshot.currentRecipe ?: return
         if (snapshot.isSwiping) return
 
-        //Optimistic advance
+        // Optimistic advance
         _state.update {
             it.copy(
                 isSwiping = true,

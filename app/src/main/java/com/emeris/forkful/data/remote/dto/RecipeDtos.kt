@@ -52,6 +52,7 @@ data class RecipeDeckItemDto(
     val rating: Double = 0.0,
     val difficulty: String? = null,
     val cuisineType: String? = null,
+    val dietaryTags: List<String> = emptyList(),
     val tags: List<String> = emptyList(),
     val topTagPoints: Int = 0,
     val matchPercentage: Int = 0,

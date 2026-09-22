@@ -51,7 +51,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.emeris.forkful.core.designsystem.AlertRed
 import com.emeris.forkful.core.designsystem.BorderLight
 import com.emeris.forkful.core.designsystem.CreamBackground
 import com.emeris.forkful.core.designsystem.ForestGreen
@@ -60,7 +59,6 @@ import com.emeris.forkful.core.designsystem.PureWhite
 import com.emeris.forkful.core.designsystem.TextCharcoal
 import com.emeris.forkful.core.designsystem.TextMuted
 import com.emeris.forkful.core.logging.ForkfulLogger
-import com.emeris.forkful.domain.model.ChoiceCatalog
 import com.emeris.forkful.domain.model.Recipe
 import com.emeris.forkful.ui.components.ErrorState
 import com.emeris.forkful.ui.components.ForkfulBottomBar
@@ -201,20 +199,27 @@ fun ExploreScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
+                    /* Cuisine category filter buttons */
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         categories.forEach { cat ->
+                            val isSelected = uiState.selectedCuisine == cat.moodKey
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.clickable { onStackSelected(cat.moodKey) }
+                                modifier = Modifier.clickable { viewModel.toggleCuisine(cat.moodKey) }
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(54.dp)
+                                        .size(56.dp)
                                         .clip(CircleShape)
-                                        .background(cat.colorBg),
+                                        .background(cat.colorBg)
+                                        .border(
+                                            width = if (isSelected) 3.dp else 0.dp,
+                                            color = if (isSelected) ForestGreen else Color.Transparent,
+                                            shape = CircleShape
+                                        ),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
@@ -228,7 +233,8 @@ fun ExploreScreen(
                                 Text(
                                     text = cat.name,
                                     fontSize = 12.sp,
-                                    color = TextCharcoal
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (isSelected) ForestGreen else TextCharcoal
                                 )
                             }
                         }
@@ -277,18 +283,32 @@ fun ExploreScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Matches for you",
+                            text = if (uiState.selectedCuisine != null) {
+                                "${uiState.selectedCuisine?.replaceFirstChar { it.uppercase() }} dishes"
+                            } else {
+                                "Matches for you"
+                            },
                             fontFamily = FontFamily.Serif,
                             fontSize = 22.sp,
                             color = TextCharcoal
                         )
-                        Text(
-                            text = "See all",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = ForestGreen,
-                            modifier = Modifier.clickable { onNavigateTo(Screen.RecipeBox.route) }
-                        )
+                        if (uiState.selectedCuisine != null) {
+                            Text(
+                                text = "Swipe this stack",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = ForestGreen,
+                                modifier = Modifier.clickable { onStackSelected(uiState.selectedCuisine!!) }
+                            )
+                        } else {
+                            Text(
+                                text = "See all",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = ForestGreen,
+                                modifier = Modifier.clickable { onNavigateTo(Screen.RecipeBox.route) }
+                            )
+                        }
                     }
                 }
             }
@@ -306,7 +326,7 @@ fun ExploreScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "No recipes match your filters.\nTry clearing them.",
+                            text = "No recipes match this category.\nTry clearing your filters.",
                             fontSize = 14.sp,
                             color = TextMuted,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -332,7 +352,6 @@ fun ExploreScreen(
                     )
                     Spacer(modifier = Modifier.height(14.dp))
                 }
-
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 20.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -407,9 +426,7 @@ fun RecipeMatchCard(
                     .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
-
             Spacer(modifier = Modifier.width(14.dp))
-
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = recipe.title,
@@ -417,9 +434,7 @@ fun RecipeMatchCard(
                     fontWeight = FontWeight.SemiBold,
                     color = TextCharcoal
                 )
-
                 Spacer(modifier = Modifier.height(4.dp))
-
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Star,
@@ -434,14 +449,12 @@ fun RecipeMatchCard(
                         color = TextMuted
                     )
                     Text(
-                        text = " · ${recipe.prepTimeMinutes} min",
+                        text = "   ${recipe.prepTimeMinutes} min",
                         fontSize = 13.sp,
                         color = TextMuted
                     )
                 }
-
                 Spacer(modifier = Modifier.height(8.dp))
-
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
@@ -456,7 +469,6 @@ fun RecipeMatchCard(
                     )
                 }
             }
-
             Box(
                 modifier = Modifier
                     .size(42.dp)
@@ -495,13 +507,11 @@ fun MoodCard(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.45f))
         )
-
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)

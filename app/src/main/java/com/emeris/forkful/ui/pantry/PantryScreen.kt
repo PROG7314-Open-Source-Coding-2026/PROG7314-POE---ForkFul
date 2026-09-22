@@ -45,10 +45,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -59,8 +59,6 @@ import com.emeris.forkful.core.designsystem.CardBorder
 import com.emeris.forkful.core.designsystem.CardSurface
 import com.emeris.forkful.core.designsystem.CreamBackground
 import com.emeris.forkful.core.designsystem.MintLight
-import com.emeris.forkful.core.designsystem.PantryBadgeBg
-import com.emeris.forkful.core.designsystem.PantryBadgeText
 import com.emeris.forkful.core.designsystem.SubtleCircleBg
 import com.emeris.forkful.core.designsystem.SubtleCircleIcon
 import com.emeris.forkful.core.designsystem.TextCharcoal
@@ -86,13 +84,22 @@ fun PantryScreen(
         ForkfulLogger.logLifecycle("PantryScreen", "ON_CREATE")
     }
 
-    val viewModel = containerViewModel { PantryViewModel(it.pantryRepository, it.recipeRepository) }
+    val viewModel = containerViewModel { PantryViewModel(it.pantryRepository) }
     val uiState by viewModel.state.collectAsState()
+
+    @Suppress("SpellCheckingInspection")
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
     var showAddSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    LaunchedEffect(uiState.addSuccessMessage) {
+        uiState.addSuccessMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.consumeMessages()
+        }
+    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -346,13 +353,13 @@ fun PantryMatchCard(
                 fontWeight = FontWeight.SemiBold,
                 color = TextCharcoal,
                 maxLines = 1,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(2.dp))
 
             Text(
-                text = "${match.recipe.prepTimeMinutes} min  -  ${match.missingIngredients.size} missing",
+                text = "${match.recipe.prepTimeMinutes} min - ${match.missingIngredients.size} missing",
                 fontSize = 12.sp,
                 color = TextMuted
             )
@@ -365,8 +372,9 @@ fun PantryItemRow(
     item: PantryItem,
     onDelete: () -> Unit
 ) {
-    val isUrgent = item.daysUntilExpiry in 0..2
-    val isExpired = item.daysUntilExpiry < 0
+    val days = item.daysUntilExpiry
+    val isUrgent = days != null && days in 0..2
+    val isExpired = days != null && days < 0
 
     Box(
         modifier = Modifier
@@ -413,16 +421,17 @@ fun PantryItemRow(
                         color = TextMuted
                     )
                     Text(
-                        text = "  -  ",
+                        text = " - ",
                         fontSize = 12.sp,
                         color = TextMuted
                     )
                     Text(
                         text = when {
-                            isExpired -> "Expired"
-                            item.daysUntilExpiry == 0 -> "Expires today"
-                            item.daysUntilExpiry == 1 -> "Expires tomorrow"
-                            else -> "Expires in ${item.daysUntilExpiry} days"
+                            days == null -> "No expiry set"
+                            days < 0 -> "Expired"
+                            days == 0 -> "Expires today"
+                            days == 1 -> "Expires tomorrow"
+                            else -> "Expires in $days days"
                         },
                         fontSize = 12.sp,
                         fontWeight = if (isUrgent || isExpired) FontWeight.Bold else FontWeight.Normal,

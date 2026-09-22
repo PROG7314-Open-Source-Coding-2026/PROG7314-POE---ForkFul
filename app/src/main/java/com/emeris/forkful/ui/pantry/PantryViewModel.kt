@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
-//Pantry UI state
 data class PantryUiState(
     val isLoading: Boolean = true,
     val isAdding: Boolean = false,
@@ -22,8 +22,15 @@ data class PantryUiState(
     val matches: List<PantryMatch> = emptyList(),
     val addSuccessMessage: String? = null
 ) {
+    @Suppress("unused")
     val expiringSoon: List<PantryItem>
-        get() = items.filter { PantryUtils.isExpiringSoon(it.daysUntilExpiry) || PantryUtils.isExpired(it.daysUntilExpiry) }
+        get() = items.filter { item ->
+            item.daysUntilExpiry?.let { days ->
+                PantryUtils.isExpiringSoon(days) || PantryUtils.isExpired(days)
+            } ?: false
+        }
+
+    @Suppress("unused")
     val bestMatch: PantryMatch? get() = matches.maxByOrNull { it.matchPercentage }
 }
 
@@ -34,16 +41,17 @@ class PantryViewModel(
     private val _state = MutableStateFlow(PantryUiState())
     val state: StateFlow<PantryUiState> = _state.asStateFlow()
 
+    @Suppress("unused")
     val quickAddSuggestions = listOf(
         "Tomatoes", "Onions", "Garlic", "Eggs", "Milk", "Butter", "Cheese",
         "Chicken", "Rice", "Pasta", "Spinach", "Potatoes", "Basil", "Olive Oil"
     )
 
     init {
-        load()
+        loadPantry()
     }
 
-    fun load() {
+    fun loadPantry() {
         _state.update { it.copy(isLoading = true, errorMessage = null) }
         viewModelScope.launch {
             pantryRepository.getPantry()
@@ -71,6 +79,14 @@ class PantryViewModel(
         }
     }
 
+    fun addPantryItem(name: String, quantity: String, category: String, daysUntilExpiry: Int) {
+        val expiryDate = LocalDate.now().plusDays(daysUntilExpiry.toLong()).toString()
+        val parts = quantity.trim().split(" ", limit = 2)
+        val qty = parts.getOrNull(0)
+        val unit = parts.getOrNull(1)
+        addItem(name = name, quantity = qty, unit = unit, expiryDate = expiryDate)
+    }
+
     fun addItem(name: String, quantity: String?, unit: String?, expiryDate: String?) {
         if (_state.value.isAdding) return
         _state.update { it.copy(isAdding = true, errorMessage = null) }
@@ -94,9 +110,10 @@ class PantryViewModel(
         }
     }
 
+    @Suppress("unused")
     fun quickAdd(name: String) = addItem(name, quantity = null, unit = null, expiryDate = null)
 
-    fun removeItem(pantryItemId: String) {
+    fun removePantryItem(pantryItemId: String) {
         viewModelScope.launch {
             pantryRepository.removeItem(pantryItemId)
                 .onSuccess {

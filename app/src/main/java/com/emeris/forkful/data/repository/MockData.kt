@@ -32,7 +32,7 @@ object MockData {
                 Ingredient("Fresh Basil", "Handful leaves", inPantry = true),
                 Ingredient("Extra Virgin Olive Oil", "1 tbsp", inPantry = false)
             ),
-            steps = listOf(
+            instructions = listOf(
                 "Preheat the oven to 220°C.",
                 "Spread crushed tomatoes over the flatbread base.",
                 "Tear mozzarella over the top and drizzle with olive oil.",
@@ -64,7 +64,7 @@ object MockData {
                 Ingredient("Cinnamon stick", "1 piece", inPantry = true),
                 Ingredient("Chilli flakes", "1 tsp", inPantry = false)
             ),
-            steps = listOf(
+            instructions = listOf(
                 "Brown the mutton in a heavy pot.",
                 "Add onions and cook until soft.",
                 "Stir in tomatoes, cinnamon and chilli.",
@@ -95,7 +95,7 @@ object MockData {
                 Ingredient("Vegetable Stock", "3 cups", inPantry = true),
                 Ingredient("Shallots", "1 minced", inPantry = false)
             ),
-            steps = listOf(
+            instructions = listOf(
                 "Soften the shallots in a little butter.",
                 "Stir in the rice until the grains look glossy.",
                 "Add stock a ladle at a time, stirring often.",
@@ -126,7 +126,7 @@ object MockData {
                 Ingredient("Avocado", "1 diced", inPantry = true),
                 Ingredient("Sweetcorn", "1/2 cup", inPantry = false)
             ),
-            steps = listOf(
+            instructions = listOf(
                 "Coat the chicken in peri-peri sauce.",
                 "Cook the rice until fluffy.",
                 "Pan-fry or grill the chicken until cooked through.",

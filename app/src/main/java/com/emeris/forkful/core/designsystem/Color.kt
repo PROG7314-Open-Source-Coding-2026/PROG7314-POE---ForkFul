@@ -41,3 +41,36 @@ val TextMuted: Color
 val BorderLight: Color
     @Composable
     get() = if (LocalIsDarkTheme.current) Color(0xFF2C332E) else Color(0xFFE0DDD5)
+
+// Adaptive semantic tokens for recipe cards and details
+val AccentGreen: Color
+    @Composable
+    get() = if (LocalIsDarkTheme.current) Color(0xFF7CE4AB) else Color(0xFF085434)
+
+val CardSurface: Color
+    @Composable
+    get() = if (LocalIsDarkTheme.current) Color(0xFF1C201D) else Color(0xFFFFFFFF)
+
+val CardBorder: Color
+    @Composable
+    get() = if (LocalIsDarkTheme.current) Color(0xFF2B332D) else Color(0xFFE5E0D5)
+
+val SubtleCircleBg: Color
+    @Composable
+    get() = if (LocalIsDarkTheme.current) Color(0xFF262C27) else Color(0xFFF0EDE6)
+
+val SubtleCircleIcon: Color
+    @Composable
+    get() = if (LocalIsDarkTheme.current) Color(0xFF9EAAA2) else Color(0xFF7A847D)
+
+val PantryBadgeBg: Color
+    @Composable
+    get() = if (LocalIsDarkTheme.current) Color(0xFF143825) else Color(0xFFE4F3EB)
+
+val PantryBadgeText: Color
+    @Composable
+    get() = if (LocalIsDarkTheme.current) Color(0xFF8CE4B6) else Color(0xFF085434)
+
+val ButtonGreen: Color
+    @Composable
+    get() = if (LocalIsDarkTheme.current) Color(0xFF1D784C) else Color(0xFF085434)

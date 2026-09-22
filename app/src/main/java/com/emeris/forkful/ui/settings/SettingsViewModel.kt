@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Settings state (FR-25 .. FR-27). */
+//Settings state
 data class SettingsUiState(
     val isLoading: Boolean = true,
     val isSaving: Boolean = false,

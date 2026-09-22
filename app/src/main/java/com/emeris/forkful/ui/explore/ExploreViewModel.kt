@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Explore home hub state (FR-11, FR-12). */
+//Explore UI state
 data class ExploreUiState(
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
@@ -31,10 +31,7 @@ data class ExploreUiState(
         get() = maxPrepTime != null || minRating != null || difficulty != null || searchQuery.isNotBlank()
 }
 
-/**
- * Central discovery hub: ranked feed from recipes-deck, live search and the
- * prep-time / rating / difficulty filter row (FR-11).
- */
+//Explore ViewModel
 @OptIn(FlowPreview::class)
 class ExploreViewModel(
     private val recipeRepository: RecipeRepository
@@ -109,7 +106,7 @@ class ExploreViewModel(
         loadFeed()
     }
 
-    /** Bookmark icon on a feed card saves the recipe (right-swipe semantics). */
+    //Save recipe bookmark
     fun saveRecipe(recipe: Recipe) {
         viewModelScope.launch {
             recipeRepository.recordSwipe(

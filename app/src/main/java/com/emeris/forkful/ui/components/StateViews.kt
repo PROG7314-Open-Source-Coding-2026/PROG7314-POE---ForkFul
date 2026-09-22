@@ -18,9 +18,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.emeris.forkful.core.designsystem.ForestGreen
 import com.emeris.forkful.core.designsystem.PureWhite
+import com.emeris.forkful.core.designsystem.TextCharcoal
 import com.emeris.forkful.core.designsystem.TextMuted
 
-/** Fullscreen loading indicator used while REST calls are in flight. */
+//Loading view
 @Composable
 fun LoadingState(message: String = "Loading...") {
     Column(
@@ -37,10 +38,7 @@ fun LoadingState(message: String = "Loading...") {
     }
 }
 
-/**
- * Fullscreen error panel with a retry action (NFR-01: graceful handling of
- * failures without crashing).
- */
+//Error view
 @Composable
 fun ErrorState(
     message: String,
@@ -55,7 +53,7 @@ fun ErrorState(
             text = "Something went wrong",
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold,
-            color = com.emeris.forkful.core.designsystem.TextCharcoal
+            color = TextCharcoal
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(

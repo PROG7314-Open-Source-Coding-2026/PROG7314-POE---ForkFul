@@ -3,13 +3,14 @@ package com.emeris.forkful.ui.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emeris.forkful.core.logging.ForkfulLogger
+import com.emeris.forkful.core.util.Validators
 import com.emeris.forkful.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-/** Authentication UI state (FR-01). */
+//Login UI state
 sealed interface LoginUiState {
     data object Idle : LoginUiState
     data object Loading : LoginUiState
@@ -17,12 +18,7 @@ sealed interface LoginUiState {
     data class Error(val message: String) : LoginUiState
 }
 
-/**
- * Handles Google SSO and email sign-in/sign-up against the auth-sso Edge
- * Function. The Google ID token itself is obtained in the Composable via
- * Android Credential Manager (requires an Activity); this ViewModel performs
- * the token-for-JWT exchange and session persistence.
- */
+//Login ViewModel
 class LoginViewModel(
     private val authRepository: AuthRepository
 ) : ViewModel() {
@@ -65,9 +61,9 @@ class LoginViewModel(
     }
 
     private fun validateCredentials(email: String, password: String): String? = when {
-        !com.emeris.forkful.core.util.Validators.isValidEmail(email) ->
+        !Validators.isValidEmail(email) ->
             "Please enter a valid email address."
-        !com.emeris.forkful.core.util.Validators.isValidPassword(password) ->
+        !Validators.isValidPassword(password) ->
             "Password must be at least 6 characters."
         else -> null
     }

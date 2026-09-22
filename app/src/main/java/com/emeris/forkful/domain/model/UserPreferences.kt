@@ -1,6 +1,6 @@
 package com.emeris.forkful.domain.model
 
-/** Server-side user preferences (FR-25 .. FR-27). */
+//User preferences model
 data class UserPreferences(
     val language: String,
     val dietaryTags: List<String>,
@@ -12,7 +12,7 @@ data class UserPreferences(
     val displayName: String? = null
 )
 
-/** Partial update for user preferences. */
+//Preferences update model
 data class PreferencesUpdate(
     val language: String? = null,
     val dietaryTags: List<String>? = null,

@@ -2,6 +2,7 @@ package com.emeris.forkful.data.repository
 
 import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.core.network.ForkfulApi
+import com.emeris.forkful.core.util.PantryUtils
 import com.emeris.forkful.data.mapper.toDomain
 import com.emeris.forkful.data.remote.dto.AddPantryItemRequest
 import com.emeris.forkful.data.remote.dto.PantryMatchRequest
@@ -10,7 +11,7 @@ import com.emeris.forkful.domain.model.PantryMatch
 import com.emeris.forkful.domain.repository.PantryRepository
 import com.emeris.forkful.core.util.Validators
 
-/** Capture Fridge data source (FR-17 .. FR-20). */
+//Pantry repo impl
 class PantryRepositoryImpl(
     private val api: ForkfulApi
 ) : PantryRepository {
@@ -40,7 +41,7 @@ class PantryRepositoryImpl(
             id = response.pantryItemId,
             name = name.trim(),
             category = "Other",
-            daysUntilExpiry = com.emeris.forkful.core.util.PantryUtils.daysUntilExpiry(expiryDate)
+            daysUntilExpiry = PantryUtils.daysUntilExpiry(expiryDate)
         )
     }
 

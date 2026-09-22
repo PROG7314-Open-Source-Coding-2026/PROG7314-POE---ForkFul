@@ -7,7 +7,7 @@ import com.emeris.forkful.data.remote.dto.ToggleGroceryItemRequest
 import com.emeris.forkful.domain.model.GroceryAisle
 import com.emeris.forkful.domain.repository.GroceryRepository
 
-/** Smart Grocery Aggregator data source (FR-21 .. FR-24). */
+//Grocery repo impl
 class GroceryRepositoryImpl(
     private val api: ForkfulApi
 ) : GroceryRepository {

@@ -2,7 +2,7 @@ package com.emeris.forkful.data.remote.dto
 
 import kotlinx.serialization.Serializable
 
-/** Current user preferences, GET /functions/v1/user-preferences. */
+//User prefs DTO
 @Serializable
 data class UserPreferencesDto(
     val userId: String,
@@ -16,10 +16,7 @@ data class UserPreferencesDto(
     val biometricLockEnabled: Boolean = false
 )
 
-/**
- * Request body for PUT /functions/v1/user-preferences
- * (spec fields + onboarding extras: seedCuisines, resetTasteProfiles).
- */
+//Update prefs req
 @Serializable
 data class UpdatePreferencesRequest(
     val language: String? = null,

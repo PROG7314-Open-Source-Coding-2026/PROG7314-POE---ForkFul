@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Swipe deck state (FR-06 .. FR-10, NFR-03). */
+//Swipe deck state
 data class SwipeUiState(
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
@@ -30,12 +30,7 @@ data class SwipeUiState(
     val stackLabel: String get() = "${deck.size - currentIndex} dishes in this stack"
 }
 
-/**
- * Adaptive Swipe Discovery Deck engine client: loads the ranked deck for a
- * mood, records every gesture as taste-profile data and advances the stack
- * (FR-06 .. FR-10). Re-ranking happens server-side; NFR-03 responsiveness is
- * achieved by advancing immediately and syncing asynchronously.
- */
+//Swipe ViewModel
 class SwipeViewModel(
     private val recipeRepository: RecipeRepository
 ) : ViewModel() {
@@ -60,16 +55,13 @@ class SwipeViewModel(
         }
     }
 
-    /**
-     * Records the swipe against the REST API and advances the visible card.
-     * Called by both drag gestures and the action buttons.
-     */
+    //Record swipe
     fun swipe(direction: SwipeDirection) {
         val snapshot = _state.value
         val recipe = snapshot.currentRecipe ?: return
         if (snapshot.isSwiping) return
 
-        // Optimistically advance (NFR-03: next card appears instantly).
+        //Optimistic advance
         _state.update {
             it.copy(
                 isSwiping = true,
@@ -87,7 +79,7 @@ class SwipeViewModel(
                     }
                 }
                 .onFailure { error ->
-                    ForkfulLogger.logAction("SWIPE", "Sync failed (will not retry in Part 2): ${error.message}")
+                    ForkfulLogger.logAction("SWIPE", "Sync failed: ${error.message}")
                     _state.update { it.copy(isSwiping = false) }
                 }
         }

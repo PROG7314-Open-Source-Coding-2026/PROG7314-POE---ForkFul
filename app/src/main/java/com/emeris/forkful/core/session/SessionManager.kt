@@ -14,7 +14,7 @@ import com.emeris.forkful.core.logging.ForkfulLogger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-/** Immutable snapshot of the authenticated session. */
+//Auth session model
 data class Session(
     val token: String,
     val userId: String,
@@ -22,7 +22,7 @@ data class Session(
     val displayName: String?
 )
 
-/** Locally cached, non-sensitive app preferences (DataStore). */
+//App preferences model
 data class LocalPrefs(
     val theme: String = "light",
     val language: String = "en",
@@ -34,13 +34,7 @@ private val Context.prefsDataStore: DataStore<Preferences> by preferencesDataSto
     name = "forkful_prefs"
 )
 
-/**
- * Holds the authenticated session and cached preferences.
- *
- * NFR-04 (Security): the session JWT and user identifiers are stored in an
- * [EncryptedSharedPreferences] file backed by the Android Keystore - never
- * in plaintext. Non-sensitive display preferences live in DataStore.
- */
+//Session & prefs store
 class SessionManager(private val context: Context) {
 
     private val securePrefs: SharedPreferences by lazy {
@@ -56,10 +50,7 @@ class SessionManager(private val context: Context) {
         )
     }
 
-    // ------------------------------------------------------------------
-    // Session (encrypted)
-    // ------------------------------------------------------------------
-
+    //Session methods
     fun getToken(): String? = securePrefs.getString(KEY_TOKEN, null)
 
     fun getSession(): Session? {
@@ -88,20 +79,14 @@ class SessionManager(private val context: Context) {
         ForkfulLogger.logAction("SESSION", "Session cleared (logout)")
     }
 
-    // ------------------------------------------------------------------
-    // Onboarding flag (FR-02 / FR-05 routing)
-    // ------------------------------------------------------------------
-
+    //Onboarding flag
     fun isOnboarded(): Boolean = securePrefs.getBoolean(KEY_ONBOARDED, false)
 
     fun setOnboarded(onboarded: Boolean) {
         securePrefs.edit().putBoolean(KEY_ONBOARDED, onboarded).apply()
     }
 
-    // ------------------------------------------------------------------
-    // Display preferences (DataStore, non-sensitive)
-    // ------------------------------------------------------------------
-
+    //DataStore prefs
     val prefsFlow: Flow<LocalPrefs> = context.prefsDataStore.data.map { prefs ->
         LocalPrefs(
             theme = prefs[KEY_THEME] ?: "light",
@@ -112,7 +97,7 @@ class SessionManager(private val context: Context) {
     }
 
     suspend fun updatePrefs(update: (LocalPrefs) -> LocalPrefs) {
-        val current = LocalPrefs() // defaults; flow is source of truth for UI
+        val current = LocalPrefs() //Default prefs
         context.prefsDataStore.edit { prefs ->
             val next = update(
                 LocalPrefs(

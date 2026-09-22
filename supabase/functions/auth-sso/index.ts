@@ -1,7 +1,4 @@
-// POST /functions/v1/auth-sso
-// Exchanges an identity for a server-issued Supabase session JWT.
-// Request : { ssoProvider: "google"|"email", idToken?, email?, password?, displayName?, mode? }
-// Response: { token, userId, isNewUser }
+//Auth SSO function
 
 import { anonClient, errorResponse, handleOptions, json, respondToError, serviceClient } from "../_shared/forkful.ts";
 
@@ -20,7 +17,7 @@ Deno.serve(async (req: Request) => {
       const idToken = String(body.idToken ?? "");
       if (!idToken) return errorResponse("Missing Google ID token", 400);
 
-      // Verify the token with Google before exchanging it with Supabase auth.
+      //Verify Google token
       const googleCheck = await fetch(
         `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`,
       );

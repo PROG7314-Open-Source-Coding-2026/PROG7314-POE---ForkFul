@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Recipe detail sheet state (FR-13, FR-14). */
+//Recipe detail state
 data class RecipeDetailUiState(
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
@@ -41,7 +41,7 @@ class RecipeDetailViewModel(
         }
     }
 
-    /** Bookmark on the detail sheet saves the recipe (right-swipe semantics). */
+    //Toggle save bookmark
     fun toggleSave() {
         val recipe = _state.value.recipe ?: return
         if (recipe.isSaved) return

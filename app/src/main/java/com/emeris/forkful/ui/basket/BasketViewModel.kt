@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Basket state (FR-21 .. FR-24). */
+//Basket UI state
 data class BasketUiState(
     val isLoading: Boolean = true,
     val errorMessage: String? = null,

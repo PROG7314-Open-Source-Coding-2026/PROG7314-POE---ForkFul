@@ -2,10 +2,7 @@ package com.emeris.forkful.data.remote.dto
 
 import kotlinx.serialization.Serializable
 
-/**
- * Response for GET /functions/v1/groceries — items grouped by retail aisle:
- * `[ { aisle, items: [ { name, quantity, unit, isChecked } ] } ]`.
- */
+//Grocery DTOs
 @Serializable
 data class GroceryAisleDto(
     val aisle: String,
@@ -21,19 +18,19 @@ data class GroceryItemDto(
     val isChecked: Boolean = false
 )
 
-/** Request body for PUT /functions/v1/groceries-item: `{ isChecked }`. */
+//Toggle grocery item req
 @Serializable
 data class ToggleGroceryItemRequest(
     val isChecked: Boolean
 )
 
-/** Generic `{ status }` response. */
+//Status res
 @Serializable
 data class StatusResponse(
     val status: String
 )
 
-/** Request body for POST /functions/v1/recipe-box (mark as cooked). */
+//Mark cooked req
 @Serializable
 data class MarkCookedRequest(
     val recipeId: String,

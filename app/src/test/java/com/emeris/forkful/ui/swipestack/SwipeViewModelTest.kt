@@ -20,8 +20,6 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import kotlinx.coroutines.test.setMain
-import kotlinx.coroutines.test.resetMain
 
 class FakeRecipeRepository : RecipeRepository {
 
@@ -110,8 +108,7 @@ class SwipeViewModelTest {
     fun `swipe failures still advance the visible card`() = runTest {
         repository.deck = listOf(recipe("r-1", "Only dish"))
         viewModel.loadDeck("comfort")
-        // Failure path: repository returns success in this fake; the guard
-        // under test is that state stays consistent after the last card.
+        //Fake repo test guard
         viewModel.swipe(SwipeDirection.RIGHT)
 
         assertNotNull(viewModel.state.value.lastTagPoints)

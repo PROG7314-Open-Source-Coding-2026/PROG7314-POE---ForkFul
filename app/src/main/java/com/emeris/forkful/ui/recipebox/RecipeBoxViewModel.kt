@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Recipe Box state (FR-15, FR-16). */
+//Recipe box state
 data class RecipeBoxUiState(
     val isLoading: Boolean = true,
     val errorMessage: String? = null,

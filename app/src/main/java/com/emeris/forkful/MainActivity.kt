@@ -66,8 +66,7 @@ class MainActivity : ComponentActivity() {
 fun ForkfulApp(container: AppContainer) {
     val navController = rememberNavController()
 
-    // FR-02 / FR-05 routing: no session -> Login; session without onboarding
-    // -> Onboarding; otherwise straight to the Explore home hub.
+    //FR-02/FR-05 start dest check
     val startDestination = remember {
         val session = container.sessionManager.getSession()
         when {

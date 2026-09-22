@@ -1,6 +1,4 @@
-// GET    /functions/v1/pantry                  (FR-17)
-// POST   /functions/v1/pantry { name, quantity, unit, expiryDate }
-// DELETE /functions/v1/pantry?pantryItemId=uuid
+//Pantry management function
 
 import { aisleFor, errorResponse, handleOptions, json, respondToError, requireUser } from "../_shared/forkful.ts";
 

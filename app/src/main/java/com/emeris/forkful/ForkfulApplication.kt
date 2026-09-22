@@ -1,7 +1,9 @@
 package com.emeris.forkful
 
+import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.os.Bundle
 import android.util.Log
 import com.emeris.forkful.core.network.NetworkModule
 import com.emeris.forkful.core.session.SessionManager
@@ -11,10 +13,7 @@ import com.emeris.forkful.data.repository.PantryRepositoryImpl
 import com.emeris.forkful.data.repository.PreferencesRepositoryImpl
 import com.emeris.forkful.data.repository.RecipeRepositoryImpl
 
-/**
- * Manual dependency container (constructor injection without a DI framework,
- * keeping the Part 2 prototype simple and fully transparent).
- */
+//Manual DI container
 class AppContainer(context: Context) {
 
     val sessionManager: SessionManager = SessionManager(context)
@@ -28,11 +27,7 @@ class AppContainer(context: Context) {
     val preferencesRepository = PreferencesRepositoryImpl(api, sessionManager)
 }
 
-/**
- * Application entry point: registers the global activity lifecycle logger
- * required by the POE ("functional logging demonstrating understanding of
- * the application lifecycle and state transitions").
- */
+//App entry point
 class ForkfulApplication : Application() {
 
     lateinit var container: AppContainer
@@ -46,31 +41,31 @@ class ForkfulApplication : Application() {
     }
 
     private class LifecycleLogger : ActivityLifecycleCallbacks {
-        override fun onActivityCreated(activity: android.app.Activity, savedInstanceState: android.os.Bundle?) {
+        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
             Log.i(TAG, "[LIFECYCLE] ${activity.javaClass.simpleName} -> onCreate")
         }
 
-        override fun onActivityStarted(activity: android.app.Activity) {
+        override fun onActivityStarted(activity: Activity) {
             Log.i(TAG, "[LIFECYCLE] ${activity.javaClass.simpleName} -> onStart")
         }
 
-        override fun onActivityResumed(activity: android.app.Activity) {
+        override fun onActivityResumed(activity: Activity) {
             Log.i(TAG, "[LIFECYCLE] ${activity.javaClass.simpleName} -> onResume")
         }
 
-        override fun onActivityPaused(activity: android.app.Activity) {
+        override fun onActivityPaused(activity: Activity) {
             Log.i(TAG, "[LIFECYCLE] ${activity.javaClass.simpleName} -> onPause")
         }
 
-        override fun onActivityStopped(activity: android.app.Activity) {
+        override fun onActivityStopped(activity: Activity) {
             Log.i(TAG, "[LIFECYCLE] ${activity.javaClass.simpleName} -> onStop")
         }
 
-        override fun onActivitySaveInstanceState(activity: android.app.Activity, outState: android.os.Bundle) {
+        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
             Log.i(TAG, "[LIFECYCLE] ${activity.javaClass.simpleName} -> onSaveInstanceState")
         }
 
-        override fun onActivityDestroyed(activity: android.app.Activity) {
+        override fun onActivityDestroyed(activity: Activity) {
             Log.i(TAG, "[LIFECYCLE] ${activity.javaClass.simpleName} -> onDestroy")
         }
     }

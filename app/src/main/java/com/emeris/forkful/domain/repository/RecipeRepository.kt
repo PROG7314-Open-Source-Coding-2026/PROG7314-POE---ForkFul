@@ -5,7 +5,7 @@ import com.emeris.forkful.domain.model.RecipeBoxFilter
 import com.emeris.forkful.domain.model.SwipeDirection
 import com.emeris.forkful.domain.model.SwipeOutcome
 
-/** Deck query knobs surfaced by the Explore filter row (FR-11). */
+//Deck query model
 data class DeckQuery(
     val mood: String? = null,
     val limit: Int = 20,
@@ -15,10 +15,7 @@ data class DeckQuery(
     val search: String? = null
 )
 
-/**
- * Recipe discovery contract: ranked decks, recipe detail, swipe recording
- * and Recipe Box access (FR-06 .. FR-16).
- */
+//Recipe repo contract
 interface RecipeRepository {
     suspend fun getDeck(query: DeckQuery): Result<List<Recipe>>
     suspend fun getRecipeDetail(recipeId: String): Result<Recipe>

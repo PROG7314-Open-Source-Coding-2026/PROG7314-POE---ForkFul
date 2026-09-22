@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Step-by-step Cooking Mode state (FR-14, inspired by SideChef). */
+//Cooking UI state
 data class CookingUiState(
     val isLoading: Boolean = true,
     val errorMessage: String? = null,

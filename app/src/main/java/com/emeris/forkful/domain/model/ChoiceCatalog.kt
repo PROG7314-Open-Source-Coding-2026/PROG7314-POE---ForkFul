@@ -1,12 +1,6 @@
 package com.emeris.forkful.domain.model
 
-/**
- * Central catalogue of selectable cuisines (mood profiles), dietary filters
- * and languages used across Onboarding, Explore and Settings.
- *
- * Mood profile keys are lowercase single words and map 1:1 to the
- * `mood_profile_key` column used by the tag-point engine.
- */
+//Choices catalog
 object ChoiceCatalog {
 
     data class Choice(val key: String, val label: String, val emoji: String)
@@ -30,7 +24,7 @@ object ChoiceCatalog {
         "Gluten-Free"
     )
 
-    /** Curated mood shelf shown on the Explore home hub (FR-11). */
+    //Explore mood shelves
     val moodShelves = listOf(
         Choice("italian", "Italian night", "🍝"),
         Choice("comfort", "Comfort food", "🥘"),
@@ -49,7 +43,7 @@ object ChoiceCatalog {
         Choice("af", "Afrikaans", "🇿🇦")
     )
 
-    /** Aisle order used when rendering the grouped basket (FR-23). */
+    //Basket aisle order
     val aisleOrder = listOf(
         "Produce",
         "Bakery",

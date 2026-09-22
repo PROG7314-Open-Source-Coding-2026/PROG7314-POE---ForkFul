@@ -1,5 +1,4 @@
-// GET /functions/v1/recipes-deck?mood=italian&limit=20&maxPrepTime=30&minRating=4.5&difficulty=Easy&search=pasta
-// Returns the taste-profile-ranked card deck (FR-06 .. FR-11).
+//Recipes deck provider
 
 import { errorResponse, handleOptions, json, respondToError, requireUser } from "../_shared/forkful.ts";
 
@@ -32,7 +31,7 @@ Deno.serve(async (req: Request) => {
 
     let mood = (url.searchParams.get("mood") ?? "").toLowerCase();
     if (!mood || mood === "null") {
-      // Pick the mood the user has invested the most points in.
+      //Select highest points mood
       const { data: moodTotals } = await admin
         .from("user_taste_profiles")
         .select("mood_profile_key, points")

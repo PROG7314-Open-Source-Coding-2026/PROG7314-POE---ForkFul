@@ -1,5 +1,4 @@
-// GET /functions/v1/groceries  (FR-23, FR-24)
-// Returns the aggregated basket grouped by retail aisle.
+//Get groceries by aisle
 
 import { AISLE_ORDER, errorResponse, handleOptions, json, respondToError, requireUser } from "../_shared/forkful.ts";
 

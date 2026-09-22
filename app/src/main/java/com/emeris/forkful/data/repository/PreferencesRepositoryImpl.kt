@@ -9,7 +9,7 @@ import com.emeris.forkful.domain.model.PreferencesUpdate
 import com.emeris.forkful.domain.model.UserPreferences
 import com.emeris.forkful.domain.repository.PreferencesRepository
 
-/** Settings data source (FR-25 .. FR-27) with local preference caching. */
+//Prefs repo impl
 class PreferencesRepositoryImpl(
     private val api: ForkfulApi,
     private val sessionManager: SessionManager

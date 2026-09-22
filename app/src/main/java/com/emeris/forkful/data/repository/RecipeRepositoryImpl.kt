@@ -13,7 +13,7 @@ import com.emeris.forkful.domain.model.SwipeOutcome
 import com.emeris.forkful.domain.repository.DeckQuery
 import com.emeris.forkful.domain.repository.RecipeRepository
 
-/** Recipe discovery / swipe / Recipe Box data source (FR-06 .. FR-16). */
+//Recipe repo impl
 class RecipeRepositoryImpl(
     private val api: ForkfulApi
 ) : RecipeRepository {

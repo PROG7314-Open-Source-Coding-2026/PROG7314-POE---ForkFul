@@ -2,11 +2,7 @@ package com.emeris.forkful.data.remote.dto
 
 import kotlinx.serialization.Serializable
 
-/**
- * Request body for POST /functions/v1/swipes:
- * `{ recipeId, moodProfileId, direction }` where direction is "RIGHT" or
- * "LEFT" (matching the user_swipes CHECK constraint in the schema).
- */
+//Swipe req
 @Serializable
 data class SwipeRequest(
     val recipeId: String,
@@ -14,7 +10,7 @@ data class SwipeRequest(
     val direction: String
 )
 
-/** A single tag-point entry returned after a swipe. */
+//Tag point DTO
 @Serializable
 data class TagPointDto(
     val moodProfileKey: String,
@@ -22,10 +18,7 @@ data class TagPointDto(
     val points: Int
 )
 
-/**
- * Response body for POST /functions/v1/swipes:
- * `{ status, swipeId, updatedTagPoints: [] }`.
- */
+//Swipe res
 @Serializable
 data class SwipeResponse(
     val status: String,

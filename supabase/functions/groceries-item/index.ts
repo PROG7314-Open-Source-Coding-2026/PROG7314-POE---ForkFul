@@ -1,5 +1,4 @@
-// PUT /functions/v1/groceries-item?itemId=uuid  { isChecked: true }
-// Toggles a basket item's purchased state (FR-24).
+//Toggle grocery item status
 
 import { errorResponse, handleOptions, json, respondToError, requireUser } from "../_shared/forkful.ts";
 

@@ -1,8 +1,4 @@
-// POST /functions/v1/pantry-match { missingThreshold: 2 }
-// Runs the Capture Fridge matching algorithm (FR-20): every recipe is scored
-// against the user's pantry; recipes missing at most `missingThreshold`
-// ingredients are returned ordered by match percentage, with recipes that use
-// soon-expiring pantry stock boosted to the top.
+//Pantry match algorithm
 
 import { errorResponse, handleOptions, json, pantryMatches, respondToError, requireUser } from "../_shared/forkful.ts";
 
@@ -20,7 +16,7 @@ Deno.serve(async (req: Request) => {
         missingThreshold = Math.max(0, Math.min(Number(body.missingThreshold), 10));
       }
     } catch (_) {
-      // empty body is fine - default threshold
+      //Default threshold
     }
 
     const { data: pantry } = await admin
@@ -65,7 +61,7 @@ Deno.serve(async (req: Request) => {
           ? 0
           : Math.round((matched / ingredients.length) * 100);
 
-        // Expiry priority: count matched pantry items expiring within 3 days.
+        //Expiry priority check
         const expiringUsed = pantryRows.filter((row) => {
           if (!row.expiry_date) return false;
           const days = Math.round(

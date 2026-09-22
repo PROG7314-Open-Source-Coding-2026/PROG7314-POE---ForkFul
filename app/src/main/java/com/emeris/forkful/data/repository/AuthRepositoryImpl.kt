@@ -14,10 +14,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import retrofit2.HttpException
 
-/**
- * Talks to the auth-sso Edge Function. On success the server-issued JWT is
- * persisted in the encrypted session store (FR-01).
- */
+//Auth repository impl
 class AuthRepositoryImpl(
     private val api: ForkfulApi,
     private val sessionManager: SessionManager

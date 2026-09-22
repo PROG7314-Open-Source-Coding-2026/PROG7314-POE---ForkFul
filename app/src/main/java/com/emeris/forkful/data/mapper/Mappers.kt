@@ -22,7 +22,7 @@ import com.emeris.forkful.data.remote.dto.TagPointDto
 import com.emeris.forkful.data.remote.dto.UpdatePreferencesRequest
 import com.emeris.forkful.domain.model.SwipeOutcome
 
-/** DTO -> domain mappers keeping the UI layer free of wire formats. */
+//DTO to domain mappers
 
 fun RecipeDeckItemDto.toDomain(): Recipe = Recipe(
     id = recipeId,

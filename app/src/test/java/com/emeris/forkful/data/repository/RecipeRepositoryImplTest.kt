@@ -4,8 +4,10 @@ import com.emeris.forkful.core.network.ForkfulApi
 import com.emeris.forkful.core.network.NetworkModule
 import com.emeris.forkful.domain.model.RecipeBoxFilter
 import com.emeris.forkful.domain.model.SwipeDirection
+import com.emeris.forkful.domain.repository.DeckQuery
 import kotlinx.coroutines.test.runTest
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -14,11 +16,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import retrofit2.Retrofit
 
-/**
- * Contract tests: the repository must speak the exact JSON wire format the
- * Supabase Edge Functions emit (Planning & Design section 5.2).
- */
+//Recipe repo contract tests
 class RecipeRepositoryImplTest {
 
     private lateinit var server: MockWebServer
@@ -30,8 +30,8 @@ class RecipeRepositoryImplTest {
         server = MockWebServer()
         server.start()
         api = NetworkModule.json.let { json ->
-            okhttp3.OkHttpClient().let { client ->
-                retrofit2.Retrofit.Builder()
+            OkHttpClient().let { client ->
+                Retrofit.Builder()
                     .baseUrl(server.url("/"))
                     .client(client)
                     .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
@@ -72,7 +72,7 @@ class RecipeRepositoryImplTest {
         )
 
         val deck = repository.getDeck(
-            com.emeris.forkful.domain.repository.DeckQuery(mood = "italian", limit = 10)
+            DeckQuery(mood = "italian", limit = 10)
         ).getOrThrow()
 
         assertEquals(1, deck.size)

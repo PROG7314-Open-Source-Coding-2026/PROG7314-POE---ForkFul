@@ -2,15 +2,7 @@ package com.emeris.forkful.data.remote.dto
 
 import kotlinx.serialization.Serializable
 
-/**
- * Card summary returned by GET /functions/v1/recipes-deck and
- * GET /functions/v1/recipe-box.
- *
- * The planning document specifies the core fields
- * (recipeId, title, imageUrl, prepTimeMinutes, tags, topTagPoints);
- * the additional fields power the richer card UI designed in section 4
- * (match percentage, pantry counts, rating, saved/cooked status).
- */
+//Recipe deck item DTO
 @Serializable
 data class RecipeDeckItemDto(
     val recipeId: String,
@@ -32,7 +24,7 @@ data class RecipeDeckItemDto(
     val isCooked: Boolean = false
 )
 
-/** Ingredient row inside a recipe detail response. */
+//Ingredient DTO
 @Serializable
 data class IngredientDto(
     val name: String,
@@ -42,10 +34,7 @@ data class IngredientDto(
     val inPantry: Boolean = false
 )
 
-/**
- * Full recipe payload returned by GET /functions/v1/recipe-detail
- * (superset endpoint backing the Recipe Detail sheet, FR-13/FR-14).
- */
+//Recipe detail DTO
 @Serializable
 data class RecipeDetailDto(
     val recipeId: String,

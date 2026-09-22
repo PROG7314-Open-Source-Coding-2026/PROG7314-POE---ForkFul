@@ -13,10 +13,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 
-/**
- * Interceptor that attaches the authenticated user's session JWT to every
- * request (NFR-04: HTTPS-only traffic, bearer-token auth).
- */
+//Auth header interceptor
 class AuthInterceptor(private val sessionManager: SessionManager) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -30,11 +27,7 @@ class AuthInterceptor(private val sessionManager: SessionManager) : Interceptor 
     }
 }
 
-/**
- * Constructs the single Retrofit instance used by the app. The base URL is
- * the Supabase project URL configured in app/build.gradle.kts
- * (BuildConfig.SUPABASE_URL) - see SETUP.md.
- */
+//Retrofit factory
 object NetworkModule {
 
     val json: Json = Json {

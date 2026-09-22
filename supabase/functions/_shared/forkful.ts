@@ -1,6 +1,4 @@
-// Shared helpers for all Forkful Edge Functions.
-// Each function imports CORS handling, the service-role client and the
-// bearer-token user resolution from this module.
+//Shared helpers
 
 export const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,9 +22,7 @@ export function handleOptions(): Response {
   return new Response("ok", { headers: corsHeaders });
 }
 
-// ---------------------------------------------------------------------------
-// Supabase clients
-// ---------------------------------------------------------------------------
+//Supabase clients
 
 export async function serviceClient() {
   const { createClient } = await import(
@@ -50,9 +46,7 @@ export async function anonClient() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Authentication: resolves the caller from the Authorization bearer token.
-// ---------------------------------------------------------------------------
+//Auth user resolver
 
 export async function requireUser(req: Request) {
   const authHeader = req.headers.get("Authorization") ?? "";
@@ -93,9 +87,7 @@ export function respondToError(error: unknown): Response {
   return errorResponse(error instanceof Error ? error.message : "Server error", 500);
 }
 
-// ---------------------------------------------------------------------------
-// Domain helpers shared by several functions
-// ---------------------------------------------------------------------------
+//Domain helpers
 
 const AISLE_KEYWORDS: Array<[string, string[]]> = [
   ["Produce", ["tomato", "onion", "garlic", "spinach", "basil", "lettuce", "pepper", "carrot", "potato", "avocado", "lemon", "lime", "cilantro", "coriander", "ginger", "mushroom", "zucchini", "cucumber", "apple", "banana", "berrri", "berry", "beetroot", "beet", "celery", "spring onion", "chilli", "chili", "herbs", "parsley", "mint", "thyme", "rosemary", "cabbage", "mealie", "butternut", "sweet potato", "corn", "sweetcorn", "gem squash"]],
@@ -133,7 +125,7 @@ export function normalizeIngredient(name: string): string {
     .trim();
 }
 
-/** Loose pantry membership test used by matching and grocery subtraction. */
+//Pantry match test
 export function pantryMatches(pantryName: string, ingredientName: string): boolean {
   const pantry = normalizeIngredient(pantryName);
   const ingredient = normalizeIngredient(ingredientName);

@@ -24,27 +24,14 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Query
 
-/**
- * Typed REST client for the custom Forkful API implemented as Supabase
- * Edge Functions (Planning & Design document, section 5.2 - Endpoint
- * Specification).
- *
- * All endpoints except [authSso] require a Bearer session token which is
- * attached automatically by [AuthInterceptor].
- */
+//Forkful API client
 interface ForkfulApi {
 
-    // -------------------------------------------------------------------------
-    // Authentication (FR-01)
-    // -------------------------------------------------------------------------
-
+    //Auth (FR-01)
     @POST("functions/v1/auth-sso")
     suspend fun authSso(@Body body: SsoAuthRequest): AuthResponse
 
-    // -------------------------------------------------------------------------
-    // Discovery / swipe engine (FR-06 .. FR-12)
-    // -------------------------------------------------------------------------
-
+    //Discovery (FR-06..12)
     @GET("functions/v1/recipes-deck")
     suspend fun recipesDeck(
         @Query("mood") mood: String? = null,
@@ -62,20 +49,14 @@ interface ForkfulApi {
     @POST("functions/v1/swipes")
     suspend fun recordSwipe(@Body body: SwipeRequest): SwipeResponse
 
-    // -------------------------------------------------------------------------
-    // Recipe Box (FR-15, FR-16)
-    // -------------------------------------------------------------------------
-
+    //Recipe box (FR-15,16)
     @GET("functions/v1/recipe-box")
     suspend fun recipeBox(@Query("status") status: String? = null): List<RecipeDeckItemDto>
 
     @POST("functions/v1/recipe-box")
     suspend fun markCooked(@Body body: MarkCookedRequest): StatusResponse
 
-    // -------------------------------------------------------------------------
-    // Pantry / Capture Fridge (FR-17 .. FR-20)
-    // -------------------------------------------------------------------------
-
+    //Pantry (FR-17..20)
     @GET("functions/v1/pantry")
     suspend fun pantry(): List<PantryItemDto>
 
@@ -88,10 +69,7 @@ interface ForkfulApi {
     @POST("functions/v1/pantry-match")
     suspend fun pantryMatch(@Body body: PantryMatchRequest): List<PantryMatchDto>
 
-    // -------------------------------------------------------------------------
-    // Basket / Smart Grocery Aggregator (FR-21 .. FR-24)
-    // -------------------------------------------------------------------------
-
+    //Basket (FR-21..24)
     @GET("functions/v1/groceries")
     suspend fun groceries(): List<GroceryAisleDto>
 
@@ -101,10 +79,7 @@ interface ForkfulApi {
         @Body body: ToggleGroceryItemRequest
     ): StatusResponse
 
-    // -------------------------------------------------------------------------
-    // Settings / preferences (FR-25 .. FR-27)
-    // -------------------------------------------------------------------------
-
+    //Settings (FR-25..27)
     @GET("functions/v1/user-preferences")
     suspend fun userPreferences(): UserPreferencesDto
 

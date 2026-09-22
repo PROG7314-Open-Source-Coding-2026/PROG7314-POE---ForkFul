@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Capture Fridge state (FR-17 .. FR-20). */
+//Pantry UI state
 data class PantryUiState(
     val isLoading: Boolean = true,
     val isAdding: Boolean = false,

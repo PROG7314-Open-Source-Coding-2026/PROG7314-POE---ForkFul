@@ -1,5 +1,4 @@
-// GET  /functions/v1/recipe-box?status=ALL|SAVED|COOKED   (FR-15, FR-16)
-// POST /functions/v1/recipe-box  { recipeId, cooked }     (mark cooked)
+//Recipe box management
 
 import { errorResponse, handleOptions, json, respondToError, requireUser } from "../_shared/forkful.ts";
 

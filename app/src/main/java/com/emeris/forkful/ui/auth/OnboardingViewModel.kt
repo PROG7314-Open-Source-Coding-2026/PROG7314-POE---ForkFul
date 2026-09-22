@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Onboarding UI state (FR-02 .. FR-04). */
+//Onboarding state
 data class OnboardingUiState(
     val step: Int = 0,
     val selectedCuisines: Set<String> = emptySet(),
@@ -29,11 +29,7 @@ data class OnboardingUiState(
         }
 }
 
-/**
- * Four-step onboarding: welcome -> cravings -> dietary needs -> review.
- * Cuisine selections seed the user_taste_profiles rows (FR-03) and dietary
- * selections become hard filters (FR-04) via the user-preferences endpoint.
- */
+//Onboarding ViewModel
 class OnboardingViewModel(
     private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {

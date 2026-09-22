@@ -1,5 +1,4 @@
-// GET /functions/v1/recipe-detail?recipeId=uuid
-// Full recipe payload with per-ingredient pantry flags (FR-13).
+//Recipe detail view
 
 import { errorResponse, handleOptions, json, pantryMatches, respondToError, requireUser } from "../_shared/forkful.ts";
 

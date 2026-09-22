@@ -2,10 +2,7 @@ package com.emeris.forkful.data.remote.dto
 
 import kotlinx.serialization.Serializable
 
-/**
- * Response row for GET /functions/v1/pantry:
- * `{ pantryItemId, name, quantity, unit, expiryDate }`.
- */
+//Pantry DTOs
 @Serializable
 data class PantryItemDto(
     val pantryItemId: String,
@@ -16,7 +13,7 @@ data class PantryItemDto(
     val category: String? = null
 )
 
-/** Request body for POST /functions/v1/pantry. */
+//Add pantry item req
 @Serializable
 data class AddPantryItemRequest(
     val name: String,
@@ -25,20 +22,20 @@ data class AddPantryItemRequest(
     val expiryDate: String? = null
 )
 
-/** Response body for POST /functions/v1/pantry: `{ pantryItemId, status }`. */
+//Add pantry item res
 @Serializable
 data class AddPantryItemResponse(
     val pantryItemId: String,
     val status: String
 )
 
-/** Request body for POST /functions/v1/pantry-match. */
+//Pantry match req
 @Serializable
 data class PantryMatchRequest(
     val missingThreshold: Int = 2
 )
 
-/** One pantry-match result row. */
+//Pantry match dto
 @Serializable
 data class PantryMatchDto(
     val recipe: RecipeDeckItemDto,

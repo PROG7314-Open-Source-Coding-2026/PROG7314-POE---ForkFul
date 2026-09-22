@@ -26,14 +26,17 @@ import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -64,6 +67,7 @@ import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.data.repository.MockData
 import com.emeris.forkful.domain.model.PantryItem
 import com.emeris.forkful.ui.components.ForkfulBottomBar
+import com.emeris.forkful.ui.components.rememberPressPop
 import com.emeris.forkful.ui.navigation.Screen
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -94,6 +98,7 @@ fun PantryScreen(
     val scrollState = rememberScrollState()
     val chipShape = RoundedCornerShape(16.dp)
     val searchShape = RoundedCornerShape(26.dp)
+    val addPop = rememberPressPop(0.92f)
 
     Scaffold(
         bottomBar = {
@@ -103,17 +108,20 @@ fun PantryScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showAddDialog = true },
-                containerColor = ForestGreen,
-                contentColor = PureWhite,
-                shape = CircleShape,
-                elevation = FloatingActionButtonDefaults.elevation(
-                    defaultElevation = 8.dp,
-                    pressedElevation = 12.dp
-                )
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Ingredient")
+            Box(modifier = addPop.modifier) {
+                FloatingActionButton(
+                    onClick = { showAddDialog = true },
+                    interactionSource = addPop.interactionSource,
+                    containerColor = ForestGreen,
+                    contentColor = PureWhite,
+                    shape = CircleShape,
+                    elevation = FloatingActionButtonDefaults.elevation(
+                        defaultElevation = 10.dp,
+                        pressedElevation = 3.dp
+                    )
+                ) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add Ingredient")
+                }
             }
         },
         containerColor = CreamBackground
@@ -131,7 +139,12 @@ fun PantryScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = {}) {
+                val menuPop = rememberPressPop(0.88f)
+                IconButton(
+                    onClick = {},
+                    modifier = menuPop.modifier,
+                    interactionSource = menuPop.interactionSource
+                ) {
                     Icon(
                         imageVector = Icons.Default.Menu,
                         contentDescription = "Menu",
@@ -146,7 +159,12 @@ fun PantryScreen(
                     color = ForestGreen
                 )
 
-                IconButton(onClick = { ForkfulLogger.logAction("SCANNER", "Camera fridge barcode triggered") }) {
+                val scanPop = rememberPressPop(0.88f)
+                IconButton(
+                    onClick = { ForkfulLogger.logAction("SCANNER", "Camera fridge barcode triggered") },
+                    modifier = scanPop.modifier,
+                    interactionSource = scanPop.interactionSource
+                ) {
                     Icon(
                         imageVector = Icons.Default.CropFree,
                         contentDescription = "Scan",
@@ -161,7 +179,7 @@ fun PantryScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
-                    .shadow(6.dp, searchShape, spotColor = Color(0x33000000))
+                    .shadow(8.dp, searchShape, spotColor = Color(0x33000000))
                     .clip(searchShape)
                     .background(PureWhite)
                     .border(1.dp, BorderLight, searchShape)
@@ -221,12 +239,16 @@ fun PantryScreen(
                 } else {
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         expiringSoon.forEach { item ->
+                            val pop = rememberPressPop()
                             Box(
-                                modifier = Modifier
-                                    .shadow(4.dp, chipShape, spotColor = Color(0x33000000))
+                                modifier = pop.modifier
+                                    .shadow(5.dp, chipShape, spotColor = Color(0x33000000))
                                     .clip(chipShape)
                                     .background(AlertPinkBackground)
-                                    .clickable { itemToRemove = item }
+                                    .clickable(
+                                        interactionSource = pop.interactionSource,
+                                        indication = ripple(color = AlertPinkText)
+                                    ) { itemToRemove = item }
                                     .padding(horizontal = 14.dp, vertical = 8.dp)
                             ) {
                                 Text(
@@ -280,13 +302,17 @@ fun PantryScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         visibleItems.forEach { item ->
+                            val pop = rememberPressPop()
                             Box(
-                                modifier = Modifier
-                                    .shadow(3.dp, chipShape, spotColor = Color(0x26000000))
+                                modifier = pop.modifier
+                                    .shadow(4.dp, chipShape, spotColor = Color(0x26000000))
                                     .clip(chipShape)
                                     .background(PureWhite)
                                     .border(1.dp, Color(0xFFECE7DE), chipShape)
-                                    .clickable { itemToRemove = item }
+                                    .clickable(
+                                        interactionSource = pop.interactionSource,
+                                        indication = ripple(color = ForestGreen)
+                                    ) { itemToRemove = item }
                                     .padding(horizontal = 16.dp, vertical = 8.dp)
                             ) {
                                 Text(
@@ -318,7 +344,7 @@ fun PantryScreen(
                 )
             },
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
                         val trimmedName = newItemName.trim()
                         if (trimmedName.isNotEmpty()) {
@@ -334,14 +360,22 @@ fun PantryScreen(
                             newItemName = ""
                             showAddDialog = false
                         }
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ForestGreen,
+                        contentColor = PureWhite
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 4.dp,
+                        pressedElevation = 8.dp
+                    )
                 ) {
                     Text("Add")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showAddDialog = false }) {
-                    Text("Cancel")
+                OutlinedButton(onClick = { showAddDialog = false }) {
+                    Text("Cancel", color = TextCharcoal)
                 }
             }
         )
@@ -353,19 +387,27 @@ fun PantryScreen(
             title = { Text("Remove item") },
             text = { Text("Remove ${item.name} from your pantry?") },
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
                         pantryItems.removeAll { it.id == item.id }
                         ForkfulLogger.logAction("PANTRY", "Removed ${item.name}")
                         itemToRemove = null
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ForestGreen,
+                        contentColor = PureWhite
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 4.dp,
+                        pressedElevation = 8.dp
+                    )
                 ) {
                     Text("Remove")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { itemToRemove = null }) {
-                    Text("Cancel")
+                OutlinedButton(onClick = { itemToRemove = null }) {
+                    Text("Cancel", color = TextCharcoal)
                 }
             }
         )

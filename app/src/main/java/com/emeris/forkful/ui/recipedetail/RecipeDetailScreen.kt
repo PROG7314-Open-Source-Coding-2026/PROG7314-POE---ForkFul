@@ -30,9 +30,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,6 +61,7 @@ import com.emeris.forkful.core.designsystem.TextMuted
 import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.data.repository.MockData
 import com.emeris.forkful.ui.components.ForkfulBottomBar
+import com.emeris.forkful.ui.components.rememberPressPop
 import com.emeris.forkful.ui.navigation.Screen
 
 @Composable
@@ -109,6 +111,7 @@ fun RecipeDetailScreen(
         containerColor = CreamBackground
     ) { innerPadding ->
         if (isCooking) {
+            val closePop = rememberPressPop(0.88f)
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -126,7 +129,11 @@ fun RecipeDetailScreen(
                         fontSize = 24.sp,
                         color = ForestGreen
                     )
-                    IconButton(onClick = { isCooking = false }) {
+                    IconButton(
+                        onClick = { isCooking = false },
+                        modifier = closePop.modifier,
+                        interactionSource = closePop.interactionSource
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Close cooking",
@@ -158,19 +165,23 @@ fun RecipeDetailScreen(
                 ) {
                     itemsIndexed(recipe.steps) { index, step ->
                         val isCurrent = index == currentStep
+                        val pop = rememberPressPop(0.97f)
                         Box(
-                            modifier = Modifier
+                            modifier = pop.modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 6.dp)
                                 .shadow(
-                                    elevation = if (isCurrent) 8.dp else 3.dp,
+                                    elevation = if (isCurrent) 10.dp else 4.dp,
                                     shape = cardShape,
                                     spotColor = Color(0x33000000)
                                 )
                                 .clip(cardShape)
                                 .background(if (isCurrent) MintLight else PureWhite)
                                 .border(1.dp, if (isCurrent) ForestGreen else BorderLight, cardShape)
-                                .clickable { currentStep = index }
+                                .clickable(
+                                    interactionSource = pop.interactionSource,
+                                    indication = ripple(color = ForestGreen)
+                                ) { currentStep = index }
                                 .padding(16.dp)
                         ) {
                             Row(verticalAlignment = Alignment.Top) {
@@ -214,12 +225,11 @@ fun RecipeDetailScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(54.dp)
-                        .shadow(8.dp, RoundedCornerShape(27.dp)),
+                        .height(54.dp),
                     shape = RoundedCornerShape(27.dp),
                     elevation = ButtonDefaults.buttonElevation(
-                        defaultElevation = 4.dp,
-                        pressedElevation = 8.dp
+                        defaultElevation = 8.dp,
+                        pressedElevation = 2.dp
                     ),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = ForestGreen,
@@ -234,6 +244,9 @@ fun RecipeDetailScreen(
                 }
             }
         } else {
+            val closePop = rememberPressPop(0.88f)
+            val heartPop = rememberPressPop(0.88f)
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -262,7 +275,11 @@ fun RecipeDetailScreen(
                         )
                     }
 
-                    IconButton(onClick = onClose) {
+                    IconButton(
+                        onClick = onClose,
+                        modifier = closePop.modifier,
+                        interactionSource = closePop.interactionSource
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Close",
@@ -326,17 +343,20 @@ fun RecipeDetailScreen(
                                 )
 
                                 Box(
-                                    modifier = Modifier
-                                        .size(44.dp)
-                                        .shadow(4.dp, CircleShape, spotColor = Color(0x33000000))
+                                    modifier = heartPop.modifier
+                                        .size(48.dp)
+                                        .shadow(8.dp, CircleShape, spotColor = Color(0x33000000))
                                         .clip(CircleShape)
-                                        .background(PureWhite)
+                                        .background(if (isSaved) ForestGreen else PureWhite)
                                         .border(
                                             1.dp,
                                             if (isSaved) ForestGreen else BorderLight,
                                             CircleShape
                                         )
-                                        .clickable {
+                                        .clickable(
+                                            interactionSource = heartPop.interactionSource,
+                                            indication = ripple(color = ForestGreen, bounded = true)
+                                        ) {
                                             isSaved = !isSaved
                                             ForkfulLogger.logAction(
                                                 "RECIPE_DETAIL",
@@ -348,7 +368,7 @@ fun RecipeDetailScreen(
                                     Icon(
                                         imageVector = if (isSaved) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                         contentDescription = if (isSaved) "Unsave recipe" else "Save recipe",
-                                        tint = if (isSaved) ForestGreen else TextMuted
+                                        tint = if (isSaved) PureWhite else ForestGreen
                                     )
                                 }
                             }
@@ -507,12 +527,11 @@ fun RecipeDetailScreen(
                                 onClick = { onStartCookingClicked() },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(54.dp)
-                                    .shadow(8.dp, RoundedCornerShape(27.dp)),
-                                shape = RoundedCornerShape(27.dp),
+                                    .height(56.dp),
+                                shape = RoundedCornerShape(28.dp),
                                 elevation = ButtonDefaults.buttonElevation(
-                                    defaultElevation = 4.dp,
-                                    pressedElevation = 8.dp
+                                    defaultElevation = 8.dp,
+                                    pressedElevation = 2.dp
                                 ),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = ForestGreen,
@@ -564,13 +583,23 @@ fun RecipeDetailScreen(
                 )
             },
             confirmButton = {
-                TextButton(onClick = { startCooking() }) {
+                Button(
+                    onClick = { startCooking() },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ForestGreen,
+                        contentColor = PureWhite
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 4.dp,
+                        pressedElevation = 8.dp
+                    )
+                ) {
                     Text("Continue cooking")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showMissingDialog = false }) {
-                    Text("Not now")
+                OutlinedButton(onClick = { showMissingDialog = false }) {
+                    Text("Not now", color = TextCharcoal)
                 }
             }
         )

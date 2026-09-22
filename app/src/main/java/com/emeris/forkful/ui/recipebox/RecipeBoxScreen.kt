@@ -26,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -56,6 +57,7 @@ import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.data.repository.MockData
 import com.emeris.forkful.domain.model.Recipe
 import com.emeris.forkful.ui.components.ForkfulBottomBar
+import com.emeris.forkful.ui.components.rememberPressPop
 import com.emeris.forkful.ui.navigation.Screen
 
 @Composable
@@ -106,7 +108,12 @@ fun RecipeBoxScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { ForkfulLogger.logAction("DRAWER", "Menu tapped") }) {
+                val menuPop = rememberPressPop(0.88f)
+                IconButton(
+                    onClick = { ForkfulLogger.logAction("DRAWER", "Menu tapped") },
+                    modifier = menuPop.modifier,
+                    interactionSource = menuPop.interactionSource
+                ) {
                     Icon(
                         imageVector = Icons.Default.Menu,
                         contentDescription = "Menu",
@@ -122,11 +129,14 @@ fun RecipeBoxScreen(
                     fontWeight = FontWeight.Normal
                 )
 
+                val searchPop = rememberPressPop(0.88f)
                 IconButton(
                     onClick = {
                         showSearch = !showSearch
                         if (!showSearch) searchQuery = ""
-                    }
+                    },
+                    modifier = searchPop.modifier,
+                    interactionSource = searchPop.interactionSource
                 ) {
                     Icon(
                         imageVector = if (showSearch) Icons.Default.Close else Icons.Default.Search,
@@ -141,7 +151,7 @@ fun RecipeBoxScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp, vertical = 4.dp)
-                        .shadow(6.dp, searchShape, spotColor = Color(0x33000000))
+                        .shadow(8.dp, searchShape, spotColor = Color(0x33000000))
                         .clip(searchShape)
                         .background(PureWhite)
                         .border(1.dp, BorderLight, searchShape)
@@ -173,10 +183,11 @@ fun RecipeBoxScreen(
             ) {
                 tabs.forEach { tab ->
                     val isTabSelected = selectedTab == tab
+                    val pop = rememberPressPop(0.94f)
                     Box(
-                        modifier = Modifier
+                        modifier = pop.modifier
                             .shadow(
-                                elevation = if (isTabSelected) 6.dp else 2.dp,
+                                elevation = if (isTabSelected) 8.dp else 3.dp,
                                 shape = tabShape,
                                 spotColor = Color(0x33000000)
                             )
@@ -187,7 +198,10 @@ fun RecipeBoxScreen(
                                 color = if (isTabSelected) ForestGreen else BorderLight,
                                 shape = tabShape
                             )
-                            .clickable { selectedTab = tab }
+                            .clickable(
+                                interactionSource = pop.interactionSource,
+                                indication = ripple(color = ForestGreen)
+                            ) { selectedTab = tab }
                             .padding(horizontal = 20.dp, vertical = 8.dp)
                     ) {
                         Text(
@@ -244,14 +258,18 @@ fun RecipeGridCard(
     onClick: () -> Unit
 ) {
     val cardShape = RoundedCornerShape(16.dp)
+    val pop = rememberPressPop(0.97f)
 
     Box(
-        modifier = Modifier
+        modifier = pop.modifier
             .fillMaxWidth()
-            .shadow(8.dp, cardShape, spotColor = Color(0x33000000))
+            .shadow(10.dp, cardShape, spotColor = Color(0x33000000))
             .clip(cardShape)
             .background(PureWhite)
-            .clickable { onClick() }
+            .clickable(
+                interactionSource = pop.interactionSource,
+                indication = ripple(color = ForestGreen)
+            ) { onClick() }
     ) {
         Column {
             Box(

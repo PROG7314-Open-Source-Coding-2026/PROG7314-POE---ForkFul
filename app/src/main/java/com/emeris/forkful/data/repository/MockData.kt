@@ -31,6 +31,13 @@ object MockData {
                 Ingredient("Fresh Mozzarella", "4 oz, torn", inPantry = true),
                 Ingredient("Fresh Basil", "Handful leaves", inPantry = true),
                 Ingredient("Extra Virgin Olive Oil", "1 tbsp", inPantry = false)
+            ),
+            steps = listOf(
+                "Preheat the oven to 220°C.",
+                "Spread crushed tomatoes over the flatbread base.",
+                "Tear mozzarella over the top and drizzle with olive oil.",
+                "Bake for 8 to 10 minutes until the edges are golden.",
+                "Finish with fresh basil and serve warm."
             )
         ),
         Recipe(
@@ -56,6 +63,13 @@ object MockData {
                 Ingredient("Potatoes", "2 quartered", inPantry = true),
                 Ingredient("Cinnamon stick", "1 piece", inPantry = true),
                 Ingredient("Chilli flakes", "1 tsp", inPantry = false)
+            ),
+            steps = listOf(
+                "Brown the mutton in a heavy pot.",
+                "Add onions and cook until soft.",
+                "Stir in tomatoes, cinnamon and chilli.",
+                "Add potatoes and simmer until the meat is tender.",
+                "Season and serve with rice or bread."
             )
         ),
         Recipe(
@@ -80,6 +94,13 @@ object MockData {
                 Ingredient("Feta Cheese", "100g crumbled", inPantry = true),
                 Ingredient("Vegetable Stock", "3 cups", inPantry = true),
                 Ingredient("Shallots", "1 minced", inPantry = false)
+            ),
+            steps = listOf(
+                "Soften the shallots in a little butter.",
+                "Stir in the rice until the grains look glossy.",
+                "Add stock a ladle at a time, stirring often.",
+                "Fold through the beetroot puree.",
+                "Finish with crumbled feta and serve."
             )
         ),
         Recipe(
@@ -104,6 +125,13 @@ object MockData {
                 Ingredient("Basmati Rice", "1 cup", inPantry = true),
                 Ingredient("Avocado", "1 diced", inPantry = true),
                 Ingredient("Sweetcorn", "1/2 cup", inPantry = false)
+            ),
+            steps = listOf(
+                "Coat the chicken in peri-peri sauce.",
+                "Cook the rice until fluffy.",
+                "Pan-fry or grill the chicken until cooked through.",
+                "Build bowls with rice, chicken, avocado and sweetcorn.",
+                "Spoon over extra peri-peri and serve."
             )
         )
     )

@@ -76,6 +76,7 @@ fun PantryScreen(
     var searchQuery by remember { mutableStateOf("") }
     var showAddDialog by remember { mutableStateOf(false) }
     var newItemName by remember { mutableStateOf("") }
+    var itemToRemove by remember { mutableStateOf<PantryItem?>(null) }
 
     val pantryItems = remember {
         mutableStateListOf<PantryItem>().apply { addAll(MockData.samplePantryItems) }
@@ -202,21 +203,30 @@ fun PantryScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    expiringSoon.forEach { item ->
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(AlertPinkBackground)
-                                .padding(horizontal = 14.dp, vertical = 8.dp)
-                        ) {
-                            Text(
-                                text = "${item.name} - ${item.daysUntilExpiry}d",
-                                color = AlertPinkText,
-                                fontFamily = FontFamily.Monospace,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium
-                            )
+                if (expiringSoon.isEmpty()) {
+                    Text(
+                        text = "Nothing is expiring soon",
+                        color = TextMuted,
+                        fontSize = 13.sp
+                    )
+                } else {
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        expiringSoon.forEach { item ->
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(AlertPinkBackground)
+                                    .clickable { itemToRemove = item }
+                                    .padding(horizontal = 14.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = "${item.name} - ${item.daysUntilExpiry}d",
+                                    color = AlertPinkText,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
                         }
                     }
                 }
@@ -231,6 +241,14 @@ fun PantryScreen(
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextMuted
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = "Tap an item to remove it",
+                    color = TextMuted,
+                    fontSize = 12.sp
                 )
 
                 Spacer(modifier = Modifier.height(14.dp))
@@ -257,9 +275,7 @@ fun PantryScreen(
                                     .clip(RoundedCornerShape(16.dp))
                                     .background(PureWhite)
                                     .border(1.dp, Color(0xFFECE7DE), RoundedCornerShape(16.dp))
-                                    .clickable {
-                                        ForkfulLogger.logAction("PANTRY_ITEM", "Clicked ${item.name}")
-                                    }
+                                    .clickable { itemToRemove = item }
                                     .padding(horizontal = 16.dp, vertical = 8.dp)
                             ) {
                                 Text(
@@ -314,6 +330,30 @@ fun PantryScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showAddDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    itemToRemove?.let { item ->
+        AlertDialog(
+            onDismissRequest = { itemToRemove = null },
+            title = { Text("Remove item") },
+            text = { Text("Remove ${item.name} from your pantry?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        pantryItems.removeAll { it.id == item.id }
+                        ForkfulLogger.logAction("PANTRY", "Removed ${item.name}")
+                        itemToRemove = null
+                    }
+                ) {
+                    Text("Remove")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { itemToRemove = null }) {
                     Text("Cancel")
                 }
             }

@@ -1,5 +1,6 @@
 package com.emeris.forkful.ui.auth
 
+import android.app.Activity
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -33,6 +34,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -57,6 +60,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
@@ -65,7 +69,6 @@ import com.emeris.forkful.BuildConfig
 import com.emeris.forkful.core.designsystem.DarkAuthBackground
 import com.emeris.forkful.core.designsystem.DarkAuthBorder
 import com.emeris.forkful.core.designsystem.ForestGreen
-import com.emeris.forkful.core.designsystem.PureWhite
 import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.core.util.Validators
 import com.emeris.forkful.ui.di.containerViewModel
@@ -109,6 +112,18 @@ fun LoginScreen(
     onAuthenticated: (isNewUser: Boolean) -> Unit,
     onNavigateToSignUp: () -> Unit
 ) {
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as? Activity)?.window
+            if (window != null) {
+                val insetsController = WindowCompat.getInsetsController(window, view)
+                insetsController.isAppearanceLightStatusBars = false
+                insetsController.isAppearanceLightNavigationBars = false
+            }
+        }
+    }
+
     val viewModel = containerViewModel { LoginViewModel(it.authRepository) }
     val uiState by viewModel.state.collectAsState()
     val context = LocalContext.current
@@ -146,13 +161,12 @@ fun LoginScreen(
     }
 
     val launchGoogleSignIn: () -> Unit = {
-        val act = activity
-        if (act == null) {
+        if (activity == null) {
             ForkfulLogger.logAction("LOGIN", "Credential Manager needs an Activity context")
         } else {
             coroutineScope.launch {
                 try {
-                    val credentialManager = CredentialManager.create(act)
+                    val credentialManager = CredentialManager.create(activity)
                     val googleIdOption = GetGoogleIdOption.Builder()
                         .setServerClientId(BuildConfig.GOOGLE_SERVER_CLIENT_ID)
                         .setFilterByAuthorizedAccounts(false)
@@ -160,7 +174,7 @@ fun LoginScreen(
                     val request = GetCredentialRequest.Builder()
                         .addCredentialOption(googleIdOption)
                         .build()
-                    val response = credentialManager.getCredential(act, request)
+                    val response = credentialManager.getCredential(activity, request)
                     val credential = response.credential
                     if (credential is CustomCredential &&
                         credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
@@ -197,7 +211,7 @@ fun LoginScreen(
             text = "Welcome back",
             fontFamily = FontFamily.Serif,
             fontSize = 32.sp,
-            color = PureWhite
+            color = Color.White
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
@@ -225,8 +239,8 @@ fun LoginScreen(
             },
             singleLine = true,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = PureWhite,
-                unfocusedTextColor = PureWhite,
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
                 focusedBorderColor = ForestGreen,
                 unfocusedBorderColor = DarkAuthBorder,
                 focusedLabelColor = ForestGreen,
@@ -274,8 +288,8 @@ fun LoginScreen(
             singleLine = true,
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = PureWhite,
-                unfocusedTextColor = PureWhite,
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
                 focusedBorderColor = ForestGreen,
                 unfocusedBorderColor = DarkAuthBorder,
                 focusedLabelColor = ForestGreen,
@@ -315,13 +329,13 @@ fun LoginScreen(
             shape = RoundedCornerShape(26.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = ForestGreen,
-                contentColor = PureWhite
+                contentColor = Color.White
             )
         ) {
             if (uiState is LoginUiState.Loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(22.dp),
-                    color = PureWhite,
+                    color = Color.White,
                     strokeWidth = 2.dp
                 )
             } else {
@@ -362,7 +376,7 @@ fun LoginScreen(
                 .height(52.dp),
             shape = RoundedCornerShape(26.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = PureWhite,
+                containerColor = Color.White,
                 contentColor = Color(0xFF1E211E)
             )
         ) {

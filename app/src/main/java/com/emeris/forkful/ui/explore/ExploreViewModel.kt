@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+// Explore UI state
 data class ExploreUiState(
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
@@ -31,6 +32,7 @@ data class ExploreUiState(
         get() = selectedCuisine != null || maxPrepTime != null || minRating != null || difficulty != null || searchQuery.isNotBlank()
 }
 
+// Explore ViewModel
 @OptIn(FlowPreview::class)
 class ExploreViewModel(
     private val recipeRepository: RecipeRepository
@@ -41,6 +43,7 @@ class ExploreViewModel(
     private val searchInput = MutableStateFlow("")
 
     val moodShelves = ChoiceCatalog.moodShelves
+    val cuisineRow = ChoiceCatalog.cuisines.take(5)
     val prepTimeOptions = ChoiceCatalog.prepTimeOptions
     val difficultyOptions = ChoiceCatalog.difficultyOptions
 
@@ -131,12 +134,14 @@ class ExploreViewModel(
         loadFeed()
     }
 
+    // Save recipe bookmark
     fun saveRecipe(recipe: Recipe) {
         viewModelScope.launch {
             recipeRepository.recordSwipe(
                 recipeId = recipe.id,
                 direction = SwipeDirection.RIGHT,
-                moodProfileKey = recipe.category.lowercase().replace(Regex("[^a-z]"), "").ifBlank { "comfort" }
+                moodProfileKey = recipe.category.lowercase().replace(Regex("[^a-z]"), "")
+                    .takeIf { it.isNotBlank() } ?: "comfort"
             ).onSuccess {
                 _state.update { current ->
                     current.copy(

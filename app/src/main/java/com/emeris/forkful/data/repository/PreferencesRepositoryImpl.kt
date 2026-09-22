@@ -9,12 +9,10 @@ import com.emeris.forkful.domain.model.PreferencesUpdate
 import com.emeris.forkful.domain.model.UserPreferences
 import com.emeris.forkful.domain.repository.PreferencesRepository
 
-//Prefs repo impl
 class PreferencesRepositoryImpl(
     private val api: ForkfulApi,
     private val sessionManager: SessionManager
 ) : PreferencesRepository {
-
     override suspend fun getPreferences(): Result<UserPreferences> = runCatching {
         ForkfulLogger.logNetwork("user-preferences", "GET")
         val dto = api.userPreferences()
@@ -30,8 +28,7 @@ class PreferencesRepositoryImpl(
     }
 
     override suspend fun updatePreferences(update: PreferencesUpdate): Result<Boolean> = runCatching {
-        ForkfulLogger.logNetwork("user-preferences", "PUT ${update.copy(seedCuisines = null)}")
-        api.updateUserPreferences(update.toRequest())
+        // Update local session storage immediately for snappy UI response
         update.theme?.let { theme -> sessionManager.updatePrefs { it.copy(theme = theme) } }
         update.language?.let { lang -> sessionManager.updatePrefs { it.copy(language = lang) } }
         update.notificationsEnabled?.let { enabled ->
@@ -41,6 +38,9 @@ class PreferencesRepositoryImpl(
             sessionManager.updatePrefs { it.copy(biometricLockEnabled = enabled) }
         }
         update.onboarded?.let { onboarded -> sessionManager.setOnboarded(onboarded) }
+
+        ForkfulLogger.logNetwork("user-preferences", "PUT ${update.copy(seedCuisines = null)}")
+        api.updateUserPreferences(update.toRequest())
         true
     }
 }

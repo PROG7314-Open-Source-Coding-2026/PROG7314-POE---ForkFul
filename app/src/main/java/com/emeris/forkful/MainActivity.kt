@@ -4,7 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
@@ -14,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.emeris.forkful.core.designsystem.ForkfulTheme
 import com.emeris.forkful.core.logging.ForkfulLogger
+import com.emeris.forkful.core.session.LocalPrefs
 import com.emeris.forkful.ui.auth.LoginScreen
 import com.emeris.forkful.ui.auth.OnboardingScreen
 import com.emeris.forkful.ui.auth.SignUpScreen
@@ -34,8 +38,17 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         ForkfulLogger.logLifecycle("MainActivity", "ON_CREATE")
 
+        val sessionManager = (application as ForkfulApplication).container.sessionManager
+
         setContent {
-            ForkfulTheme {
+            val prefs by sessionManager.prefsFlow.collectAsState(initial = LocalPrefs())
+            val isDarkTheme = when (prefs.theme) {
+                "dark" -> true
+                "light" -> false
+                else -> isSystemInDarkTheme()
+            }
+
+            ForkfulTheme(darkTheme = isDarkTheme) {
                 ForkfulApp()
             }
         }

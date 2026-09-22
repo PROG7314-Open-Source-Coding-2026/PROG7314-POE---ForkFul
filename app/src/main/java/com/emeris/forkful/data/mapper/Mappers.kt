@@ -22,8 +22,7 @@ import com.emeris.forkful.data.remote.dto.TagPointDto
 import com.emeris.forkful.data.remote.dto.UpdatePreferencesRequest
 import com.emeris.forkful.domain.model.SwipeOutcome
 
-//DTO to domain mappers
-
+// DTO to domain mappers
 fun RecipeDeckItemDto.toDomain(): Recipe = Recipe(
     id = recipeId,
     title = title,
@@ -59,6 +58,7 @@ fun RecipeDetailDto.toDomain(): Recipe = Recipe(
     category = cuisineType ?: "Other",
     isSaved = isSaved,
     isCooked = isCooked,
+    dietaryTags = dietaryTags,
     tags = tags,
     ingredients = ingredients.map { it.toDomain() },
     instructions = instructions
@@ -68,7 +68,10 @@ fun IngredientDto.toDomain(): Ingredient = Ingredient(
     name = name,
     quantity = buildString {
         quantity?.let { append(it) }
-        unit?.takeIf { it.isNotBlank() }?.let { if (isNotEmpty()) append(' ') ; append(it) }
+        unit?.takeIf { it.isNotBlank() }?.let {
+            if (isNotEmpty()) append(' ')
+            append(it)
+        }
     }.ifBlank { "1" },
     inPantry = inPantry
 )

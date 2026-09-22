@@ -199,7 +199,7 @@ fun ExploreScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    /* Cuisine category filter buttons */
+                    // Cuisine category avatar row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -292,7 +292,9 @@ fun ExploreScreen(
                             fontSize = 22.sp,
                             color = TextCharcoal
                         )
-                        if (uiState.selectedCuisine != null) {
+
+                        // Only show Swipe This Stack when there are at least 5 recipes to swipe
+                        if (uiState.selectedCuisine != null && uiState.feed.size >= 5) {
                             Text(
                                 text = "Swipe this stack",
                                 fontSize = 13.sp,
@@ -300,7 +302,7 @@ fun ExploreScreen(
                                 color = ForestGreen,
                                 modifier = Modifier.clickable { onStackSelected(uiState.selectedCuisine!!) }
                             )
-                        } else {
+                        } else if (uiState.selectedCuisine == null) {
                             Text(
                                 text = "See all",
                                 fontSize = 14.sp,
@@ -316,8 +318,8 @@ fun ExploreScreen(
             when {
                 uiState.isLoading -> item { LoadingState("Finding your matches...") }
                 uiState.errorMessage != null -> item {
-                    ErrorState(message = uiState.errorMessage.orEmpty(), onRetry = viewModel::loadFeed)
-                }
+                ErrorState(message = uiState.errorMessage.orEmpty(), onRetry = viewModel::loadFeed)
+            }
                 uiState.feed.isEmpty() -> item {
                     Box(
                         modifier = Modifier
@@ -326,7 +328,7 @@ fun ExploreScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "No recipes match this category.\nTry clearing your filters.",
+                            text = "No recipes match your filters.\nTry clearing them.",
                             fontSize = 14.sp,
                             color = TextMuted,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center

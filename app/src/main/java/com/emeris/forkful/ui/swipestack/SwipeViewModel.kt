@@ -40,16 +40,17 @@ class SwipeViewModel(
     fun loadDeck(moodKey: String) {
         _state.update { it.copy(moodKey = moodKey, isLoading = true, errorMessage = null, reachedEnd = false) }
         viewModelScope.launch {
-            recipeRepository.getDeck(DeckQuery(mood = moodKey, limit = 20))
+            recipeRepository.getDeck(DeckQuery(mood = moodKey, limit = 50))
                 .onSuccess { rawDeck ->
                     val target = moodKey.lowercase().trim()
 
-                    // Filter out any dishes that do not match the requested cuisine or mood
+                    // Ensure other cuisines do not leak into the stack
                     val curatedDeck = rawDeck.filter { recipe ->
-                        val categoryMatches = recipe.category.lowercase() == target
+                        val categoryMatches = recipe.category.lowercase().trim() == target
                         val tagMatches = recipe.tags.any { it.lowercase().contains(target) }
                         val specialMoodMatches = when (target) {
-                            "vegan" -> recipe.tags.any { it.contains("vegan", ignoreCase = true) }
+                            "vegan" -> recipe.dietaryTags.any { it.equals("vegan", ignoreCase = true) } ||
+                                    recipe.tags.any { it.contains("vegan", ignoreCase = true) }
                             "healthy" -> recipe.category.equals("Healthy", ignoreCase = true) || recipe.calories <= 450
                             "comfort" -> recipe.category.equals("Comfort", ignoreCase = true) || recipe.category.equals("Braai", ignoreCase = true)
                             "pantry" -> true

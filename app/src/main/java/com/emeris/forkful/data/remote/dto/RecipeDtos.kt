@@ -10,9 +10,6 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonPrimitive
 
-/**
- * Deserializes JSON strings, numbers (e.g. 250, 1.5), and nulls into String?.
- */
 object StringOrNumericSerializer : KSerializer<String> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("StringOrNumeric", PrimitiveKind.STRING)

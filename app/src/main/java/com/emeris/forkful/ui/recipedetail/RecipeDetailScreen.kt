@@ -25,12 +25,14 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -71,10 +73,28 @@ fun RecipeDetailScreen(
 
     val recipe = MockData.sampleRecipes.find { it.id == recipeId } ?: MockData.sampleRecipes.first()
     val pantryOwnedCount = recipe.ingredients.count { it.inPantry }
+    val missingIngredients = recipe.ingredients.filter { !it.inPantry }
+
     var isSaved by remember(recipeId) { mutableStateOf(recipe.isSaved) }
     var isCooked by remember(recipeId) { mutableStateOf(recipe.isCooked) }
     var isCooking by remember(recipeId) { mutableStateOf(false) }
     var currentStep by remember(recipeId) { mutableStateOf(0) }
+    var showMissingDialog by remember { mutableStateOf(false) }
+
+    fun startCooking() {
+        currentStep = 0
+        isCooking = true
+        showMissingDialog = false
+        ForkfulLogger.logAction("COOKING_SESSION", "Started for ${recipe.title}")
+    }
+
+    fun onStartCookingClicked() {
+        if (missingIngredients.isNotEmpty()) {
+            showMissingDialog = true
+        } else {
+            startCooking()
+        }
+    }
 
     Scaffold(
         bottomBar = {
@@ -459,11 +479,7 @@ fun RecipeDetailScreen(
                         Spacer(modifier = Modifier.height(20.dp))
                         Box(modifier = Modifier.padding(horizontal = 24.dp)) {
                             Button(
-                                onClick = {
-                                    currentStep = 0
-                                    isCooking = true
-                                    ForkfulLogger.logAction("COOKING_SESSION", "Started for ${recipe.title}")
-                                },
+                                onClick = { onStartCookingClicked() },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(54.dp),
@@ -493,5 +509,40 @@ fun RecipeDetailScreen(
                 }
             }
         }
+    }
+
+    if (showMissingDialog) {
+        val missingNames = missingIngredients.joinToString(", ") { it.name }
+        val missingCount = missingIngredients.size
+        val titleText = if (missingCount == 1) {
+            "You are missing 1 ingredient"
+        } else {
+            "You are missing $missingCount ingredients"
+        }
+
+        AlertDialog(
+            onDismissRequest = { showMissingDialog = false },
+            title = {
+                Text(
+                    text = titleText,
+                    fontFamily = FontFamily.Serif
+                )
+            },
+            text = {
+                Text(
+                    text = "Missing: $missingNames.\n\nDo you want to cook this recipe anyway?"
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { startCooking() }) {
+                    Text("Continue cooking")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showMissingDialog = false }) {
+                    Text("Not now")
+                }
+            }
+        )
     }
 }

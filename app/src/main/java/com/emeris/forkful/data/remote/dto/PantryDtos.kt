@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 data class PantryItemDto(
     val pantryItemId: String,
     val name: String,
+    @Serializable(with = StringOrNumericSerializer::class)
     val quantity: String? = null,
     val unit: String? = null,
     val expiryDate: String? = null,

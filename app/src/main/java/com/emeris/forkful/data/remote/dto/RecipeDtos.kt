@@ -1,8 +1,45 @@
 package com.emeris.forkful.data.remote.dto
 
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonPrimitive
 
-//Recipe deck item DTO
+/**
+ * Deserializes JSON strings, numbers (e.g. 250, 1.5), and nulls into String?.
+ */
+object StringOrNumericSerializer : KSerializer<String> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("StringOrNumeric", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: String) {
+        encoder.encodeString(value)
+    }
+
+    override fun deserialize(decoder: Decoder): String {
+        val jsonDecoder = decoder as? JsonDecoder ?: return decoder.decodeString()
+        val element = jsonDecoder.decodeJsonElement()
+        return (element as? JsonPrimitive)?.content ?: element.toString()
+    }
+}
+
+// Ingredient DTO
+@Serializable
+data class IngredientDto(
+    val name: String,
+    @Serializable(with = StringOrNumericSerializer::class)
+    val quantity: String? = null,
+    val unit: String? = null,
+    val aisleCategory: String? = null,
+    val inPantry: Boolean = false
+)
+
+// Recipe deck item DTO
 @Serializable
 data class RecipeDeckItemDto(
     val recipeId: String,
@@ -21,20 +58,11 @@ data class RecipeDeckItemDto(
     val inPantryCount: Int = 0,
     val totalIngredientsCount: Int = 0,
     val isSaved: Boolean = false,
-    val isCooked: Boolean = false
+    val isCooked: Boolean = false,
+    val ingredients: List<IngredientDto> = emptyList()
 )
 
-//Ingredient DTO
-@Serializable
-data class IngredientDto(
-    val name: String,
-    val quantity: String? = null,
-    val unit: String? = null,
-    val aisleCategory: String? = null,
-    val inPantry: Boolean = false
-)
-
-//Recipe detail DTO
+// Recipe detail DTO
 @Serializable
 data class RecipeDetailDto(
     val recipeId: String,

@@ -13,6 +13,7 @@ data class GroceryAisleDto(
 data class GroceryItemDto(
     val itemId: String,
     val name: String,
+    @Serializable(with = StringOrNumericSerializer::class)
     val quantity: String? = null,
     val unit: String? = null,
     val isChecked: Boolean = false

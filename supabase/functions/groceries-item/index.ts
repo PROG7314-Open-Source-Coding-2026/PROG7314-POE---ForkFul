@@ -1,16 +1,26 @@
-//Toggle grocery item status
+//Toggle or remove a single grocery item
 
 import { errorResponse, handleOptions, json, respondToError, requireUser } from "../_shared/forkful.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return handleOptions();
-  if (req.method !== "PUT") return errorResponse("Use PUT", 405);
+  if (req.method !== "PUT" && req.method !== "DELETE") return errorResponse("Use PUT or DELETE", 405);
 
   try {
     const { admin, userId } = await requireUser(req);
 
     const itemId = new URL(req.url).searchParams.get("itemId");
     if (!itemId) return errorResponse("itemId query parameter is required", 400);
+
+    if (req.method === "DELETE") {
+      const { error } = await admin
+        .from("grocery_items")
+        .delete()
+        .eq("user_id", userId)
+        .eq("item_id", itemId);
+      if (error) return errorResponse(error.message, 500);
+      return json({ status: "deleted" });
+    }
 
     const body = await req.json();
     if (typeof body.isChecked !== "boolean") {

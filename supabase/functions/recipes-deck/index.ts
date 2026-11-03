@@ -1,6 +1,6 @@
 //Recipes deck provider
 
-import { errorResponse, handleOptions, json, respondToError, requireUser } from "../_shared/forkful.ts";
+import { errorResponse, handleOptions, json, pantryMatches, respondToError, requireUser } from "../_shared/forkful.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return handleOptions();
@@ -106,11 +106,9 @@ Deno.serve(async (req: Request) => {
         const score = moodTags.reduce((sum, tag) => sum + (pointsByTag.get(tag) ?? 0), 0);
 
         const ingredients = (recipe.ingredients as Array<{ name: string }>).map((row) => row.name);
+        //Same matching rule as pantry-match, recipe-detail and swipes
         const inPantry = ingredients.filter((name) =>
-          pantryNames.some((pantryName) =>
-            pantryName.toLowerCase().includes(name.toLowerCase().split(" ")[0]) ||
-            name.toLowerCase().includes(pantryName.toLowerCase())
-          )
+          pantryNames.some((pantryName) => pantryMatches(pantryName, name))
         ).length;
         const total = ingredients.length;
         const matchPercentage = total === 0 ? 0 : Math.round((inPantry / total) * 100);

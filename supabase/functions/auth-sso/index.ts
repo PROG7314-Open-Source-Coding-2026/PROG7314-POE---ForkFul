@@ -11,7 +11,12 @@ Deno.serve(async (req: Request) => {
     const provider = String(body.ssoProvider ?? "").toLowerCase();
     const supabase = await anonClient();
 
-    let session: { access_token: string; user: { id: string; email?: string } } | null = null;
+    let session: {
+      access_token: string;
+      refresh_token: string;
+      expires_at: number | null;
+      user: { id: string; email?: string };
+    } | null = null;
 
     if (provider === "google") {
       const idToken = String(body.idToken ?? "");
@@ -38,6 +43,8 @@ Deno.serve(async (req: Request) => {
       }
       session = {
         access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+        expires_at: data.session.expires_at ?? null,
         user: { id: data.user.id, email: data.user.email },
       };
     } else if (provider === "email") {
@@ -61,6 +68,8 @@ Deno.serve(async (req: Request) => {
         }
         session = {
           access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+        expires_at: data.session.expires_at ?? null,
           user: { id: data.user.id, email: data.user.email },
         };
       } else {
@@ -70,6 +79,8 @@ Deno.serve(async (req: Request) => {
         }
         session = {
           access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+        expires_at: data.session.expires_at ?? null,
           user: { id: data.user.id, email: data.user.email },
         };
       }
@@ -103,6 +114,8 @@ Deno.serve(async (req: Request) => {
 
     return json({
       token: session.access_token,
+      refreshToken: session.refresh_token,
+      expiresAt: session.expires_at,
       userId: session.user.id,
       isNewUser,
     });

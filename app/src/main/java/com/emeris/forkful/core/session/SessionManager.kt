@@ -19,7 +19,9 @@ data class Session(
     val token: String,
     val userId: String,
     val email: String?,
-    val displayName: String?
+    val displayName: String?,
+    val refreshToken: String? = null,
+    val expiresAt: Long? = null //Unix seconds
 )
 
 //App preferences model
@@ -34,8 +36,15 @@ private val Context.prefsDataStore: DataStore<Preferences> by preferencesDataSto
     name = "forkful_prefs"
 )
 
+//Token access used by the network layer
+interface TokenStore {
+    fun getToken(): String?
+    fun getRefreshToken(): String?
+    fun updateTokens(token: String, refreshToken: String, expiresAt: Long?)
+}
+
 //Session & prefs store
-class SessionManager(private val context: Context) {
+class SessionManager(private val context: Context) : TokenStore {
 
     private val securePrefs: SharedPreferences by lazy {
         val masterKey = MasterKey.Builder(context)
@@ -51,7 +60,7 @@ class SessionManager(private val context: Context) {
     }
 
     //Session methods
-    fun getToken(): String? = securePrefs.getString(KEY_TOKEN, null)
+    override fun getToken(): String? = securePrefs.getString(KEY_TOKEN, null)
 
     fun getSession(): Session? {
         val token = securePrefs.getString(KEY_TOKEN, null) ?: return null
@@ -60,9 +69,13 @@ class SessionManager(private val context: Context) {
             token = token,
             userId = userId,
             email = securePrefs.getString(KEY_EMAIL, null),
-            displayName = securePrefs.getString(KEY_DISPLAY_NAME, null)
+            displayName = securePrefs.getString(KEY_DISPLAY_NAME, null),
+            refreshToken = securePrefs.getString(KEY_REFRESH_TOKEN, null),
+            expiresAt = securePrefs.getLong(KEY_EXPIRES_AT, 0L).takeIf { it > 0L }
         )
     }
+
+    override fun getRefreshToken(): String? = securePrefs.getString(KEY_REFRESH_TOKEN, null)
 
     fun saveSession(session: Session) {
         securePrefs.edit()
@@ -70,8 +83,20 @@ class SessionManager(private val context: Context) {
             .putString(KEY_USER_ID, session.userId)
             .putString(KEY_EMAIL, session.email)
             .putString(KEY_DISPLAY_NAME, session.displayName)
+            .putString(KEY_REFRESH_TOKEN, session.refreshToken)
+            .putLong(KEY_EXPIRES_AT, session.expiresAt ?: 0L)
             .apply()
         ForkfulLogger.logAction("SESSION", "Session saved for user ${session.userId}")
+    }
+
+    //Swap in refreshed tokens
+    override fun updateTokens(token: String, refreshToken: String, expiresAt: Long?) {
+        securePrefs.edit()
+            .putString(KEY_TOKEN, token)
+            .putString(KEY_REFRESH_TOKEN, refreshToken)
+            .putLong(KEY_EXPIRES_AT, expiresAt ?: 0L)
+            .commit()
+        ForkfulLogger.logAction("SESSION", "Access token refreshed")
     }
 
     fun clearSession() {
@@ -119,6 +144,8 @@ class SessionManager(private val context: Context) {
         const val KEY_USER_ID = "session_user_id"
         const val KEY_EMAIL = "session_email"
         const val KEY_DISPLAY_NAME = "session_display_name"
+        const val KEY_REFRESH_TOKEN = "session_refresh_token"
+        const val KEY_EXPIRES_AT = "session_expires_at"
         const val KEY_ONBOARDED = "session_onboarded"
 
         val KEY_THEME = stringPreferencesKey("pref_theme")

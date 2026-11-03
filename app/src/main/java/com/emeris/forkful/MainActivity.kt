@@ -79,8 +79,8 @@ fun ForkfulApp() {
     ) {
         composable(Screen.Login.route) {
             LoginScreen(
-                onAuthenticated = { isNewUser ->
-                    val destination = if (isNewUser) Screen.Onboarding.route else Screen.Explore.route
+                onAuthenticated = { needsOnboarding ->
+                    val destination = if (needsOnboarding) Screen.Onboarding.route else Screen.Explore.route
                     navController.navigate(destination) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
@@ -93,8 +93,8 @@ fun ForkfulApp() {
 
         composable(Screen.SignUp.route) {
             SignUpScreen(
-                onAuthenticated = { isNewUser ->
-                    val destination = if (isNewUser) Screen.Onboarding.route else Screen.Explore.route
+                onAuthenticated = { needsOnboarding ->
+                    val destination = if (needsOnboarding) Screen.Onboarding.route else Screen.Explore.route
                     navController.navigate(destination) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }

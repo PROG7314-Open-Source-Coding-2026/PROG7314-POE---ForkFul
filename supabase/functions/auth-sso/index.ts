@@ -95,7 +95,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: existing } = await admin
       .from("users")
-      .select("user_id")
+      .select("user_id, onboarded")
       .eq("user_id", session.user.id)
       .maybeSingle();
     const isNewUser = !existing;
@@ -118,6 +118,7 @@ Deno.serve(async (req: Request) => {
       expiresAt: session.expires_at,
       userId: session.user.id,
       isNewUser,
+      onboarded: existing?.onboarded === true,
     });
   } catch (error) {
     return respondToError(error);

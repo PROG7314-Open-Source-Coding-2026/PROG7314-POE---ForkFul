@@ -20,7 +20,8 @@ data class AuthResponse(
     val userId: String,
     val isNewUser: Boolean,
     val refreshToken: String? = null,
-    val expiresAt: Long? = null
+    val expiresAt: Long? = null,
+    val onboarded: Boolean? = null
 )
 
 //Token refresh req

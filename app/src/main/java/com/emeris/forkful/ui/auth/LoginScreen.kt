@@ -102,7 +102,7 @@ fun ForkfulLogoBadge(modifier: Modifier = Modifier) {
 
 @Composable
 fun LoginScreen(
-    onAuthenticated: (isNewUser: Boolean) -> Unit,
+    onAuthenticated: (needsOnboarding: Boolean) -> Unit,
     onNavigateToSignUp: () -> Unit
 ) {
     val view = LocalView.current
@@ -136,7 +136,7 @@ fun LoginScreen(
     LaunchedEffect(uiState) {
         val current = uiState
         if (current is LoginUiState.Authenticated) {
-            onAuthenticated(current.isNewUser)
+            onAuthenticated(current.needsOnboarding)
             viewModel.consumeState()
         }
     }

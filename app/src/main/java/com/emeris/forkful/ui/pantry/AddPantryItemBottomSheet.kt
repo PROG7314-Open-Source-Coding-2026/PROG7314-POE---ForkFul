@@ -24,6 +24,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material3.Button
@@ -38,7 +39,6 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -66,25 +66,31 @@ import com.emeris.forkful.core.designsystem.SubtleCircleIcon
 import com.emeris.forkful.core.designsystem.TextCharcoal
 import com.emeris.forkful.core.designsystem.TextMuted
 import com.emeris.forkful.core.designsystem.TrueWhite
+import com.emeris.forkful.domain.model.PantryItem
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddPantryItemBottomSheet(
     sheetState: SheetState,
     onDismiss: () -> Unit,
-    onConfirm: (name: String, quantity: String, category: String, daysUntilExpiry: Int) -> Unit
+    //daysUntilExpiry is null only when editing and the expiry is left unchanged
+    onConfirm: (name: String, quantity: String, category: String, daysUntilExpiry: Int?) -> Unit,
+    editingItem: PantryItem? = null
 ) {
-    val focusManager = LocalFocusManager.current
-    var name by remember { mutableStateOf("") }
-    var quantity by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf("Produce") }
-    var selectedDays by remember { mutableIntStateOf(7) }
-    var validationError by remember { mutableStateOf<String?>(null) }
-
+    val isEditing = editingItem != null
     val categories = listOf(
         "Produce", "Dairy", "Butchery", "Bakery",
         "Pantry", "Dry Goods", "Frozen", "Spices", "Condiments"
     )
+    val focusManager = LocalFocusManager.current
+    var name by remember(editingItem) { mutableStateOf(editingItem?.name.orEmpty()) }
+    var quantity by remember(editingItem) { mutableStateOf(editingItem?.quantityLabel.orEmpty()) }
+    var selectedCategory by remember(editingItem) {
+        mutableStateOf(editingItem?.category?.takeIf { it in categories } ?: "Produce")
+    }
+    var selectedDays by remember(editingItem) { mutableStateOf<Int?>(if (isEditing) null else 7) }
+    var validationError by remember { mutableStateOf<String?>(null) }
+
     val expiryOptions = listOf(
         Pair("3 days", 3),
         Pair("1 week", 7),
@@ -136,14 +142,18 @@ fun AddPantryItemBottomSheet(
             ) {
                 Column {
                     Text(
-                        text = "Add to Pantry",
+                        text = if (isEditing) "Edit pantry item" else "Add to Pantry",
                         fontFamily = FontFamily.Serif,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Normal,
                         color = TextCharcoal
                     )
                     Text(
-                        text = "Track your stock to unlock recipe matches",
+                        text = if (isEditing) {
+                            "Update the name, amount or shelf life"
+                        } else {
+                            "Track your stock to unlock recipe matches"
+                        },
                         fontSize = 13.sp,
                         color = TextMuted
                     )
@@ -284,6 +294,13 @@ fun AddPantryItemBottomSheet(
                 fontWeight = FontWeight.SemiBold,
                 color = TextCharcoal
             )
+            if (isEditing && selectedDays == null) {
+                Text(
+                    text = "Keeping the current expiry - pick an option to change it",
+                    fontSize = 12.sp,
+                    color = TextMuted
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(
@@ -331,14 +348,14 @@ fun AddPantryItemBottomSheet(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.Add,
+                        imageVector = if (isEditing) Icons.Default.Check else Icons.Default.Add,
                         contentDescription = null,
                         tint = TrueWhite,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Add to Pantry",
+                        text = if (isEditing) "Save changes" else "Add to Pantry",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = TrueWhite

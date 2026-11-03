@@ -7,6 +7,7 @@ import com.emeris.forkful.domain.model.PantryMatch
 interface PantryRepository {
     suspend fun getPantry(): Result<List<PantryItem>>
     suspend fun addItem(name: String, quantity: String?, unit: String?, expiryDate: String?): Result<PantryItem>
+    suspend fun updateItem(pantryItemId: String, name: String, quantity: String?, unit: String?, expiryDate: String?): Result<Boolean>
     suspend fun removeItem(pantryItemId: String): Result<Boolean>
     suspend fun getMatches(missingThreshold: Int = 2): Result<List<PantryMatch>>
 }

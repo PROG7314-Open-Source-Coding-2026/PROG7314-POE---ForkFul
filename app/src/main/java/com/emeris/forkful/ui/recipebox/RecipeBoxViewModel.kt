@@ -33,6 +33,7 @@ class RecipeBoxViewModel(
     val state: StateFlow<RecipeBoxUiState> = _state.asStateFlow()
 
     private val searchInput = MutableStateFlow("")
+    private var hasBeenShown = false
 
     init {
         load()
@@ -57,6 +58,11 @@ class RecipeBoxViewModel(
                     }
                 }
         }
+    }
+
+    //Reload when returning from a recipe that may have been unsaved
+    fun onScreenShown() {
+        if (hasBeenShown) load() else hasBeenShown = true
     }
 
     fun setFilter(filter: RecipeBoxFilter) {

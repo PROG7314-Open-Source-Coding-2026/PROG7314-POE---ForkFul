@@ -68,7 +68,22 @@ Deno.serve(async (req: Request) => {
       return json({ status: "ok" });
     }
 
-    return errorResponse("Use GET or POST", 405);
+    //Unsave: the recipe leaves the Recipe Box and stays out of the deck
+    if (req.method === "DELETE") {
+      const recipeId = new URL(req.url).searchParams.get("recipeId");
+      if (!recipeId) return errorResponse("recipeId is required", 400);
+
+      const { error } = await admin
+        .from("user_swipes")
+        .update({ direction: "LEFT", cooked_at: null })
+        .eq("user_id", userId)
+        .eq("recipe_id", recipeId);
+      if (error) return errorResponse(error.message, 500);
+
+      return json({ status: "unsaved" });
+    }
+
+    return errorResponse("Use GET, POST or DELETE", 405);
   } catch (error) {
     return respondToError(error);
   }

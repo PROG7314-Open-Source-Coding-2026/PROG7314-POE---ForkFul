@@ -1,6 +1,6 @@
-//Pantry matching tests (run: deno test supabase/functions/_shared)
+//Matching & sanitiser tests (run: deno test supabase/functions/_shared)
 
-import { pantryMatches, singularize } from "./forkful.ts";
+import { isUuid, pantryMatches, sanitizeSearch, singularize } from "./forkful.ts";
 
 function assertEquals(actual: unknown, expected: unknown, label: string) {
   if (actual !== expected) {
@@ -33,4 +33,19 @@ Deno.test("partial words never match", () => {
   assertEquals(pantryMatches("pea", "peanut butter"), false, "pea vs peanut butter");
   assertEquals(pantryMatches("corn", "cornflour"), false, "corn vs cornflour");
   assertEquals(pantryMatches("", "salt"), false, "blank pantry");
+});
+
+Deno.test("search text is stripped of filter syntax", () => {
+  assertEquals(sanitizeSearch("pasta,title.eq.x"), "pasta title eq x", "comma and dots");
+  assertEquals(sanitizeSearch("100% (best)*"), "100 best", "wildcards and brackets");
+  assertEquals(sanitizeSearch("  mac   & cheese "), "mac cheese", "whitespace");
+  assertEquals(sanitizeSearch("bobotie"), "bobotie", "plain text");
+  assertEquals(sanitizeSearch(null), "", "null");
+  assertEquals(sanitizeSearch("a".repeat(100)).length, 60, "length cap");
+});
+
+Deno.test("uuid validation", () => {
+  assertEquals(isUuid("0b6e7c1a-3f7d-4a5e-9c1b-2d4e6f8a0b1c"), true, "valid uuid");
+  assertEquals(isUuid("1 or 1=1"), false, "injection text");
+  assertEquals(isUuid(null), false, "null");
 });

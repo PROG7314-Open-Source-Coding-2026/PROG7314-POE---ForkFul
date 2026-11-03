@@ -1,6 +1,6 @@
 //Toggle or remove a single grocery item
 
-import { errorResponse, handleOptions, json, respondToError, requireUser } from "../_shared/forkful.ts";
+import { errorResponse, handleOptions, isUuid, json, respondToError, requireUser } from "../_shared/forkful.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return handleOptions();
@@ -10,7 +10,7 @@ Deno.serve(async (req: Request) => {
     const { admin, userId } = await requireUser(req);
 
     const itemId = new URL(req.url).searchParams.get("itemId");
-    if (!itemId) return errorResponse("itemId query parameter is required", 400);
+    if (!isUuid(itemId)) return errorResponse("itemId must be a valid id", 400);
 
     if (req.method === "DELETE") {
       const { error } = await admin

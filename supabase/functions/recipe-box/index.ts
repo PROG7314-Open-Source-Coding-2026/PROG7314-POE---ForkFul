@@ -1,6 +1,6 @@
 //Recipe box management
 
-import { errorResponse, handleOptions, json, respondToError, requireUser } from "../_shared/forkful.ts";
+import { errorResponse, handleOptions, isUuid, json, respondToError, requireUser } from "../_shared/forkful.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return handleOptions();
@@ -56,7 +56,7 @@ Deno.serve(async (req: Request) => {
       const body = await req.json();
       const recipeId = String(body.recipeId ?? "");
       const cooked = body.cooked !== false;
-      if (!recipeId) return errorResponse("recipeId is required", 400);
+      if (!isUuid(recipeId)) return errorResponse("recipeId must be a valid id", 400);
 
       const { error } = await admin
         .from("user_swipes")
@@ -71,7 +71,7 @@ Deno.serve(async (req: Request) => {
     //Unsave: the recipe leaves the Recipe Box and stays out of the deck
     if (req.method === "DELETE") {
       const recipeId = new URL(req.url).searchParams.get("recipeId");
-      if (!recipeId) return errorResponse("recipeId is required", 400);
+      if (!isUuid(recipeId)) return errorResponse("recipeId must be a valid id", 400);
 
       const { error } = await admin
         .from("user_swipes")

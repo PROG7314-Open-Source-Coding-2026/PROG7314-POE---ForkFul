@@ -1,6 +1,6 @@
 //Recipes deck provider
 
-import { errorResponse, handleOptions, json, pantryMatches, respondToError, requireUser } from "../_shared/forkful.ts";
+import { errorResponse, handleOptions, json, pantryMatches, respondToError, requireUser, sanitizeSearch } from "../_shared/forkful.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return handleOptions();
@@ -14,7 +14,8 @@ Deno.serve(async (req: Request) => {
     const maxPrepTime = url.searchParams.get("maxPrepTime");
     const minRating = url.searchParams.get("minRating");
     const difficulty = url.searchParams.get("difficulty");
-    const search = url.searchParams.get("search")?.trim();
+    //User text is stripped of PostgREST filter syntax before it reaches .or()
+    const search = sanitizeSearch(url.searchParams.get("search"));
     //Swipe stacks hide every recipe already swiped (LEFT or RIGHT)
     const excludeSwiped = url.searchParams.get("excludeSwiped") === "true";
     const dietaryParam = url.searchParams.get("dietaryTags");
@@ -66,7 +67,7 @@ Deno.serve(async (req: Request) => {
     if (difficulty) query = query.eq("difficulty", difficulty);
     if (search) {
       query = query.or(
-        `title.ilike.%${search}%,description.ilike.%${search}%`,
+        `title.ilike."%${search}%",description.ilike."%${search}%"`,
       );
     }
 

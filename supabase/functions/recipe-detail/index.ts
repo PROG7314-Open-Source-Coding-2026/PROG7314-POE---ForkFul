@@ -1,6 +1,6 @@
 //Recipe detail view
 
-import { errorResponse, handleOptions, json, pantryMatches, respondToError, requireUser } from "../_shared/forkful.ts";
+import { errorResponse, handleOptions, isUuid, json, pantryMatches, respondToError, requireUser } from "../_shared/forkful.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return handleOptions();
@@ -9,7 +9,7 @@ Deno.serve(async (req: Request) => {
   try {
     const { admin, userId } = await requireUser(req);
     const recipeId = new URL(req.url).searchParams.get("recipeId");
-    if (!recipeId) return errorResponse("recipeId is required", 400);
+    if (!isUuid(recipeId)) return errorResponse("recipeId must be a valid id", 400);
 
     const { data: recipe, error } = await admin
       .from("recipes")

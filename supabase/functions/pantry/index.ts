@@ -1,6 +1,6 @@
 //Pantry management function
 
-import { aisleFor, errorResponse, handleOptions, json, respondToError, requireUser } from "../_shared/forkful.ts";
+import { aisleFor, errorResponse, handleOptions, isUuid, json, respondToError, requireUser } from "../_shared/forkful.ts";
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -67,7 +67,7 @@ Deno.serve(async (req: Request) => {
 
     if (req.method === "DELETE") {
       const pantryItemId = new URL(req.url).searchParams.get("pantryItemId");
-      if (!pantryItemId) return errorResponse("pantryItemId is required", 400);
+      if (!isUuid(pantryItemId)) return errorResponse("pantryItemId must be a valid id", 400);
 
       const { error } = await admin
         .from("user_pantry")
@@ -82,7 +82,7 @@ Deno.serve(async (req: Request) => {
     //Edit an existing item (only the fields sent are changed)
     if (req.method === "PUT") {
       const pantryItemId = new URL(req.url).searchParams.get("pantryItemId");
-      if (!pantryItemId) return errorResponse("pantryItemId is required", 400);
+      if (!isUuid(pantryItemId)) return errorResponse("pantryItemId must be a valid id", 400);
       const body = await req.json();
 
       const update: Record<string, unknown> = {};

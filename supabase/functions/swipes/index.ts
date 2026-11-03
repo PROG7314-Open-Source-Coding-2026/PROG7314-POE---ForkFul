@@ -4,7 +4,7 @@
 // Request : { recipeId, moodProfileId, direction: "RIGHT"|"LEFT" }
 // Response: { status, swipeId, updatedTagPoints: [{ moodProfileKey, tagName, points }] }
 
-import { errorResponse, handleOptions, json, normalizeIngredient, pantryMatches, respondToError, requireUser } from "../_shared/forkful.ts";
+import { errorResponse, handleOptions, isUuid, json, normalizeIngredient, pantryMatches, respondToError, requireUser } from "../_shared/forkful.ts";
 
 const RIGHT_DELTA = 2;
 const LEFT_DELTA = -1;
@@ -21,7 +21,7 @@ Deno.serve(async (req: Request) => {
     const recipeId = String(body.recipeId ?? "");
     const moodProfileId = String(body.moodProfileId ?? "comfort").toLowerCase();
     const direction = String(body.direction ?? "").toUpperCase();
-    if (!recipeId) return errorResponse("recipeId is required", 400);
+    if (!isUuid(recipeId)) return errorResponse("recipeId must be a valid id", 400);
     if (direction !== "RIGHT" && direction !== "LEFT") {
       return errorResponse("direction must be RIGHT or LEFT", 400);
     }

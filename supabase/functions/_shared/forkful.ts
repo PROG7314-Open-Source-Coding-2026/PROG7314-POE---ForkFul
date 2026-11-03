@@ -113,28 +113,43 @@ export function aisleFor(name: string): string {
   return "Other";
 }
 
-const STOP_WORDS = new Set(["fresh", "ripe", "dried", "chopped", "large", "small", "free", "range"]);
+const STOP_WORDS = new Set([
+  "fresh", "ripe", "dried", "chopped", "large", "small", "medium", "free", "range",
+  "sliced", "diced", "minced", "grated", "finely", "roughly", "crushed", "ground",
+  "and", "for", "the", "taste", "optional", "extra",
+]);
 
-export function normalizeIngredient(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z\s-]/g, "")
-    .split(/\s+/)
-    .filter((word) => word.length > 2 && !STOP_WORDS.has(word))
-    .join(" ")
-    .trim();
+//Plural to singular
+export function singularize(word: string): string {
+  if (word.length <= 3) return word;
+  if (word.endsWith("ies")) return word.slice(0, -3) + "y";
+  if (word.endsWith("oes")) return word.slice(0, -2);
+  if (/(ches|shes|sses|xes)$/.test(word)) return word.slice(0, -2);
+  if (word.endsWith("s") && !word.endsWith("ss") && !word.endsWith("us")) return word.slice(0, -1);
+  return word;
 }
 
-//Pantry match test
+//Ingredient name to whole-word tokens
+export function ingredientTokens(name: string): string[] {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, " ")
+    .split(/\s+/)
+    .filter((word) => word.length > 2 && !STOP_WORDS.has(word))
+    .map(singularize);
+}
+
+export function normalizeIngredient(name: string): string {
+  return ingredientTokens(name).join(" ");
+}
+
+//Single pantry matching rule: every word of the pantry item must appear as a
+//whole word in the ingredient ("salt" never matches "salted butter").
 export function pantryMatches(pantryName: string, ingredientName: string): boolean {
-  const pantry = normalizeIngredient(pantryName);
-  const ingredient = normalizeIngredient(ingredientName);
-  if (!pantry || !ingredient) return false;
-  if (pantry === ingredient) return true;
-  if (pantry.length >= 4 && ingredient.includes(pantry)) return true;
-  if (ingredient.length >= 4 && pantry.includes(ingredient)) return true;
-  const singular = (word: string) => word.endsWith("oes") ? word.slice(0, -2) : word.endsWith("s") && !word.endsWith("ss") ? word.slice(0, -1) : word;
-  return singular(pantry) === singular(ingredient);
+  const pantry = ingredientTokens(pantryName);
+  const ingredient = new Set(ingredientTokens(ingredientName));
+  if (pantry.length === 0 || ingredient.size === 0) return false;
+  return pantry.every((word) => ingredient.has(word));
 }
 
 export const AISLE_ORDER = [

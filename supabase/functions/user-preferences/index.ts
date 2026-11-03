@@ -91,6 +91,14 @@ Deno.serve(async (req: Request) => {
           .update({ points: 0 })
           .eq("user_id", userId);
         if (error) return errorResponse(error.message, 500);
+
+        //Dismissed recipes come back so the deck really starts fresh
+        const { error: swipeError } = await admin
+          .from("user_swipes")
+          .delete()
+          .eq("user_id", userId)
+          .eq("direction", "LEFT");
+        if (swipeError) return errorResponse(swipeError.message, 500);
       }
 
       return json({ status: "ok", updated: Object.keys(update) });

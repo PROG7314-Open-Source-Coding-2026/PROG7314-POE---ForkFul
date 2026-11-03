@@ -16,7 +16,9 @@ import kotlinx.coroutines.launch
 data class RecipeDetailUiState(
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
-    val recipe: Recipe? = null
+    val recipe: Recipe? = null,
+    val isSaving: Boolean = false,
+    val actionMessage: String? = null
 )
 
 class RecipeDetailViewModel(
@@ -41,21 +43,47 @@ class RecipeDetailViewModel(
         }
     }
 
-    //Toggle save bookmark
+    //Toggle save bookmark (works both ways)
     fun toggleSave() {
-        val recipe = _state.value.recipe ?: return
-        if (recipe.isSaved) return
+        val snapshot = _state.value
+        val recipe = snapshot.recipe ?: return
+        if (snapshot.isSaving) return
+        val saving = !recipe.isSaved
+
+        //Optimistic heart update
+        _state.update { it.copy(isSaving = true, recipe = recipe.copy(isSaved = saving)) }
         viewModelScope.launch {
-            recipeRepository.recordSwipe(
-                recipe.id,
-                SwipeDirection.RIGHT,
-                recipe.category.lowercase().replace(Regex("[^a-z]"), "").ifBlank { "comfort" }
-            ).onSuccess {
+            val result = if (saving) {
+                recipeRepository.recordSwipe(
+                    recipe.id,
+                    SwipeDirection.RIGHT,
+                    recipe.category.lowercase().replace(Regex("[^a-z]"), "").ifBlank { "comfort" }
+                ).map { true }
+            } else {
+                recipeRepository.unsaveRecipe(recipe.id)
+            }
+            result.onSuccess {
+                ForkfulLogger.logAction("RECIPE_BOX", "${if (saving) "Saved" else "Unsaved"} ${recipe.title}")
+                _state.update {
+                    it.copy(
+                        isSaving = false,
+                        actionMessage = if (saving) "Saved to your Recipe Box" else "Removed from your Recipe Box"
+                    )
+                }
+            }.onFailure { error ->
                 _state.update { current ->
-                    current.copy(recipe = current.recipe?.copy(isSaved = true))
+                    current.copy(
+                        isSaving = false,
+                        recipe = current.recipe?.copy(isSaved = recipe.isSaved),
+                        actionMessage = error.message ?: "Could not update your Recipe Box"
+                    )
                 }
             }
         }
+    }
+
+    fun consumeActionMessage() {
+        _state.update { it.copy(actionMessage = null) }
     }
 
     fun markCooked(onDone: () -> Unit) {

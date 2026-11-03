@@ -29,7 +29,8 @@ class RecipeRepositoryImpl(
             maxPrepTime = query.maxPrepTime,
             minRating = query.minRating,
             difficulty = query.difficulty,
-            search = query.search?.takeIf { it.isNotBlank() }
+            search = query.search?.takeIf { it.isNotBlank() },
+            excludeSwiped = query.excludeSwiped.takeIf { it }
         ).map { it.toDomain() }
     }
 
@@ -61,6 +62,12 @@ class RecipeRepositoryImpl(
     override suspend fun setCooked(recipeId: String, cooked: Boolean): Result<Boolean> = runCatching {
         ForkfulLogger.logAction("RECIPE_BOX", "mark cooked=$cooked for $recipeId")
         api.markCooked(MarkCookedRequest(recipeId, cooked))
+        true
+    }
+
+    override suspend fun unsaveRecipe(recipeId: String): Result<Boolean> = runCatching {
+        ForkfulLogger.logAction("RECIPE_BOX", "unsave $recipeId")
+        api.unsaveRecipe(recipeId)
         true
     }
 }

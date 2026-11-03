@@ -64,11 +64,12 @@ fun RecipeBoxScreen(
     onNavigateTo: (String) -> Unit,
     onRecipeSelected: (String) -> Unit
 ) {
+    val viewModel = containerViewModel { RecipeBoxViewModel(it.recipeRepository) }
+
     LaunchedEffect(Unit) {
         ForkfulLogger.logLifecycle("RecipeBoxScreen", "ON_CREATE")
+        viewModel.onScreenShown()
     }
-
-    val viewModel = containerViewModel { RecipeBoxViewModel(it.recipeRepository) }
     val uiState by viewModel.state.collectAsState()
 
     var isSearchVisible by remember { mutableStateOf(false) }

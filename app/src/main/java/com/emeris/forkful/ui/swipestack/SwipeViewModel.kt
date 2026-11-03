@@ -40,7 +40,7 @@ class SwipeViewModel(
     fun loadDeck(moodKey: String) {
         _state.update { it.copy(moodKey = moodKey, isLoading = true, errorMessage = null, reachedEnd = false) }
         viewModelScope.launch {
-            recipeRepository.getDeck(DeckQuery(mood = moodKey, limit = 50))
+            recipeRepository.getDeck(DeckQuery(mood = moodKey, limit = 50, excludeSwiped = true))
                 .onSuccess { rawDeck ->
                     val target = moodKey.lowercase().trim()
 

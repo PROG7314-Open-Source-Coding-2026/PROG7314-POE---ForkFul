@@ -15,6 +15,8 @@ Deno.serve(async (req: Request) => {
     const minRating = url.searchParams.get("minRating");
     const difficulty = url.searchParams.get("difficulty");
     const search = url.searchParams.get("search")?.trim();
+    //Swipe stacks hide every recipe already swiped (LEFT or RIGHT)
+    const excludeSwiped = url.searchParams.get("excludeSwiped") === "true";
     const dietaryParam = url.searchParams.get("dietaryTags");
     const dietary = dietaryParam
       ? dietaryParam.split(",").map((tag) => tag.trim()).filter(Boolean)
@@ -78,6 +80,7 @@ Deno.serve(async (req: Request) => {
     const savedIds = new Set(
       (swiped ?? []).filter((row) => row.direction === "RIGHT").map((row) => row.recipe_id),
     );
+    const swipedIds = new Set((swiped ?? []).map((row) => row.recipe_id));
     const cookedIds = new Set(
       (swiped ?? [])
         .filter((row) => row.cooked_at !== null && row.cooked_at !== undefined)
@@ -95,7 +98,7 @@ Deno.serve(async (req: Request) => {
 
     const scored = (recipes ?? [])
       .filter((recipe) => matchesDietary(recipe.dietary_tags as string[] | null))
-      .filter((recipe) => !savedIds.has(recipe.recipe_id))
+      .filter((recipe) => !(excludeSwiped ? swipedIds : savedIds).has(recipe.recipe_id))
       .map((recipe) => {
         const moodTags = (recipe.recipe_tags as Array<{ mood_profile_key: string; tag_name: string }>)
           .filter((tag) => tag.mood_profile_key === mood)

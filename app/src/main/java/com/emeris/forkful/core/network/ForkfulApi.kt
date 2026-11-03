@@ -40,7 +40,8 @@ interface ForkfulApi {
         @Query("maxPrepTime") maxPrepTime: Int? = null,
         @Query("minRating") minRating: Double? = null,
         @Query("difficulty") difficulty: String? = null,
-        @Query("search") search: String? = null
+        @Query("search") search: String? = null,
+        @Query("excludeSwiped") excludeSwiped: Boolean? = null
     ): List<RecipeDeckItemDto>
 
     @GET("functions/v1/recipe-detail")
@@ -55,6 +56,9 @@ interface ForkfulApi {
 
     @POST("functions/v1/recipe-box")
     suspend fun markCooked(@Body body: MarkCookedRequest): StatusResponse
+
+    @DELETE("functions/v1/recipe-box")
+    suspend fun unsaveRecipe(@Query("recipeId") recipeId: String): StatusResponse
 
     //Pantry (FR-17..20)
     @GET("functions/v1/pantry")

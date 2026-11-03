@@ -12,7 +12,8 @@ data class DeckQuery(
     val maxPrepTime: Int? = null,
     val minRating: Double? = null,
     val difficulty: String? = null,
-    val search: String? = null
+    val search: String? = null,
+    val excludeSwiped: Boolean = false
 )
 
 //Recipe repo contract
@@ -22,4 +23,5 @@ interface RecipeRepository {
     suspend fun getRecipeBox(filter: RecipeBoxFilter): Result<List<Recipe>>
     suspend fun recordSwipe(recipeId: String, direction: SwipeDirection, moodProfileKey: String): Result<SwipeOutcome>
     suspend fun setCooked(recipeId: String, cooked: Boolean): Result<Boolean>
+    suspend fun unsaveRecipe(recipeId: String): Result<Boolean>
 }

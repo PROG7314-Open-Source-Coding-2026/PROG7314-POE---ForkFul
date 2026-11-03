@@ -69,7 +69,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SignUpScreen(
-    onAuthenticated: (isNewUser: Boolean) -> Unit,
+    onAuthenticated: (needsOnboarding: Boolean) -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
     val view = LocalView.current
@@ -104,7 +104,7 @@ fun SignUpScreen(
     LaunchedEffect(uiState) {
         val current = uiState
         if (current is LoginUiState.Authenticated) {
-            onAuthenticated(current.isNewUser)
+            onAuthenticated(current.needsOnboarding)
             viewModel.consumeState()
         }
     }

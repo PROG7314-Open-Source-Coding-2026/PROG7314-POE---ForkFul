@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 sealed interface LoginUiState {
     data object Idle : LoginUiState
     data object Loading : LoginUiState
-    data class Authenticated(val isNewUser: Boolean) : LoginUiState
+    data class Authenticated(val needsOnboarding: Boolean) : LoginUiState
     data class Error(val message: String) : LoginUiState
 }
 
@@ -32,8 +32,8 @@ class LoginViewModel(
         viewModelScope.launch {
             authRepository.signInWithGoogle(idToken, email, displayName)
                 .onSuccess { outcome ->
-                    ForkfulLogger.logAction("LOGIN", "Google SSO success (isNewUser=${outcome.isNewUser})")
-                    _state.value = LoginUiState.Authenticated(outcome.isNewUser)
+                    ForkfulLogger.logAction("LOGIN", "Google SSO success (needsOnboarding=${outcome.needsOnboarding})")
+                    _state.value = LoginUiState.Authenticated(outcome.needsOnboarding)
                 }
                 .onFailure { error ->
                     ForkfulLogger.logAction("LOGIN", "Google SSO failed: ${error.message}")
@@ -79,7 +79,7 @@ class LoginViewModel(
             }
             result
                 .onSuccess { outcome ->
-                    _state.value = LoginUiState.Authenticated(outcome.isNewUser)
+                    _state.value = LoginUiState.Authenticated(outcome.needsOnboarding)
                 }
                 .onFailure { error ->
                     _state.value = LoginUiState.Error(error.message ?: "Sign-in failed")

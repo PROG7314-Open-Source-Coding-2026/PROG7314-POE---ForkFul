@@ -99,8 +99,11 @@ class SessionManager(private val context: Context) : TokenStore {
         ForkfulLogger.logAction("SESSION", "Access token refreshed")
     }
 
+    //Clears credentials only - the onboarding flag survives logout
     fun clearSession() {
-        securePrefs.edit().clear().apply()
+        securePrefs.edit().apply {
+            SESSION_KEYS.forEach { remove(it) }
+        }.apply()
         ForkfulLogger.logAction("SESSION", "Session cleared (logout)")
     }
 
@@ -147,6 +150,10 @@ class SessionManager(private val context: Context) : TokenStore {
         const val KEY_REFRESH_TOKEN = "session_refresh_token"
         const val KEY_EXPIRES_AT = "session_expires_at"
         const val KEY_ONBOARDED = "session_onboarded"
+
+        val SESSION_KEYS = listOf(
+            KEY_TOKEN, KEY_USER_ID, KEY_EMAIL, KEY_DISPLAY_NAME, KEY_REFRESH_TOKEN, KEY_EXPIRES_AT
+        )
 
         val KEY_THEME = stringPreferencesKey("pref_theme")
         val KEY_LANGUAGE = stringPreferencesKey("pref_language")

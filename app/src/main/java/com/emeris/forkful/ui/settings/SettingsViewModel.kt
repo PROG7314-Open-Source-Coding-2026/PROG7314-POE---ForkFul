@@ -112,8 +112,8 @@ class SettingsViewModel(
     }
 
     fun logout() {
+        //Onboarding flag is kept so returning users skip onboarding
         authRepository.signOut()
-        sessionManager.setOnboarded(false)
         _state.update { it.copy(loggedOut = true) }
     }
 

@@ -36,7 +36,14 @@ class AuthRepositoryImpl(
                 )
             )
             sessionManager.saveSession(
-                Session(response.token, response.userId, email, displayName)
+                Session(
+                    token = response.token,
+                    userId = response.userId,
+                    email = email,
+                    displayName = displayName,
+                    refreshToken = response.refreshToken,
+                    expiresAt = response.expiresAt
+                )
             )
             AuthOutcome(response.isNewUser)
         } catch (e: HttpException) {
@@ -72,7 +79,16 @@ class AuthRepositoryImpl(
                     mode = mode
                 )
             )
-            sessionManager.saveSession(Session(response.token, response.userId, email, displayName))
+            sessionManager.saveSession(
+                Session(
+                    token = response.token,
+                    userId = response.userId,
+                    email = email,
+                    displayName = displayName,
+                    refreshToken = response.refreshToken,
+                    expiresAt = response.expiresAt
+                )
+            )
             AuthOutcome(response.isNewUser)
         } catch (e: HttpException) {
             throw Exception(extractServerError(e), e)

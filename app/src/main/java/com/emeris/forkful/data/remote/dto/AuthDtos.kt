@@ -18,5 +18,22 @@ data class SsoAuthRequest(
 data class AuthResponse(
     val token: String,
     val userId: String,
-    val isNewUser: Boolean
+    val isNewUser: Boolean,
+    val refreshToken: String? = null,
+    val expiresAt: Long? = null
+)
+
+//Token refresh req
+@Serializable
+data class RefreshTokenRequest(
+    val refreshToken: String
+)
+
+//Token refresh res
+@Serializable
+data class RefreshTokenResponse(
+    val token: String,
+    val refreshToken: String,
+    val expiresAt: Long? = null,
+    val userId: String
 )

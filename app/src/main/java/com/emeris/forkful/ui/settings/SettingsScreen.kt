@@ -52,6 +52,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.emeris.forkful.BuildConfig
 import com.emeris.forkful.core.designsystem.BorderLight
 import com.emeris.forkful.core.designsystem.CreamBackground
 import com.emeris.forkful.core.designsystem.ForestGreen
@@ -313,6 +314,31 @@ fun SettingsScreen(
                     color = Color(0xFFA33B39),
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp
+                )
+            }
+
+            //Session expiry test tools - never shown in release builds
+            if (BuildConfig.DEBUG) {
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "Debug: simulate expired access token",
+                    color = TextMuted,
+                    fontSize = 12.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { viewModel.debugExpireAccessToken() }
+                        .padding(vertical = 8.dp),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                Text(
+                    text = "Debug: simulate expired session",
+                    color = TextMuted,
+                    fontSize = 12.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { viewModel.debugExpireSession() }
+                        .padding(vertical = 8.dp),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
             }
 

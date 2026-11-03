@@ -12,6 +12,9 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.emeris.forkful.core.logging.ForkfulLogger
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 
 //Auth session model
@@ -105,6 +108,36 @@ class SessionManager(private val context: Context) : TokenStore {
             SESSION_KEYS.forEach { remove(it) }
         }.apply()
         ForkfulLogger.logAction("SESSION", "Session cleared (logout)")
+    }
+
+    //Expired-session event: the app listens and routes back to Login
+    private val _sessionExpired = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val sessionExpired: SharedFlow<Unit> = _sessionExpired.asSharedFlow()
+
+    @Volatile
+    private var pendingLoginMessage: String? = null
+
+    fun expireSession() {
+        if (getToken() == null) return
+        clearSession()
+        pendingLoginMessage = "Your session has expired. Please sign in again."
+        ForkfulLogger.logAction("SESSION", "Session expired - routing to login")
+        _sessionExpired.tryEmit(Unit)
+    }
+
+    //One-shot message for the Login screen
+    fun consumeLoginMessage(): String? = pendingLoginMessage.also { pendingLoginMessage = null }
+
+    //Debug-build helpers for testing expiry on a device
+    fun debugBreakAccessToken() {
+        securePrefs.edit().putString(KEY_TOKEN, "expired-access-token").commit()
+    }
+
+    fun debugBreakAllTokens() {
+        securePrefs.edit()
+            .putString(KEY_TOKEN, "expired-access-token")
+            .putString(KEY_REFRESH_TOKEN, "revoked-refresh-token")
+            .commit()
     }
 
     //Onboarding flag

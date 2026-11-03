@@ -117,6 +117,17 @@ class SettingsViewModel(
         _state.update { it.copy(loggedOut = true) }
     }
 
+    //Debug builds only: force the token states used in the expiry tests
+    fun debugExpireAccessToken() {
+        sessionManager.debugBreakAccessToken()
+        load() //Next call 401s, refreshes and succeeds
+    }
+
+    fun debugExpireSession() {
+        sessionManager.debugBreakAllTokens()
+        load() //Refresh is rejected and the app returns to Login
+    }
+
     fun consumeMessages() {
         _state.update { it.copy(errorMessage = null, infoMessage = null) }
     }

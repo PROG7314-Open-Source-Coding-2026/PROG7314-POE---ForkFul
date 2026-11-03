@@ -87,6 +87,11 @@ class LoginViewModel(
         }
     }
 
+    //Surface sign-in errors raised outside the ViewModel
+    fun showError(message: String) {
+        _state.value = LoginUiState.Error(message)
+    }
+
     fun consumeState() {
         _state.value = LoginUiState.Idle
     }

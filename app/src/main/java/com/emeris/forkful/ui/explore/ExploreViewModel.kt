@@ -21,7 +21,8 @@ data class ExploreUiState(
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
     val feed: List<Recipe> = emptyList(),
-    val searchQuery: String = "",
+    val searchQuery: String = "", //Debounced value used for the API call
+    val searchText: String = "", //What the search box shows, updated on every keystroke
     val selectedCuisine: String? = null,
     val maxPrepTime: Int? = null,
     val minRating: Double? = null,
@@ -103,6 +104,7 @@ class ExploreViewModel(
     }
 
     fun onSearchInput(query: String) {
+        _state.update { it.copy(searchText = query) }
         searchInput.value = query
     }
 
@@ -122,13 +124,15 @@ class ExploreViewModel(
     }
 
     fun clearFilters() {
+        searchInput.value = ""
         _state.update {
             it.copy(
                 selectedCuisine = null,
                 maxPrepTime = null,
                 minRating = null,
                 difficulty = null,
-                searchQuery = ""
+                searchQuery = "",
+                searchText = ""
             )
         }
         loadFeed()

@@ -143,14 +143,14 @@ fun RecipeBoxScreen(
                     )
                     Spacer(modifier = Modifier.padding(8.dp))
                     BasicTextField(
-                        value = uiState.searchQuery,
+                        value = uiState.searchText,
                         onValueChange = viewModel::onSearchInput,
                         textStyle = TextStyle(fontSize = 14.sp, color = TextCharcoal),
                         singleLine = true,
                         modifier = Modifier.weight(1f),
                         decorationBox = { innerTextField ->
                             Box(contentAlignment = Alignment.CenterStart) {
-                                if (uiState.searchQuery.isEmpty()) {
+                                if (uiState.searchText.isEmpty()) {
                                     Text(text = "Search your recipes...", color = TextMuted, fontSize = 14.sp)
                                 }
                                 innerTextField()

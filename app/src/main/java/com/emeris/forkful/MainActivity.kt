@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -73,12 +74,24 @@ fun ForkfulApp() {
 
     val navController = rememberNavController()
 
+    //Expired session from any screen -> back to Login with a message
+    LaunchedEffect(Unit) {
+        sessionManager.sessionExpired.collect {
+            navController.navigate(Screen.Login.route) {
+                popUpTo(0) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = startDestination
     ) {
         composable(Screen.Login.route) {
+            val notice = remember { sessionManager.consumeLoginMessage() }
             LoginScreen(
+                notice = notice,
                 onAuthenticated = { needsOnboarding ->
                     val destination = if (needsOnboarding) Screen.Onboarding.route else Screen.Explore.route
                     navController.navigate(destination) {

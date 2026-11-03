@@ -103,7 +103,8 @@ fun ForkfulLogoBadge(modifier: Modifier = Modifier) {
 @Composable
 fun LoginScreen(
     onAuthenticated: (needsOnboarding: Boolean) -> Unit,
-    onNavigateToSignUp: () -> Unit
+    onNavigateToSignUp: () -> Unit,
+    notice: String? = null
 ) {
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -280,6 +281,7 @@ fun LoginScreen(
         )
 
         val activeError = validationError ?: (uiState as? LoginUiState.Error)?.message
+            ?: notice.takeIf { uiState is LoginUiState.Idle && email.isEmpty() && password.isEmpty() }
         if (activeError != null) {
             Spacer(modifier = Modifier.height(14.dp))
             Text(

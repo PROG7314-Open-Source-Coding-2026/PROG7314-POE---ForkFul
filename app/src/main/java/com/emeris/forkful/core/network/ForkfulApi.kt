@@ -1,5 +1,7 @@
 package com.emeris.forkful.core.network
 
+import com.emeris.forkful.data.remote.dto.AddGroceryItemRequest
+import com.emeris.forkful.data.remote.dto.AddGroceryItemResponse
 import com.emeris.forkful.data.remote.dto.AddPantryItemRequest
 import com.emeris.forkful.data.remote.dto.AddPantryItemResponse
 import com.emeris.forkful.data.remote.dto.AuthResponse
@@ -83,6 +85,15 @@ interface ForkfulApi {
     //Basket (FR-21..24)
     @GET("functions/v1/groceries")
     suspend fun groceries(): List<GroceryAisleDto>
+
+    @POST("functions/v1/groceries")
+    suspend fun addGroceryItem(@Body body: AddGroceryItemRequest): AddGroceryItemResponse
+
+    @DELETE("functions/v1/groceries")
+    suspend fun clearGroceries(@Query("scope") scope: String): StatusResponse
+
+    @DELETE("functions/v1/groceries-item")
+    suspend fun deleteGroceryItem(@Query("itemId") itemId: String): StatusResponse
 
     @PUT("functions/v1/groceries-item")
     suspend fun toggleGroceryItem(

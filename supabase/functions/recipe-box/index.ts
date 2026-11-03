@@ -80,6 +80,15 @@ Deno.serve(async (req: Request) => {
         .eq("recipe_id", recipeId);
       if (error) return errorResponse(error.message, 500);
 
+      //Drop the basket items this recipe added that are not ticked off yet
+      const { error: basketError } = await admin
+        .from("grocery_items")
+        .delete()
+        .eq("user_id", userId)
+        .eq("recipe_id", recipeId)
+        .eq("is_checked", false);
+      if (basketError) return errorResponse(basketError.message, 500);
+
       return json({ status: "unsaved" });
     }
 

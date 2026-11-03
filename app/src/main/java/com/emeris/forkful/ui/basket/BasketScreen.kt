@@ -22,16 +22,28 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,6 +53,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.emeris.forkful.core.designsystem.AlertRed
 import com.emeris.forkful.core.designsystem.BorderLight
 import com.emeris.forkful.core.designsystem.CreamBackground
 import com.emeris.forkful.core.designsystem.ForestGreen
@@ -77,7 +90,20 @@ fun BasketScreen(
         context.startActivity(Intent.createChooser(sendIntent, "Share basket via"))
     }
 
+    var showMenu by remember { mutableStateOf(false) }
+    var showAddDialog by remember { mutableStateOf(false) }
+    var showClearConfirm by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(uiState.snackbarMessage) {
+        uiState.snackbarMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.consumeSnackbar()
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             ForkfulBottomBar(
                 currentRoute = Screen.Basket.route,
@@ -99,10 +125,10 @@ fun BasketScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = { showAddDialog = true }) {
                         Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu",
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add item",
                             tint = ForestGreen
                         )
                     }
@@ -114,12 +140,46 @@ fun BasketScreen(
                         color = ForestGreen
                     )
 
-                    IconButton(onClick = shareBasket) {
-                        Icon(
-                            imageVector = Icons.Default.Share,
-                            contentDescription = "Share",
-                            tint = ForestGreen
-                        )
+                    Box {
+                        IconButton(onClick = { showMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Basket options",
+                                tint = ForestGreen
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Share basket") },
+                                leadingIcon = { Icon(Icons.Default.Share, contentDescription = null) },
+                                enabled = uiState.totalItemCount > 0,
+                                onClick = {
+                                    showMenu = false
+                                    shareBasket()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Remove collected items") },
+                                leadingIcon = { Icon(Icons.Default.Check, contentDescription = null) },
+                                enabled = uiState.checkedItemCount > 0,
+                                onClick = {
+                                    showMenu = false
+                                    viewModel.clearCollected()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Clear basket") },
+                                leadingIcon = { Icon(Icons.Default.Close, contentDescription = null) },
+                                enabled = uiState.totalItemCount > 0,
+                                onClick = {
+                                    showMenu = false
+                                    showClearConfirm = true
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -227,7 +287,7 @@ fun BasketScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "Your basket is empty.\nSave recipes and their missing\ningredients will appear here.",
+                                    text = "Your basket is empty.\nSave recipes and their missing\ningredients will appear here,\nor tap + to add your own.",
                                     fontSize = 14.sp,
                                     lineHeight = 20.sp,
                                     color = TextMuted,
@@ -293,7 +353,7 @@ fun BasketScreen(
 
                                             Spacer(modifier = Modifier.width(16.dp))
 
-                                            Column {
+                                            Column(modifier = Modifier.weight(1f)) {
                                                 Text(
                                                     text = item.name,
                                                     fontSize = 15.sp,
@@ -305,6 +365,18 @@ fun BasketScreen(
                                                     fontSize = 12.sp,
                                                     fontFamily = FontFamily.Monospace,
                                                     color = TextMuted
+                                                )
+                                            }
+
+                                            IconButton(
+                                                onClick = { viewModel.removeItem(item.id) },
+                                                modifier = Modifier.size(32.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Close,
+                                                    contentDescription = "Remove ${item.name}",
+                                                    tint = TextMuted,
+                                                    modifier = Modifier.size(18.dp)
                                                 )
                                             }
                                         }
@@ -327,4 +399,109 @@ fun BasketScreen(
             }
         }
     }
+
+    if (showAddDialog) {
+        AddBasketItemDialog(
+            isSubmitting = uiState.isSubmitting,
+            onDismiss = { showAddDialog = false },
+            onConfirm = { name, quantity ->
+                viewModel.addItem(name, quantity) { showAddDialog = false }
+            }
+        )
+    }
+
+    if (showClearConfirm) {
+        AlertDialog(
+            onDismissRequest = { showClearConfirm = false },
+            title = { Text("Clear basket?") },
+            text = { Text("This removes all ${uiState.totalItemCount} items from your basket.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showClearConfirm = false
+                    viewModel.clearAll()
+                }) {
+                    Text("Clear", color = AlertRed)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearConfirm = false }) {
+                    Text("Cancel", color = ForestGreen)
+                }
+            },
+            containerColor = PureWhite
+        )
+    }
+}
+
+@Composable
+private fun AddBasketItemDialog(
+    isSubmitting: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: (name: String, quantity: String) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var quantity by remember { mutableStateOf("") }
+    var showError by remember { mutableStateOf(false) }
+    val fieldColors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = TextCharcoal,
+        unfocusedTextColor = TextCharcoal,
+        focusedBorderColor = ForestGreen,
+        unfocusedBorderColor = BorderLight,
+        focusedLabelColor = ForestGreen,
+        unfocusedLabelColor = TextMuted,
+        cursorColor = ForestGreen
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add to basket", fontFamily = FontFamily.Serif, color = TextCharcoal) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = {
+                        name = it.take(80)
+                        showError = false
+                    },
+                    label = { Text("Item (e.g. Dish soap, Bread)") },
+                    singleLine = true,
+                    isError = showError,
+                    supportingText = if (showError) {
+                        { Text("Please enter an item name") }
+                    } else {
+                        null
+                    },
+                    colors = fieldColors,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = quantity,
+                    onValueChange = { quantity = it.take(30) },
+                    label = { Text("Amount (optional, e.g. 2 tins)") },
+                    singleLine = true,
+                    colors = fieldColors,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = !isSubmitting,
+                onClick = {
+                    if (name.isBlank()) showError = true else onConfirm(name, quantity)
+                }
+            ) {
+                Text(if (isSubmitting) "Adding..." else "Add", color = ForestGreen)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = TextMuted)
+            }
+        },
+        containerColor = PureWhite
+    )
 }

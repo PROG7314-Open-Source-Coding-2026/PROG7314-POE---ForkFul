@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material.icons.filled.RestaurantMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -92,6 +93,7 @@ fun PantryScreen(
     val coroutineScope = rememberCoroutineScope()
 
     var showAddSheet by remember { mutableStateOf(false) }
+    var editingItem by remember { mutableStateOf<PantryItem?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     LaunchedEffect(uiState.addSuccessMessage) {
@@ -111,7 +113,10 @@ fun PantryScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showAddSheet = true },
+                onClick = {
+                    editingItem = null
+                    showAddSheet = true
+                },
                 containerColor = ButtonGreen,
                 contentColor = TrueWhite,
                 shape = CircleShape
@@ -264,6 +269,10 @@ fun PantryScreen(
                         items(uiState.items, key = { it.id }) { item ->
                             PantryItemRow(
                                 item = item,
+                                onEdit = {
+                                    editingItem = item
+                                    showAddSheet = true
+                                },
                                 onDelete = { viewModel.removePantryItem(item.id) }
                             )
                         }
@@ -275,12 +284,22 @@ fun PantryScreen(
         if (showAddSheet) {
             AddPantryItemBottomSheet(
                 sheetState = sheetState,
-                onDismiss = { showAddSheet = false },
+                onDismiss = {
+                    showAddSheet = false
+                    editingItem = null
+                },
+                editingItem = editingItem,
                 onConfirm = { name, quantity, category, daysUntilExpiry ->
-                    viewModel.addPantryItem(name, quantity, category, daysUntilExpiry)
+                    val target = editingItem
+                    if (target != null) {
+                        viewModel.updatePantryItem(target, name, quantity, daysUntilExpiry)
+                    } else {
+                        viewModel.addPantryItem(name, quantity, category, daysUntilExpiry ?: 7)
+                    }
                     coroutineScope.launch { sheetState.hide() }.invokeOnCompletion {
                         if (!sheetState.isVisible) {
                             showAddSheet = false
+                            editingItem = null
                         }
                     }
                 }
@@ -370,6 +389,7 @@ fun PantryMatchCard(
 @Composable
 fun PantryItemRow(
     item: PantryItem,
+    onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     val days = item.daysUntilExpiry
@@ -383,6 +403,7 @@ fun PantryItemRow(
             .clip(RoundedCornerShape(16.dp))
             .background(CardSurface)
             .border(1.dp, CardBorder, RoundedCornerShape(16.dp))
+            .clickable(onClick = onEdit)
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(
@@ -438,6 +459,18 @@ fun PantryItemRow(
                         color = if (isUrgent || isExpired) AlertRed else TextMuted
                     )
                 }
+            }
+
+            IconButton(
+                onClick = onEdit,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit ${item.name}",
+                    tint = TextMuted,
+                    modifier = Modifier.size(20.dp)
+                )
             }
 
             IconButton(

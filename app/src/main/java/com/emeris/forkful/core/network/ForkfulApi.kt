@@ -15,6 +15,7 @@ import com.emeris.forkful.data.remote.dto.StatusResponse
 import com.emeris.forkful.data.remote.dto.SwipeRequest
 import com.emeris.forkful.data.remote.dto.SwipeResponse
 import com.emeris.forkful.data.remote.dto.ToggleGroceryItemRequest
+import com.emeris.forkful.data.remote.dto.UpdatePantryItemRequest
 import com.emeris.forkful.data.remote.dto.UpdatePreferencesRequest
 import com.emeris.forkful.data.remote.dto.UserPreferencesDto
 import retrofit2.http.Body
@@ -66,6 +67,12 @@ interface ForkfulApi {
 
     @POST("functions/v1/pantry")
     suspend fun addPantryItem(@Body body: AddPantryItemRequest): AddPantryItemResponse
+
+    @PUT("functions/v1/pantry")
+    suspend fun updatePantryItem(
+        @Query("pantryItemId") pantryItemId: String,
+        @Body body: UpdatePantryItemRequest
+    ): StatusResponse
 
     @DELETE("functions/v1/pantry")
     suspend fun deletePantryItem(@Query("pantryItemId") pantryItemId: String): StatusResponse

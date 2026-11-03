@@ -17,6 +17,7 @@ import java.time.LocalDate
 data class PantryUiState(
     val isLoading: Boolean = true,
     val isAdding: Boolean = false,
+    val isUpdating: Boolean = false,
     val errorMessage: String? = null,
     val items: List<PantryItem> = emptyList(),
     val matches: List<PantryMatch> = emptyList(),
@@ -81,10 +82,56 @@ class PantryViewModel(
 
     fun addPantryItem(name: String, quantity: String, category: String, daysUntilExpiry: Int) {
         val expiryDate = LocalDate.now().plusDays(daysUntilExpiry.toLong()).toString()
-        val parts = quantity.trim().split(" ", limit = 2)
-        val qty = parts.getOrNull(0)
-        val unit = parts.getOrNull(1)
+        val (qty, unit) = splitQuantity(quantity)
         addItem(name = name, quantity = qty, unit = unit, expiryDate = expiryDate)
+    }
+
+    //Edit: daysUntilExpiry null keeps the current expiry date
+    fun updatePantryItem(item: PantryItem, name: String, quantity: String, daysUntilExpiry: Int?) {
+        if (_state.value.isUpdating) return
+        val (qty, unit) = splitQuantity(quantity)
+        val expiryDate = daysUntilExpiry?.let { LocalDate.now().plusDays(it.toLong()).toString() }
+            ?: item.expiryDate
+        _state.update { it.copy(isUpdating = true, errorMessage = null) }
+        viewModelScope.launch {
+            pantryRepository.updateItem(item.id, name, qty, unit, expiryDate)
+                .onSuccess {
+                    ForkfulLogger.logAction("PANTRY", "Updated ${item.name} -> $name")
+                    _state.update { current ->
+                        current.copy(
+                            isUpdating = false,
+                            items = current.items.map { existing ->
+                                if (existing.id != item.id) existing else existing.copy(
+                                    name = name.trim(),
+                                    quantity = qty,
+                                    unit = unit,
+                                    expiryDate = expiryDate,
+                                    daysUntilExpiry = PantryUtils.daysUntilExpiry(expiryDate)
+                                )
+                            },
+                            addSuccessMessage = "${name.trim()} updated"
+                        )
+                    }
+                    loadMatches()
+                }
+                .onFailure { error ->
+                    //Snackbar only - the pantry list stays on screen
+                    _state.update {
+                        it.copy(isUpdating = false, addSuccessMessage = error.message ?: "Could not update item")
+                    }
+                }
+        }
+    }
+
+    //"500 g" -> ("500", "g"); "a bunch" -> (null, "a bunch")
+    private fun splitQuantity(quantity: String): Pair<String?, String?> {
+        val parts = quantity.trim().split(Regex("\\s+"), limit = 2).filter { it.isNotBlank() }
+        val first = parts.getOrNull(0) ?: return null to null
+        return if (first.replace(",", ".").toDoubleOrNull() != null) {
+            first to parts.getOrNull(1)
+        } else {
+            null to quantity.trim()
+        }
     }
 
     fun addItem(name: String, quantity: String?, unit: String?, expiryDate: String?) {

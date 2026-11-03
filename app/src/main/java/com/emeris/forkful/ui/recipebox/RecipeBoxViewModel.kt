@@ -19,7 +19,8 @@ data class RecipeBoxUiState(
     val errorMessage: String? = null,
     val filter: RecipeBoxFilter = RecipeBoxFilter.ALL,
     val allRecipes: List<Recipe> = emptyList(),
-    val searchQuery: String = ""
+    val searchQuery: String = "",
+    val searchText: String = ""
 ) {
     val displayedRecipes: List<Recipe>
         get() = allRecipes.filter { it.title.contains(searchQuery, ignoreCase = true) }
@@ -72,6 +73,7 @@ class RecipeBoxViewModel(
     }
 
     fun onSearchInput(query: String) {
+        _state.update { it.copy(searchText = query) }
         searchInput.value = query
     }
 }

@@ -152,6 +152,22 @@ export function pantryMatches(pantryName: string, ingredientName: string): boole
   return pantry.every((word) => ingredient.has(word));
 }
 
+//Search text sanitiser for PostgREST filters
+export function sanitizeSearch(raw: string | null | undefined, maxLength = 60): string {
+  return (raw ?? "")
+    .normalize("NFKC")
+    .replace(/[^\p{L}\p{N}\s'-]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, maxLength);
+}
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function isUuid(value: string | null | undefined): value is string {
+  return !!value && UUID_REGEX.test(value);
+}
+
 export const AISLE_ORDER = [
   "Produce", "Bakery", "Butchery", "Dairy", "Deli", "Seafood", "Frozen",
   "Pantry", "Dry Goods", "Condiments", "Spices", "Baking", "Beverages", "Other",

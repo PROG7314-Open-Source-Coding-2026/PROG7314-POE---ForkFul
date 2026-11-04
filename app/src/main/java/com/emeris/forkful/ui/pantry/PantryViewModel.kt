@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.core.util.PantryUtils
+import com.emeris.forkful.data.local.LocalPantryRepository
 import com.emeris.forkful.domain.model.PantryItem
 import com.emeris.forkful.domain.model.PantryMatch
 import com.emeris.forkful.domain.repository.PantryRepository
@@ -36,7 +37,8 @@ data class PantryUiState(
 }
 
 class PantryViewModel(
-    private val pantryRepository: PantryRepository
+    private val pantryRepository: PantryRepository,
+    private val localPantryRepository: LocalPantryRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PantryUiState())
@@ -86,7 +88,6 @@ class PantryViewModel(
         addItem(name = name, quantity = qty, unit = unit, expiryDate = expiryDate)
     }
 
-    //Edit: daysUntilExpiry null keeps the current expiry date
     fun updatePantryItem(item: PantryItem, name: String, quantity: String, daysUntilExpiry: Int?) {
         if (_state.value.isUpdating) return
         val (qty, unit) = splitQuantity(quantity)
@@ -115,7 +116,6 @@ class PantryViewModel(
                     loadMatches()
                 }
                 .onFailure { error ->
-                    //Snackbar only - the pantry list stays on screen
                     _state.update {
                         it.copy(isUpdating = false, addSuccessMessage = error.message ?: "Could not update item")
                     }
@@ -123,7 +123,6 @@ class PantryViewModel(
         }
     }
 
-    //"500 g" -> ("500", "g"); "a bunch" -> (null, "a bunch")
     private fun splitQuantity(quantity: String): Pair<String?, String?> {
         val parts = quantity.trim().split(Regex("\\s+"), limit = 2).filter { it.isNotBlank() }
         val first = parts.getOrNull(0) ?: return null to null
@@ -140,6 +139,8 @@ class PantryViewModel(
         viewModelScope.launch {
             pantryRepository.addItem(name, quantity, unit, expiryDate)
                 .onSuccess { item ->
+                    // Also save locally so it survives offline / app restart
+                    localPantryRepository.add(item.name, item.category)
                     _state.update { current ->
                         current.copy(
                             isAdding = false,
@@ -164,6 +165,7 @@ class PantryViewModel(
         viewModelScope.launch {
             pantryRepository.removeItem(pantryItemId)
                 .onSuccess {
+                    localPantryRepository.remove(pantryItemId)
                     _state.update { current ->
                         current.copy(items = current.items.filterNot { it.id == pantryItemId })
                     }

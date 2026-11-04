@@ -85,7 +85,7 @@ fun PantryScreen(
         ForkfulLogger.logLifecycle("PantryScreen", "ON_CREATE")
     }
 
-    val viewModel = containerViewModel { PantryViewModel(it.pantryRepository) }
+    val viewModel = containerViewModel { PantryViewModel(it.pantryRepository, it.localPantryRepository) }
     val uiState by viewModel.state.collectAsState()
 
     @Suppress("SpellCheckingInspection")

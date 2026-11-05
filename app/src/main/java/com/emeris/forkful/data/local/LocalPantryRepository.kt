@@ -34,4 +34,8 @@ class LocalPantryRepository(context: Context) {
     suspend fun remove(id: String) {
         dao.deleteById(id)
     }
+
+    suspend fun getPendingSync(): List<PantryItemEntity> = dao.getPendingSync()
+
+    suspend fun markSynced(id: String) = dao.markSynced(id)
 }

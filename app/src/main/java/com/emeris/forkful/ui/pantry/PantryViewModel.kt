@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 data class PantryUiState(
     val isLoading: Boolean = true,
@@ -23,7 +25,8 @@ data class PantryUiState(
     val items: List<PantryItem> = emptyList(),
     val matches: List<PantryMatch> = emptyList(),
     val addSuccessMessage: String? = null,
-    val isOffline: Boolean = false
+    val isOffline: Boolean = false,
+    val lastSynced: String? = null
 ) {
     @Suppress("unused")
     val expiringSoon: List<PantryItem>
@@ -45,6 +48,8 @@ class PantryViewModel(
     private val _state = MutableStateFlow(PantryUiState())
     val state: StateFlow<PantryUiState> = _state.asStateFlow()
 
+    private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+
     @Suppress("unused")
     val quickAddSuggestions = listOf(
         "Tomatoes", "Onions", "Garlic", "Eggs", "Milk", "Butter", "Cheese",
@@ -56,7 +61,6 @@ class PantryViewModel(
         loadPantry()
     }
 
-    // Show local items immediately so the screen works offline
     private fun observeLocalPantry() {
         viewModelScope.launch {
             localPantryRepository.getAll().collect { localItems ->
@@ -76,11 +80,20 @@ class PantryViewModel(
         viewModelScope.launch {
             pantryRepository.getPantry()
                 .onSuccess { items ->
-                    _state.update { it.copy(isLoading = false, items = items, isOffline = false) }
+                    val now = LocalDateTime.now().format(timeFormatter)
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            items = items,
+                            isOffline = false,
+                            lastSynced = now
+                        )
+                    }
+                    // Sync any offline changes now that we are online
+                    syncPendingItems()
                     loadMatches()
                 }
                 .onFailure { error ->
-                    // Fall back to local data instead of showing a hard error
                     _state.update {
                         it.copy(
                             isLoading = false,
@@ -90,6 +103,33 @@ class PantryViewModel(
                     }
                     ForkfulLogger.logAction("PANTRY", "Using local data (offline): ${error.message}")
                 }
+        }
+    }
+
+    // Send any items that were added offline to the server
+    private fun syncPendingItems() {
+        viewModelScope.launch {
+            val pending = localPantryRepository.getPendingSync()
+            if (pending.isEmpty()) return@launch
+
+            ForkfulLogger.logAction("PANTRY", "Syncing ${pending.size} offline items")
+            pending.forEach { entity ->
+                pantryRepository.addItem(
+                    name = entity.name,
+                    quantity = null,
+                    unit = null,
+                    expiryDate = null
+                ).onSuccess {
+                    localPantryRepository.markSynced(entity.id)
+                }.onFailure { error ->
+                    ForkfulLogger.logAction("PANTRY", "Failed to sync ${entity.name}: ${error.message}")
+                }
+            }
+            // Refresh from server after sync
+            pantryRepository.getPantry().onSuccess { items ->
+                val now = LocalDateTime.now().format(timeFormatter)
+                _state.update { it.copy(items = items, lastSynced = now, isOffline = false) }
+            }
         }
     }
 
@@ -173,7 +213,6 @@ class PantryViewModel(
                     loadMatches()
                 }
                 .onFailure {
-                    // Still save locally so the user can add items offline
                     localPantryRepository.add(name.trim(), "Other")
                     _state.update { current ->
                         current.copy(
@@ -200,7 +239,6 @@ class PantryViewModel(
                     loadMatches()
                 }
                 .onFailure {
-                    // Still remove locally
                     localPantryRepository.remove(pantryItemId)
                     _state.update { current ->
                         current.copy(

@@ -22,7 +22,8 @@ data class PantryUiState(
     val errorMessage: String? = null,
     val items: List<PantryItem> = emptyList(),
     val matches: List<PantryMatch> = emptyList(),
-    val addSuccessMessage: String? = null
+    val addSuccessMessage: String? = null,
+    val isOffline: Boolean = false
 ) {
     @Suppress("unused")
     val expiringSoon: List<PantryItem>
@@ -51,21 +52,43 @@ class PantryViewModel(
     )
 
     init {
+        observeLocalPantry()
         loadPantry()
     }
 
+    // Show local items immediately so the screen works offline
+    private fun observeLocalPantry() {
+        viewModelScope.launch {
+            localPantryRepository.getAll().collect { localItems ->
+                _state.update { current ->
+                    if (current.items.isEmpty() || current.isOffline) {
+                        current.copy(items = localItems, isLoading = false)
+                    } else {
+                        current
+                    }
+                }
+            }
+        }
+    }
+
     fun loadPantry() {
-        _state.update { it.copy(isLoading = true, errorMessage = null) }
+        _state.update { it.copy(isLoading = true, errorMessage = null, isOffline = false) }
         viewModelScope.launch {
             pantryRepository.getPantry()
                 .onSuccess { items ->
-                    _state.update { it.copy(isLoading = false, items = items) }
+                    _state.update { it.copy(isLoading = false, items = items, isOffline = false) }
                     loadMatches()
                 }
                 .onFailure { error ->
+                    // Fall back to local data instead of showing a hard error
                     _state.update {
-                        it.copy(isLoading = false, errorMessage = error.message ?: "Could not load your pantry")
+                        it.copy(
+                            isLoading = false,
+                            isOffline = true,
+                            errorMessage = null
+                        )
                     }
+                    ForkfulLogger.logAction("PANTRY", "Using local data (offline): ${error.message}")
                 }
         }
     }
@@ -139,7 +162,6 @@ class PantryViewModel(
         viewModelScope.launch {
             pantryRepository.addItem(name, quantity, unit, expiryDate)
                 .onSuccess { item ->
-                    // Also save locally so it survives offline / app restart
                     localPantryRepository.add(item.name, item.category)
                     _state.update { current ->
                         current.copy(
@@ -150,9 +172,15 @@ class PantryViewModel(
                     }
                     loadMatches()
                 }
-                .onFailure { error ->
-                    _state.update {
-                        it.copy(isAdding = false, errorMessage = error.message ?: "Could not add item")
+                .onFailure {
+                    // Still save locally so the user can add items offline
+                    localPantryRepository.add(name.trim(), "Other")
+                    _state.update { current ->
+                        current.copy(
+                            isAdding = false,
+                            isOffline = true,
+                            addSuccessMessage = "$name saved locally (will sync later)"
+                        )
                     }
                 }
         }
@@ -171,9 +199,14 @@ class PantryViewModel(
                     }
                     loadMatches()
                 }
-                .onFailure { error ->
-                    _state.update {
-                        it.copy(errorMessage = error.message ?: "Could not remove item")
+                .onFailure {
+                    // Still remove locally
+                    localPantryRepository.remove(pantryItemId)
+                    _state.update { current ->
+                        current.copy(
+                            items = current.items.filterNot { it.id == pantryItemId },
+                            isOffline = true
+                        )
                     }
                 }
         }

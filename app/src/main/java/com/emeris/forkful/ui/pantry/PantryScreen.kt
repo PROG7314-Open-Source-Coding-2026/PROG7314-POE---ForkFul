@@ -177,6 +177,18 @@ fun PantryScreen(
                                 fontSize = 14.sp,
                                 color = TextMuted
                             )
+                            if (uiState.lastSynced != null || uiState.isOffline) {
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = if (uiState.isOffline) {
+                                        "Offline – showing saved items"
+                                    } else {
+                                        "Last synced at ${uiState.lastSynced}"
+                                    },
+                                    fontSize = 12.sp,
+                                    color = if (uiState.isOffline) AlertRed else TextMuted
+                                )
+                            }
                         }
                     }
 

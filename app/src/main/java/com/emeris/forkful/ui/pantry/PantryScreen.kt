@@ -59,6 +59,7 @@ import com.emeris.forkful.core.designsystem.ButtonGreen
 import com.emeris.forkful.core.designsystem.CardBorder
 import com.emeris.forkful.core.designsystem.CardSurface
 import com.emeris.forkful.core.designsystem.CreamBackground
+import com.emeris.forkful.core.designsystem.ForestGreen
 import com.emeris.forkful.core.designsystem.MintLight
 import com.emeris.forkful.core.designsystem.SubtleCircleBg
 import com.emeris.forkful.core.designsystem.SubtleCircleIcon
@@ -450,13 +451,26 @@ fun PantryItemRow(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (item.quantityLabel.isNotBlank()) {
+                        Text(
+                            text = item.quantityLabel,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = ForestGreen
+                        )
+                        Text(
+                            text = " • ",
+                            fontSize = 12.sp,
+                            color = TextMuted
+                        )
+                    }
                     Text(
                         text = item.category,
                         fontSize = 12.sp,
                         color = TextMuted
                     )
                     Text(
-                        text = " - ",
+                        text = " • ",
                         fontSize = 12.sp,
                         color = TextMuted
                     )

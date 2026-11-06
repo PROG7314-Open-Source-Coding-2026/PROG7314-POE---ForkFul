@@ -84,7 +84,28 @@ fun AddPantryItemBottomSheet(
     )
     val focusManager = LocalFocusManager.current
     var name by remember(editingItem) { mutableStateOf(editingItem?.name.orEmpty()) }
-    var quantity by remember(editingItem) { mutableStateOf(editingItem?.quantityLabel.orEmpty()) }
+    val initialAmount = remember(editingItem) {
+        val rawQty = editingItem?.quantity
+        if (!rawQty.isNullOrBlank()) {
+            rawQty.filter { it.isDigit() || it == '.' || it == ',' }.replace(',', '.')
+        } else {
+            val label = editingItem?.quantityLabel.orEmpty().trim()
+            val firstPart = label.split(Regex("\\s+")).firstOrNull().orEmpty()
+            firstPart.filter { it.isDigit() || it == '.' || it == ',' }.replace(',', '.')
+        }
+    }
+    val initialUnit = remember(editingItem) {
+        val rawUnit = editingItem?.unit
+        if (!rawUnit.isNullOrBlank()) {
+            rawUnit
+        } else {
+            val label = editingItem?.quantityLabel.orEmpty().trim()
+            val parts = label.split(Regex("\\s+"), limit = 2)
+            if (parts.size > 1 && parts[1].isNotBlank()) parts[1].trim() else "items"
+        }
+    }
+    var quantityAmount by remember(editingItem) { mutableStateOf(initialAmount) }
+    var selectedUnit by remember(editingItem) { mutableStateOf(initialUnit) }
     var selectedCategory by remember(editingItem) {
         mutableStateOf(editingItem?.category?.takeIf { it in categories } ?: "Produce")
     }
@@ -104,10 +125,18 @@ fun AddPantryItemBottomSheet(
             validationError = "Please enter an item name."
             return
         }
+        val cleanAmount = quantityAmount.trim()
+        val cleanUnit = selectedUnit.trim()
+        val combinedQuantity = when {
+            cleanAmount.isNotBlank() && cleanUnit.isNotBlank() -> "$cleanAmount $cleanUnit"
+            cleanAmount.isNotBlank() -> "$cleanAmount items"
+            cleanUnit.isNotBlank() -> "1 $cleanUnit"
+            else -> "1 item"
+        }
         validationError = null
         onConfirm(
             name.trim(),
-            quantity.trim().ifBlank { "1 piece" },
+            combinedQuantity,
             selectedCategory,
             selectedDays
         )
@@ -223,30 +252,103 @@ fun AddPantryItemBottomSheet(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            OutlinedTextField(
-                value = quantity,
-                onValueChange = { quantity = it },
-                label = { Text("Quantity (e.g. 500 g, 2 tins, 1 bunch)") },
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = TextCharcoal,
-                    unfocusedTextColor = TextCharcoal,
-                    focusedBorderColor = ForestGreen,
-                    unfocusedBorderColor = CardBorder,
-                    focusedLabelColor = ForestGreen,
-                    unfocusedLabelColor = TextMuted,
-                    cursorColor = ForestGreen
-                ),
-                shape = RoundedCornerShape(16.dp),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = { focusManager.clearFocus() }
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = quantityAmount,
+                    onValueChange = { input ->
+                        // Only allow numeric input (digits and at most one decimal point). Strictly reject letters.
+                        val filtered = input.replace(',', '.').filter { it.isDigit() || it == '.' }
+                        val dotCount = filtered.count { it == '.' }
+                        if (dotCount <= 1) {
+                            quantityAmount = filtered.take(8)
+                        }
+                    },
+                    label = { Text("Quantity") },
+                    placeholder = { Text("1") },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = TextCharcoal,
+                        unfocusedTextColor = TextCharcoal,
+                        focusedBorderColor = ForestGreen,
+                        unfocusedBorderColor = CardBorder,
+                        focusedLabelColor = ForestGreen,
+                        unfocusedLabelColor = TextMuted,
+                        cursorColor = ForestGreen
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Right) }
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+
+                OutlinedTextField(
+                    value = selectedUnit,
+                    onValueChange = { selectedUnit = it.take(20) },
+                    label = { Text("Unit") },
+                    placeholder = { Text("items") },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = TextCharcoal,
+                        unfocusedTextColor = TextCharcoal,
+                        focusedBorderColor = ForestGreen,
+                        unfocusedBorderColor = CardBorder,
+                        focusedLabelColor = ForestGreen,
+                        unfocusedLabelColor = TextMuted,
+                        cursorColor = ForestGreen
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = { focusManager.clearFocus() }
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            val commonUnits = listOf("items", "g", "kg", "ml", "L", "tins", "packs")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                commonUnits.forEach { unitOption ->
+                    val isUnitActive = selectedUnit.equals(unitOption, ignoreCase = true)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(10.dp))
+                            .border(
+                                width = 1.dp,
+                                color = if (isUnitActive) ForestGreen else CardBorder,
+                                shape = RoundedCornerShape(10.dp)
+                            )
+                            .background(if (isUnitActive) MintLight else PureWhite)
+                            .clickable { selectedUnit = unitOption }
+                            .padding(vertical = 6.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = unitOption,
+                            fontSize = 11.sp,
+                            fontWeight = if (isUnitActive) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isUnitActive) ForestGreen else TextCharcoal
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 

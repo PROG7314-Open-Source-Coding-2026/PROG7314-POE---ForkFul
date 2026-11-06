@@ -26,15 +26,16 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DinnerDining
-import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,6 +64,7 @@ import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.core.notification.NotificationHelper
 import com.emeris.forkful.domain.model.NotificationModel
 import com.emeris.forkful.domain.model.NotificationType
+import com.emeris.forkful.ui.di.containerViewModel
 import java.time.LocalTime
 
 @Composable
@@ -72,16 +74,20 @@ fun NotificationsScreen(
 ) {
     val context = LocalContext.current
     val strings = currentStrings()
+    val viewModel = containerViewModel { NotificationsViewModel(it.pantryRepository, it.recipeRepository) }
+    val uiState by viewModel.state.collectAsState()
+
     var lastTriggeredMessage by remember { mutableStateOf<String?>(null) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
+            val firstItem = uiState.pantryItems.firstOrNull()?.name ?: "Spinach"
             NotificationHelper.showNotification(
                 context = context,
-                title = "Forkful Alert: Spinach Expiring!",
-                body = "Your spinach expires today! Tap to view 3 quick recipes to use it up."
+                title = "Forkful Alert: $firstItem Expiring Soon!",
+                body = "Your $firstItem is nearing its expiry date. Tap to find quick recipes to use it up."
             )
             lastTriggeredMessage = "Real-time notification dispatched to device"
         }
@@ -100,43 +106,6 @@ fun NotificationsScreen(
 
     LaunchedEffect(Unit) {
         ForkfulLogger.logLifecycle("NotificationsScreen", "ON_CREATE")
-    }
-
-    val sampleNotifications = remember {
-        listOf(
-            NotificationModel(
-                id = "n1",
-                title = "Action Required: Spinach Expiring Soon",
-                description = "Your fresh spinach is nearing its expiry date in your pantry. Use it up in a Creamy Tuscan Chicken or a quick dinner bowl before it spoils.",
-                timeAgo = "10m ago",
-                type = NotificationType.ACTION_REQUIRED,
-                isUnread = true
-            ),
-            NotificationModel(
-                id = "n2",
-                title = "Dinner Recommendation: Braaibroodjie",
-                description = "You have all 5 ingredients (bread, cheddar, tomato, onion, chutney) in your pantry ready to grill tonight!",
-                timeAgo = "1h ago",
-                type = NotificationType.PANTRY_MATCH,
-                isUnread = true
-            ),
-            NotificationModel(
-                id = "n3",
-                title = "Prep Reminder: Thaw Stewing Mutton",
-                description = "Remember to take the mutton cubes out of the freezer early for tonight's slow-cooked Tomato Bredie.",
-                timeAgo = "3h ago",
-                type = NotificationType.PREP_REMINDER,
-                isUnread = false
-            ),
-            NotificationModel(
-                id = "n4",
-                title = "Pantry Expiry Alert: Milk & Cream",
-                description = "Dairy items nearing expiration date. Prepare a quick Malva Pudding or pan sauce to prevent food waste.",
-                timeAgo = "5h ago",
-                type = NotificationType.EXPIRY_ALERT,
-                isUnread = false
-            )
-        )
     }
 
     Column(
@@ -178,7 +147,7 @@ fun NotificationsScreen(
                     color = TextCharcoal
                 )
                 Text(
-                    text = "Pantry alerts & smart meal recommendations",
+                    text = "Live database alerts & meal recommendations",
                     fontSize = 12.sp,
                     color = TextMuted
                 )
@@ -244,50 +213,52 @@ fun NotificationsScreen(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Test instant push notifications dispatched to your device's lockscreen and notification tray:",
+                        text = "Test instant push notifications dispatched to your device's notification tray and lockscreen:",
                         fontSize = 12.sp,
                         color = TextMuted
                     )
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // 1. Pantry Expiry Alert
+                    // 1. Pantry Expiry Alert (Derived from live user pantry)
+                    val expiringItem = uiState.pantryItems.firstOrNull()?.name ?: "Fresh Produce"
                     SmartTriggerButton(
                         icon = Icons.Default.Warning,
                         iconTint = AlertPinkText,
                         iconBg = AlertPinkBackground,
                         title = "1. Expiring Ingredients Alert",
-                        subtitle = "Alerts user when items in pantry expire today/tomorrow",
+                        subtitle = "Alerts user when items in pantry ($expiringItem) expire",
                         buttonText = "Send Expiry Alert",
                         onClick = {
                             dispatchNotification(
-                                title = "⚠️ Forkful Alert: Spinach Expiring Soon!",
-                                body = "Your fresh spinach is nearing its expiry. Tap to view 3 quick recipes to use it up before it spoils!"
+                                title = "⚠️ Forkful Alert: $expiringItem Expiring Soon!",
+                                body = "Your $expiringItem in your pantry is nearing expiry. Tap to view quick recipes to use it up before it spoils!"
                             )
                         }
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // 2. Meal Recommendation (Context-aware based on hour)
+                    // 2. Meal Recommendation (Context-aware based on hour and live recipes)
                     val currentHour = LocalTime.now().hour
-                    val (mealTitle, mealRecipe, mealIngredients) = when {
-                        currentHour < 11 -> Triple("Breakfast Idea", "Warm Pap & Chakalaka", "maize meal and baked beans")
-                        currentHour < 15 -> Triple("Lunch Recommendation", "Peri-Peri Chicken Bowls", "chicken breasts, basmati rice, and sweetcorn")
-                        else -> Triple("Dinner Recommendation", "Braaibroodjie", "bread, cheddar cheese, and tomatoes")
+                    val mealTitle = when {
+                        currentHour < 11 -> "Breakfast Idea"
+                        currentHour < 15 -> "Lunch Recommendation"
+                        else -> "Dinner Recommendation"
                     }
+                    val topRecipe = uiState.recipes.firstOrNull()?.title ?: "Braaibroodjie"
 
                     SmartTriggerButton(
                         icon = Icons.Default.DinnerDining,
                         iconTint = ForestGreen,
                         iconBg = MintLight,
                         title = "2. $mealTitle",
-                        subtitle = "Recommends $mealRecipe using pending pantry stock",
+                        subtitle = "Recommends $topRecipe using available pantry items",
                         buttonText = "Send Meal Alert",
                         onClick = {
                             dispatchNotification(
-                                title = "🔥 $mealTitle: $mealRecipe",
-                                body = "You have $mealIngredients in your pantry ready to cook tonight!"
+                                title = "🔥 $mealTitle: $topRecipe",
+                                body = "Ready to cook tonight based on ingredients in your kitchen!"
                             )
                         }
                     )
@@ -304,8 +275,8 @@ fun NotificationsScreen(
                         buttonText = "Send Cloud Alert",
                         onClick = {
                             dispatchNotification(
-                                title = "⚡ Forkful Cloud Alert: Weekend Braai Special",
-                                body = "New authentic Braai recipes have been added to your curated feed. Tap to explore!"
+                                title = "⚡ Forkful Cloud Alert: New Recipes Added",
+                                body = "Fresh authentic recipes have been added to your live feed. Tap to explore!"
                             )
                         }
                     )
@@ -346,16 +317,32 @@ fun NotificationsScreen(
                         color = TextCharcoal
                     )
                     Text(
-                        text = "${sampleNotifications.size} active",
+                        text = "${uiState.notifications.size} active",
                         fontSize = 12.sp,
                         color = TextMuted
                     )
                 }
             }
 
-            // Recent Alerts Feed
-            items(sampleNotifications) { notification ->
-                RecentNotificationCard(notification = notification)
+            if (uiState.isLoading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = ForestGreen,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
+            } else {
+                // Live Alerts Feed
+                items(uiState.notifications) { notification ->
+                    RecentNotificationCard(notification = notification)
+                }
             }
 
             item {

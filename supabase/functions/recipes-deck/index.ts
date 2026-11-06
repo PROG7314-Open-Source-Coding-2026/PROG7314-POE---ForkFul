@@ -127,7 +127,9 @@ Deno.serve(async (req: Request) => {
           cuisineType: recipe.cuisine_type,
           tags: moodTags.map((tag) => {
             const points = pointsByTag.get(tag) ?? 0;
-            return `${tag} ${points >= 0 ? "+" : ""}${points}`;
+            if (points > 0) return `${tag} +${points}`;
+            if (points < 0) return `${tag} ${points}`;
+            return tag;
           }),
           topTagPoints: moodTags.reduce(
             (max, tag) => Math.max(max, pointsByTag.get(tag) ?? 0),

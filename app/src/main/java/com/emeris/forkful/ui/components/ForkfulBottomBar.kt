@@ -7,11 +7,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -26,15 +24,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import com.emeris.forkful.core.designsystem.BorderLight
+import com.emeris.forkful.core.designsystem.CreamBackground
 import com.emeris.forkful.core.designsystem.ForestGreen
 import com.emeris.forkful.core.designsystem.PureWhite
 import com.emeris.forkful.core.designsystem.TextMuted
@@ -61,22 +61,30 @@ fun ForkfulBottomBar(
         BottomNavItem(Screen.Settings.route, strings.navSettings, Icons.Outlined.Settings)
     )
 
-    val navBarBottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-    val bottomGapHeight = max(navBarBottomInset, 16.dp)
-
-    Column(
+    Box(
         modifier = Modifier.fillMaxWidth()
     ) {
-        // Soft top gradient fade into the navbar
+        // Soft faded blur overlay projecting upward over scrolling content
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(14.dp)
+                .height(36.dp)
+                .align(Alignment.TopCenter)
+                .graphicsLayer {
+                    translationY = -size.height
+                }
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, PureWhite)
+                        colors = listOf(
+                            Color.Transparent,
+                            CreamBackground.copy(alpha = 0.20f),
+                            CreamBackground.copy(alpha = 0.55f),
+                            CreamBackground.copy(alpha = 0.85f),
+                            CreamBackground
+                        )
                     )
                 )
+                .blur(8.dp)
         )
 
         // Main Navigation Bar Container
@@ -84,6 +92,7 @@ fun ForkfulBottomBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(PureWhite)
+                .navigationBarsPadding()
         ) {
             Box(
                 modifier = Modifier
@@ -134,22 +143,6 @@ fun ForkfulBottomBar(
                 }
             }
         }
-
-        // Scaffold gap fade at the bottom (under the navbar)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(bottomGapHeight)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            PureWhite,
-                            PureWhite.copy(alpha = 0.5f),
-                            Color.Transparent
-                        )
-                    )
-                )
-        )
     }
 }
 

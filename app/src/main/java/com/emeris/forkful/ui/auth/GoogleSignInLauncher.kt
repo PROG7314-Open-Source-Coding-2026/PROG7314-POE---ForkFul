@@ -1,5 +1,17 @@
 package com.emeris.forkful.ui.auth
 
+/**
+ * Forkful - Google Sign-In Credential Manager Helper
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Interacts with AndroidX Credential Manager to request Google ID tokens securely.
+ */
+
 import android.app.Activity
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential

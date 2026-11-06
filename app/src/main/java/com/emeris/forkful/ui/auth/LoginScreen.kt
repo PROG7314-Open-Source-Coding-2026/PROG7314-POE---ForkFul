@@ -71,6 +71,16 @@ import com.emeris.forkful.core.util.Validators
 import com.emeris.forkful.ui.di.containerViewModel
 import kotlinx.coroutines.launch
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Visual application brand badge displaying the custom fork & knife cutlery icon.
+ */
 @Composable
 fun ForkfulLogoBadge(modifier: Modifier = Modifier) {
     Box(
@@ -89,6 +99,15 @@ fun ForkfulLogoBadge(modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * Authentication login screen.
+ * Supports email/password authentication via Supabase Auth, credential validation,
+ * password visibility toggling, error state banners, and Google Identity services.
+ *
+ * @param onAuthenticated Triggered upon verified authentication, passing whether onboarding preferences are needed
+ * @param onNavigateToSignUp Navigation callback to launch registration flow
+ * @param notice Optional status notice displayed above inputs
+ */
 @Composable
 fun LoginScreen(
     onAuthenticated: (needsOnboarding: Boolean) -> Unit,

@@ -23,6 +23,18 @@ import com.emeris.forkful.ui.recipedetail.RecipeDetailScreen
 import com.emeris.forkful.ui.settings.SettingsScreen
 import com.emeris.forkful.ui.swipestack.SwipeStackScreen
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Central navigation graph for the Forkful application.
+ * Resolves dynamic start destinations based on authentication session state and onboarding completion.
+ * Manages route transitions, deep links, backstack popups, and session expiration listeners.
+ */
 @Composable
 fun ForkfulApp() {
     val context = LocalContext.current

@@ -1,5 +1,17 @@
 package com.emeris.forkful.ui.di
 
+/**
+ * Forkful - ViewModel Dependency Injection Factory Utilities
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Provides composition-scoped helper functions for injecting AppContainer dependencies into Jetpack Compose ViewModels.
+ */
+
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel

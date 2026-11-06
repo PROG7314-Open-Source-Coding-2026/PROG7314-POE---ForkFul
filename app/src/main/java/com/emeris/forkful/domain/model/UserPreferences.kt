@@ -1,5 +1,17 @@
 package com.emeris.forkful.domain.model
 
+/**
+ * Forkful - User Preferences Domain Model
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Domain representation of user application configuration and dietary restriction settings.
+ */
+
 //User preferences model
 data class UserPreferences(
     val language: String,

@@ -1,5 +1,17 @@
 package com.emeris.forkful.core.network
 
+/**
+ * Forkful - Retrofit REST & Edge Function API Contract
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Declares network endpoints for authentication, recipe discovery, swipes, pantry tracking, and grocery synchronization.
+ */
+
 import com.emeris.forkful.data.remote.dto.AddGroceryItemRequest
 import com.emeris.forkful.data.remote.dto.AddGroceryItemResponse
 import com.emeris.forkful.data.remote.dto.AddPantryItemRequest

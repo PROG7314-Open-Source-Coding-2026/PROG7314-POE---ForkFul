@@ -1,5 +1,17 @@
 package com.emeris.forkful.core.designsystem
 
+/**
+ * Forkful - Typography & Font Hierarchy
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Configures typography styles, letter spacing, line heights, and font weights for the Forkful design system.
+ */
+
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily

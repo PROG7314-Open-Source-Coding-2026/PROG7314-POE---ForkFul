@@ -1,5 +1,17 @@
 package com.emeris.forkful.ui.theme
 
+/**
+ * Forkful - UI Theme Color Aliases
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Exposes semantic color aliases and theme palette mappings for Compose UI components.
+ */
+
 import androidx.compose.ui.graphics.Color
 
 val Purple80 = Color(0xFFD0BCFF)

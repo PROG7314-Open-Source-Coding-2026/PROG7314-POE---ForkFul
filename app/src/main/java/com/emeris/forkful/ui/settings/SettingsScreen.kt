@@ -70,6 +70,21 @@ import com.emeris.forkful.ui.components.ForkfulBottomBar
 import com.emeris.forkful.ui.di.containerViewModel
 import com.emeris.forkful.ui.navigation.Screen
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * User settings and preferences screen.
+ * Handles dietary filters, biometric security enrollment, notification preferences,
+ * theme switching (system/light/dark), language localization, and account logout.
+ *
+ * @param onNavigateTo Route navigation handler for bottom tabs
+ * @param onLogout Callback triggered upon successful session termination
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(

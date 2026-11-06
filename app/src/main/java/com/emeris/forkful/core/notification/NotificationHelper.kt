@@ -14,12 +14,34 @@ import com.emeris.forkful.MainActivity
 import com.emeris.forkful.R
 import com.emeris.forkful.core.logging.ForkfulLogger
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Helper utility for managing Android notification channels and dispatching
+ * high-priority system notifications (pantry expirations, cooking alerts, and suggestions).
+ */
 object NotificationHelper {
 
+    /** Primary notification channel ID for all kitchen and recipe alerts */
     const val CHANNEL_ID = "forkful_alerts"
+
+    /** User-visible channel title in system notification settings */
     const val CHANNEL_NAME = "Kitchen & Recipe Alerts"
+
+    /** Channel description explaining the alert scope to the user */
     const val CHANNEL_DESC = "Real-time updates for pantry expirations, recipe timers, and smart suggestions"
 
+    /**
+     * Initializes the notification channel on Android 8.0 (API 26) and above.
+     * Configures high importance, vibration, and application badge display.
+     *
+     * @param context Application or activity context
+     */
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val importance = NotificationManager.IMPORTANCE_HIGH
@@ -34,6 +56,12 @@ object NotificationHelper {
         }
     }
 
+    /**
+     * Checks whether POST_NOTIFICATIONS runtime permission has been granted (Android 13+).
+     *
+     * @param context Application or activity context
+     * @return True if notification delivery is permitted, false otherwise
+     */
     fun hasNotificationPermission(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ContextCompat.checkSelfPermission(
@@ -45,6 +73,15 @@ object NotificationHelper {
         }
     }
 
+    /**
+     * Builds and dispatches a high-priority system notification to the user's status bar.
+     * Automatically attaches a PendingIntent that directs the user back to [MainActivity].
+     *
+     * @param context Context used to build and post notification
+     * @param title Header title of the notification
+     * @param body Descriptive alert content
+     * @param notificationId Unique integer ID for notification deduplication
+     */
     fun showNotification(
         context: Context,
         title: String,
@@ -53,6 +90,7 @@ object NotificationHelper {
     ) {
         createNotificationChannel(context)
 
+        // Launch MainActivity and bring existing task to the front
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -79,6 +117,7 @@ object NotificationHelper {
             NotificationManagerCompat.from(context).notify(notificationId, notification)
             ForkfulLogger.logAction("NOTIFICATION", "Sent real-time notification: '$title'")
         } catch (e: SecurityException) {
+            // Handled when Android 13 POST_NOTIFICATIONS permission has been revoked by user
             ForkfulLogger.logAction("NOTIFICATION", "Missing POST_NOTIFICATIONS permission: ${e.message}")
         }
     }

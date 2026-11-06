@@ -1,5 +1,17 @@
 package com.emeris.forkful.ui.components
 
+/**
+ * Forkful - Bottom Navigation Bar with Scaffold Blur Fade
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Interactive bottom navigation bar with animated tab selection and an upward gradient blur overlay.
+ */
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

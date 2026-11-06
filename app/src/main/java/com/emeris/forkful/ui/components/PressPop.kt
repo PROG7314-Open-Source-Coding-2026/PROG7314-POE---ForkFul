@@ -1,5 +1,17 @@
 package com.emeris.forkful.ui.components
 
+/**
+ * Forkful - Tactile Micro-Interaction Modifier
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Provides subtle physical press-and-release spring animations for touchable cards and buttons.
+ */
+
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.interaction.MutableInteractionSource

@@ -67,6 +67,21 @@ import com.emeris.forkful.core.util.Validators
 import com.emeris.forkful.ui.di.containerViewModel
 import kotlinx.coroutines.launch
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * New user registration screen.
+ * Collects display name, email, and password, validates input integrity, registers the user
+ * via Supabase Auth, and transitions new accounts directly to onboarding preferences.
+ *
+ * @param onAuthenticated Triggered upon account creation, routing to onboarding
+ * @param onNavigateToLogin Navigation callback to return to the sign-in screen
+ */
 @Composable
 fun SignUpScreen(
     onAuthenticated: (needsOnboarding: Boolean) -> Unit,

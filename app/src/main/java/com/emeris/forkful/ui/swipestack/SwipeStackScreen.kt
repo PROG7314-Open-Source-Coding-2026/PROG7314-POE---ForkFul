@@ -66,6 +66,25 @@ import com.emeris.forkful.ui.di.containerViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Fullscreen gamified recipe recommendation screen.
+ * Implements a physics-based card deck with drag gestures, rotation, spring return animations,
+ * and directional decision handling:
+ * - Swipe Left: Skip dish
+ * - Swipe Right: Save dish to Recipe Box
+ * - Swipe Up: Launch full cooking mode
+ *
+ * @param moodKey The active mood category key (e.g. "italian", "comfort", "healthy")
+ * @param onDismiss Triggered to exit the swipe stack and return to previous screen
+ * @param onInspectRecipe Triggered to view deep details for the current recipe card
+ */
 @Composable
 fun SwipeStackScreen(
     moodKey: String,

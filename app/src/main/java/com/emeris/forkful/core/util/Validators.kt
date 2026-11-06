@@ -1,5 +1,17 @@
 package com.emeris.forkful.core.util
 
+/**
+ * Forkful - Form Input Validation Engine
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Validates user email formats, password complexities, and numerical ingredient quantities for UI safety.
+ */
+
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit

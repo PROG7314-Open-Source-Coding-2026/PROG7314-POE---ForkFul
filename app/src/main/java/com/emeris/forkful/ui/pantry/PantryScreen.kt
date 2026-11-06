@@ -77,6 +77,21 @@ import com.emeris.forkful.ui.di.containerViewModel
 import com.emeris.forkful.ui.navigation.Screen
 import kotlinx.coroutines.launch
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Primary pantry inventory screen.
+ * Displays tracked kitchen ingredients, offline Room caching status, real-time recipe matches
+ * based on pantry stock, and triggers the add/edit item modal bottom sheets.
+ *
+ * @param onNavigateTo Callback for bottom navigation tab switching
+ * @param onRecipeSelected Callback triggered when a user taps a matching recipe card
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantryScreen(
@@ -323,6 +338,12 @@ fun PantryScreen(
     }
 }
 
+/**
+ * Visual card displaying a smart recipe suggestion matched against active pantry ingredients.
+ *
+ * @param match The [PantryMatch] data containing title, category, match percentage, and image URL
+ * @param onClick Triggered to open the recipe details view
+ */
 @Composable
 fun PantryMatchCard(
     match: PantryMatch,
@@ -401,6 +422,14 @@ fun PantryMatchCard(
     }
 }
 
+/**
+ * Row item representing a single tracked ingredient in the user's pantry.
+ * Displays title, quantity label, category icon, expiry countdown badge, and edit/delete actions.
+ *
+ * @param item The [PantryItem] containing stock details and calculated expiry
+ * @param onEdit Triggered when the user taps the edit icon button
+ * @param onDelete Triggered when the user confirms item deletion
+ */
 @Composable
 fun PantryItemRow(
     item: PantryItem,

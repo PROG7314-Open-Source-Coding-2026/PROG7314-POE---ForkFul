@@ -1,5 +1,17 @@
 package com.emeris.forkful.ui.cooking
 
+/**
+ * Forkful - Cooking Mode Step-by-Step State Management
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Tracks active recipe step execution, timers, completed status, and step transitions.
+ */
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emeris.forkful.core.logging.ForkfulLogger

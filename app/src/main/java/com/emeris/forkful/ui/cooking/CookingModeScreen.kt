@@ -52,6 +52,21 @@ import com.emeris.forkful.ui.components.ErrorState
 import com.emeris.forkful.ui.components.LoadingState
 import com.emeris.forkful.ui.di.containerViewModel
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Hands-free, step-by-step cooking mode screen.
+ * Guides the user sequentially through recipe preparation steps with large high-contrast typography,
+ * progress bars, step completion tracking, and automatic "cooked" status recording.
+ *
+ * @param recipeId UUID of the recipe being cooked
+ * @param onFinished Callback invoked when cooking completes or the user exits
+ */
 @Composable
 fun CookingModeScreen(
     recipeId: String,

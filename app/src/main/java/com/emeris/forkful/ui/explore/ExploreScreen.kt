@@ -67,8 +67,27 @@ import com.emeris.forkful.ui.components.LoadingState
 import com.emeris.forkful.ui.di.containerViewModel
 import com.emeris.forkful.ui.navigation.Screen
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Model representing a cuisine avatar circle in the top discovery tray.
+ */
 data class CategoryAvatar(val name: String, val colorBg: Color, val moodKey: String)
 
+/**
+ * Main discovery and exploration screen.
+ * Features search with debounce, cuisine avatar filters, mood shelf recommendation stacks,
+ * and high-match recipe cards with 1-tap bookmarking.
+ *
+ * @param onNavigateTo Route navigation handler for tabs
+ * @param onRecipeSelected Handler when a user taps a recipe card
+ * @param onStackSelected Handler when a user taps a curated mood stack
+ */
 @Composable
 fun ExploreScreen(
     onNavigateTo: (String) -> Unit,
@@ -398,6 +417,13 @@ fun ExploreScreen(
     }
 }
 
+/**
+ * Filter chip pill for toggling active dietary tags or quick filters.
+ *
+ * @param label The filter title
+ * @param selected True if active
+ * @param onClick Invoked on selection
+ */
 @Composable
 private fun FilterPill(
     label: String,
@@ -420,6 +446,14 @@ private fun FilterPill(
     }
 }
 
+/**
+ * Card representing an individual recipe match in the explore feed.
+ * Displays photo, title, rating, preparation time, ingredient match badge, and bookmark action.
+ *
+ * @param recipe Domain [Recipe] object
+ * @param onClick Triggered to open recipe detail
+ * @param onSave Triggered to save/bookmark the recipe
+ */
 @Composable
 fun RecipeMatchCard(
     recipe: Recipe,
@@ -505,6 +539,15 @@ fun RecipeMatchCard(
     }
 }
 
+/**
+ * Visual mood card in the horizontal "Your mood today" discovery row.
+ * Displays high-resolution food photography with dark scrim overlay and crisp white text.
+ *
+ * @param title Mood shelf title (e.g. Italian, Comfort, Healthy)
+ * @param subtitle Descriptive subtitle (e.g. "Swipe a curated stack")
+ * @param imageUrl Background hero image
+ * @param onClick Triggered to launch the full-screen Tinder-style swipe stack
+ */
 @Composable
 fun MoodCard(
     title: String,

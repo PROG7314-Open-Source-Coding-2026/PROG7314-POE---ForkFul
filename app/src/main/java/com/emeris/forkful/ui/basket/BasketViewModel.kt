@@ -11,7 +11,24 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-//Basket UI state
+/**
+ * Forkful - Smart Grocery & Basket Planning
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Represents the observable UI state of the smart grocery basket.
+ *
+ * @property isLoading True when the grocery repository is fetching the active basket items.
+ * @property errorMessage Error text displayed if network or database operations fail.
+ * @property aisles The list of grocery items grouped by supermarket aisle/category.
+ * @property pendingItemId ID of an item currently undergoing optimistic checkbox toggling.
+ * @property isSubmitting True when an item is currently being inserted via bottom sheet.
+ * @property snackbarMessage Transient toast/snackbar message presented to the user.
+ * @property bannerText Contextual educational banner text explaining automated basket calculation.
+ */
 data class BasketUiState(
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
@@ -21,9 +38,16 @@ data class BasketUiState(
     val snackbarMessage: String? = null,
     val bannerText: String? = "Items are added automatically whenever you save a recipe - anything already in your pantry is subtracted. Tap + to add your own."
 ) {
+    /** Total number of grocery items across all aisles. */
     val totalItemCount: Int get() = aisles.sumOf { it.items.size }
+
+    /** Number of grocery items marked as collected/checked. */
     val checkedItemCount: Int get() = aisles.sumOf { aisle -> aisle.items.count { it.isChecked } }
 
+    /**
+     * Converts the current basket contents into a cleanly formatted plaintext list
+     * suitable for sharing via WhatsApp, SMS, or email.
+     */
     fun asShareText(): String = buildString {
         appendLine("My Forkful basket")
         aisles.forEach { aisle ->
@@ -36,6 +60,12 @@ data class BasketUiState(
     }
 }
 
+/**
+ * ViewModel managing grocery basket items, optimistic UI updates, aisle grouping,
+ * pantry deduction feedback, and real-time backend synchronization.
+ *
+ * @property groceryRepository Repository providing CRUD operations for grocery items and sync.
+ */
 class BasketViewModel(
     private val groceryRepository: GroceryRepository
 ) : ViewModel() {
@@ -47,6 +77,9 @@ class BasketViewModel(
         load()
     }
 
+    /**
+     * Loads the full grocery basket from the repository and groups items into aisles.
+     */
     fun load() {
         _state.update { it.copy(isLoading = true, errorMessage = null) }
         viewModelScope.launch {
@@ -62,7 +95,9 @@ class BasketViewModel(
         }
     }
 
-    //Quiet reload after a change, keeps the list on screen
+    /**
+     * Background refresh that updates aisles in-place without triggering full screen loading spinners.
+     */
     private fun refresh() {
         viewModelScope.launch {
             groceryRepository.getBasket().onSuccess { aisles ->
@@ -71,6 +106,12 @@ class BasketViewModel(
         }
     }
 
+    /**
+     * Optimistically toggles the checked status of a grocery item and persists to repository.
+     *
+     * @param itemId Unique ID of the grocery item.
+     * @param isChecked New checked state.
+     */
     fun setChecked(itemId: String, isChecked: Boolean) {
         _state.update { current ->
             current.copy(
@@ -96,7 +137,11 @@ class BasketViewModel(
         }
     }
 
-    //Remove one item (optimistic, restored on failure)
+    /**
+     * Optimistically deletes an item from the basket, rolling back if the network call fails.
+     *
+     * @param itemId Unique ID of the item to delete.
+     */
     fun removeItem(itemId: String) {
         val before = _state.value.aisles
         val removed = before.flatMap { it.items }.firstOrNull { it.id == itemId } ?: return
@@ -116,7 +161,13 @@ class BasketViewModel(
         }
     }
 
-    //Manual add from the Add item dialog
+    /**
+     * Adds a custom grocery item directly into the basket.
+     *
+     * @param name Descriptive ingredient name.
+     * @param quantity Amount or packaging string (e.g., "500g", "2 cans").
+     * @param onAdded Optional callback invoked upon successful addition.
+     */
     fun addItem(name: String, quantity: String, onAdded: () -> Unit = {}) {
         if (_state.value.isSubmitting) return
         if (name.isBlank()) {
@@ -141,10 +192,19 @@ class BasketViewModel(
         }
     }
 
+    /**
+     * Clears only the items marked as checked/purchased.
+     */
     fun clearCollected() = clear(checkedOnly = true)
 
+    /**
+     * Empties the entire grocery basket.
+     */
     fun clearAll() = clear(checkedOnly = false)
 
+    /**
+     * Executes bulk deletion of items from the basket with optimistic rollback.
+     */
     private fun clear(checkedOnly: Boolean) {
         val before = _state.value.aisles
         if (checkedOnly && _state.value.checkedItemCount == 0) return
@@ -168,10 +228,16 @@ class BasketViewModel(
         }
     }
 
+    /**
+     * Consumes transient snackbar text after user acknowledgement.
+     */
     fun consumeSnackbar() {
         _state.update { it.copy(snackbarMessage = null) }
     }
 
+    /**
+     * Dismisses the informational banner card.
+     */
     fun dismissBanner() {
         _state.update { it.copy(bannerText = null) }
     }

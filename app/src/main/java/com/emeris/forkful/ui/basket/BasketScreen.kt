@@ -66,6 +66,20 @@ import com.emeris.forkful.ui.components.LoadingState
 import com.emeris.forkful.ui.di.containerViewModel
 import com.emeris.forkful.ui.navigation.Screen
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Interactive grocery basket and shopping list screen.
+ * Groups grocery items by store aisle, supports checklist toggling with progress tracking,
+ * native plain-text sharing, clearing collected items, and launching the add-item bottomsheet.
+ *
+ * @param onNavigateTo Route navigation handler for bottom tabs
+ */
 @Composable
 fun BasketScreen(
     onNavigateTo: (String) -> Unit

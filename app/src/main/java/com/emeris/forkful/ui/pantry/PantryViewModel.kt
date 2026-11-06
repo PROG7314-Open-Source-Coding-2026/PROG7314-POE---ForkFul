@@ -17,6 +17,18 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Immutable state model for the Pantry screen.
+ * Captures network loading states, offline synchronization, active pantry items,
+ * and computed recipe matches.
+ */
 data class PantryUiState(
     val isLoading: Boolean = true,
     val isAdding: Boolean = false,
@@ -40,6 +52,12 @@ data class PantryUiState(
     val bestMatch: PantryMatch? get() = matches.maxByOrNull { it.matchPercentage }
 }
 
+/**
+ * ViewModel managing pantry inventory operations.
+ * Implements an offline-first architecture by observing the Room database [LocalPantryRepository],
+ * synchronizing live updates with the remote Supabase API [PantryRepository], and computing
+ * pantry-matched recipes.
+ */
 class PantryViewModel(
     private val pantryRepository: PantryRepository,
     private val localPantryRepository: LocalPantryRepository? = null

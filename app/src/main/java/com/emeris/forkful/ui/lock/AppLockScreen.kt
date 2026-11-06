@@ -35,6 +35,21 @@ import androidx.fragment.app.FragmentActivity
 import com.emeris.forkful.core.i18n.currentStrings
 import com.emeris.forkful.core.security.BiometricHelper
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Fullscreen biometric security challenge gate.
+ * Displayed upon cold launch or returning from background when biometric lock is enabled.
+ * Prompts fingerprint or face recognition, allowing authorized entry or session termination.
+ *
+ * @param onUnlocked Callback invoked upon successful biometric verification
+ * @param onLogout Callback invoked if the user opts to log out instead of unlocking
+ */
 @Composable
 fun AppLockScreen(
     onUnlocked: () -> Unit,

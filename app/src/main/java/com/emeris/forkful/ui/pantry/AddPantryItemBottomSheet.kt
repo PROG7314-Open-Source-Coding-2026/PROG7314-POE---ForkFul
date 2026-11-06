@@ -68,12 +68,28 @@ import com.emeris.forkful.core.designsystem.TextMuted
 import com.emeris.forkful.core.designsystem.TrueWhite
 import com.emeris.forkful.domain.model.PantryItem
 
+/**
+ * Forkful - Pantry Item Management Bottom Sheet
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Interactive bottom sheet enabling users to add or edit inventory items within their digital pantry.
+ * Supports item naming, amount/unit specification, category taxonomy assignment, and shelf-life tracking.
+ *
+ * @param sheetState Bottom sheet animation and expansion state.
+ * @param onDismiss Invoked when the user closes or dismisses the bottom sheet.
+ * @param onConfirm Invoked with sanitized values when the user saves or updates the item.
+ * @param editingItem If present, pre-populates fields to edit an existing pantry entity; null for new items.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddPantryItemBottomSheet(
     sheetState: SheetState,
     onDismiss: () -> Unit,
-    //daysUntilExpiry is null only when editing and the expiry is left unchanged
+    // daysUntilExpiry is null only when editing and the expiry is left unchanged
     onConfirm: (name: String, quantity: String, category: String, daysUntilExpiry: Int?) -> Unit,
     editingItem: PantryItem? = null
 ) {

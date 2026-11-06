@@ -1,5 +1,17 @@
 package com.emeris.forkful.data.remote.dto
 
+/**
+ * Forkful - Recipe Network Data Transfer Objects (DTOs)
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Data transfer schemas for recipe cards, deck payloads, nutrition breakdowns, and cooking instructions.
+ */
+
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind

@@ -22,6 +22,18 @@ import com.emeris.forkful.data.remote.dto.TagPointDto
 import com.emeris.forkful.data.remote.dto.UpdatePreferencesRequest
 import com.emeris.forkful.domain.model.SwipeOutcome
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Data mappers transforming remote Supabase Data Transfer Objects (DTOs)
+ * into domain model entities, ensuring strict separation of concerns across architectural layers.
+ */
+
 // DTO to domain mappers
 fun RecipeDeckItemDto.toDomain(): Recipe = Recipe(
     id = recipeId,

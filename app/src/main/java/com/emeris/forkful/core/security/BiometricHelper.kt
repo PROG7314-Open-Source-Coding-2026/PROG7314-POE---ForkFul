@@ -9,15 +9,39 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.emeris.forkful.core.logging.ForkfulLogger
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Represents the operational readiness state of device biometric sensors.
+ */
 enum class BiometricStatus {
+    /** Biometric sensors (fingerprint/face) are enrolled and available */
     READY,
+    /** Device does not have biometric sensor hardware */
     NO_HARDWARE,
+    /** Device has hardware, but user has not enrolled fingerprints/face */
     NOT_ENROLLED,
+    /** Sensor is temporarily busy, disabled, or locked out */
     UNAVAILABLE
 }
 
+/**
+ * Helper utility encapsulating AndroidX BiometricPrompt API integration.
+ * Provides hardware capability verification and secure authentication callbacks.
+ */
 object BiometricHelper {
 
+    /**
+     * Inspects device biometric capabilities against BIOMETRIC_STRONG and DEVICE_CREDENTIAL.
+     *
+     * @param context Application context
+     * @return [BiometricStatus] indicating sensor readiness
+     */
     fun checkStatus(context: Context): BiometricStatus {
         val biometricManager = BiometricManager.from(context)
         return when (biometricManager.canAuthenticate(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)) {
@@ -28,10 +52,27 @@ object BiometricHelper {
         }
     }
 
+    /**
+     * Fast convenience check for whether biometric authentication can be requested.
+     *
+     * @param context Application context
+     * @return True if [checkStatus] evaluates to [BiometricStatus.READY]
+     */
     fun isAvailable(context: Context): Boolean {
         return checkStatus(context) == BiometricStatus.READY
     }
 
+    /**
+     * Prompts the user with a standard system biometric authentication dialog.
+     * Dispatches callbacks on the main UI executor thread.
+     *
+     * @param activity FragmentActivity hosting the prompt lifecycle
+     * @param title Title displayed on the biometric sheet
+     * @param subtitle Explanatory prompt subtitle
+     * @param onSuccess Invoked upon successful identity verification
+     * @param onError Invoked upon fatal sensor failure or user cancellation
+     * @param onFailed Invoked when a biometric sample is rejected (e.g. unrecognized finger)
+     */
     fun authenticate(
         activity: FragmentActivity,
         title: String = "Unlock Forkful",

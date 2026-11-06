@@ -1,5 +1,17 @@
 package com.emeris.forkful.ui.navigation
 
+/**
+ * Forkful - Navigation Route Destinations
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Defines type-safe destination routes, route arguments, and screen labels for Forkful navigation.
+ */
+
 sealed class Screen(val route: String) {
     object Login : Screen("login")
     object SignUp : Screen("sign_up")

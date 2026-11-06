@@ -1,5 +1,17 @@
 package com.emeris.forkful.data.local
 
+/**
+ * Forkful - Pantry Room Data Access Object (DAO)
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Executes Room SQL queries, batch inserts, updates, and deletes for offline pantry persistence.
+ */
+
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy

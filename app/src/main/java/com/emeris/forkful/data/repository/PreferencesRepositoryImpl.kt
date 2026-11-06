@@ -1,5 +1,17 @@
 package com.emeris.forkful.data.repository
 
+/**
+ * Forkful - User Preferences Repository Implementation
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Synchronizes user theme, language, dietary restrictions, and biometric lock configurations.
+ */
+
 import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.core.network.ForkfulApi
 import com.emeris.forkful.core.session.SessionManager

@@ -1,5 +1,17 @@
 package com.emeris.forkful.core.designsystem
 
+/**
+ * Forkful - Design System Palette Definitions
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Defines primary brand colors, earthy tones, semantic tints, and dark mode background palettes.
+ */
+
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 

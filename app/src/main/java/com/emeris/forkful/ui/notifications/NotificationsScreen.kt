@@ -1,5 +1,17 @@
 package com.emeris.forkful.ui.notifications
 
+/**
+ * Forkful - In-App Notification Center UI
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Displays meal reminders, pantry expiry alerts, and promotional announcements with read/unread indicators.
+ */
+
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts

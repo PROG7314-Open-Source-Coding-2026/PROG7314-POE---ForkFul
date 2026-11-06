@@ -1,5 +1,17 @@
 package com.emeris.forkful.core.session
 
+/**
+ * Forkful - Secure Session Storage & Preferences DataStore
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Encrypts JWT auth tokens via Android Jetpack EncryptedSharedPreferences (AES256) and manages DataStore preferences.
+ */
+
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.datastore.core.DataStore

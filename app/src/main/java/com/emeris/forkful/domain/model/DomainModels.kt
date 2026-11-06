@@ -1,5 +1,17 @@
 package com.emeris.forkful.domain.model
 
+/**
+ * Forkful - Domain Model Aggregates & Value Objects
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Defines shared domain value objects including swipe directions, deck queries, and filter modes.
+ */
+
 //Swipe direction enum
 enum class SwipeDirection(val wireName: String) {
     RIGHT("RIGHT"),

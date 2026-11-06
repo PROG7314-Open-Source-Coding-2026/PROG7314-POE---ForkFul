@@ -1,5 +1,17 @@
 package com.emeris.forkful.core.network
 
+/**
+ * Forkful - Network Client Configuration & Token Interceptor
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Constructs Retrofit and OkHttpClient instances with Bearer token authentication and transparent refresh handling.
+ */
+
 import com.emeris.forkful.BuildConfig
 import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.core.session.SessionManager

@@ -1,5 +1,17 @@
 package com.emeris.forkful.core.designsystem
 
+/**
+ * Forkful - Material3 Design System Theme Provider
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Configures Material3 ColorScheme dynamically for light and dark themes with custom surface tinting.
+ */
+
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

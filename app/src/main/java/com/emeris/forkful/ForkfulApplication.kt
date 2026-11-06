@@ -1,5 +1,17 @@
 package com.emeris.forkful
 
+/**
+ * Forkful - Application Entry Point & Manual Dependency Injection Container
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Initializes global application state, configures logging callbacks, notification channels, and manual DI tree.
+ */
+
 import android.app.Activity
 import android.app.Application
 import android.content.Context

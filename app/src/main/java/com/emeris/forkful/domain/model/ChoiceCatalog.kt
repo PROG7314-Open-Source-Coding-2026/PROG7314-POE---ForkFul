@@ -1,5 +1,17 @@
 package com.emeris.forkful.domain.model
 
+/**
+ * Forkful - Static Choice Catalogs & Option Enumerations
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Provides static option lists for moods, cuisines, prep times, difficulties, languages, and dietary tags.
+ */
+
 //Choices catalog
 object ChoiceCatalog {
 

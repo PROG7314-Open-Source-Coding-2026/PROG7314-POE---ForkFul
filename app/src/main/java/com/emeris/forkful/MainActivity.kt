@@ -20,8 +20,24 @@ import com.emeris.forkful.core.session.LocalPrefs
 import com.emeris.forkful.ui.lock.AppLockScreen
 import com.emeris.forkful.ui.navigation.ForkfulApp
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Primary single-activity entry point for Forkful.
+ * Inherits from [FragmentActivity] to support the AndroidX [androidx.biometric.BiometricPrompt] lifecycle.
+ * Manages cold-launch and background-resumption biometric security gating, theme preferences, and locale providers.
+ */
 class MainActivity : FragmentActivity() {
+
+    /** Tracks whether the application transition was paused/stopped to enforce app locking on return */
     private var wasInBackground = false
+
+    /** Holds the active biometric lock security overlay state */
     private val isAppLocked = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {

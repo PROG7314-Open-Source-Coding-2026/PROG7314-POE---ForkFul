@@ -1,5 +1,17 @@
 package com.emeris.forkful.domain.model
 
+/**
+ * Forkful - Recipe & Ingredient Domain Models
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Domain representation of recipes, instructional cooking steps, nutrition values, and ingredients.
+ */
+
 data class Ingredient(
     val name: String,
     val quantity: String,

@@ -68,6 +68,21 @@ import com.emeris.forkful.core.designsystem.TextCharcoal
 import com.emeris.forkful.core.designsystem.TextMuted
 import com.emeris.forkful.core.designsystem.TrueWhite
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Modal bottom sheet allowing users to add custom groceries or ingredients to their basket.
+ * Features quick-tap staples, numeric quantity input with letter filtering, and quick unit chips.
+ *
+ * @param isSubmitting Indicates whether an add-item network operation is currently in flight
+ * @param onDismiss Triggered to close the modal bottom sheet
+ * @param onConfirm Callback delivering validated item name and formatted quantity string
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddBasketItemBottomSheet(

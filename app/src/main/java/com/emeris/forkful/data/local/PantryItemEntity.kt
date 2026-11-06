@@ -1,5 +1,17 @@
 package com.emeris.forkful.data.local
 
+/**
+ * Forkful - Pantry Room Entity Schema
+ * Module: PROG7314 Portfolio of Evidence (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Room table definition storing pantry item metadata, quantities, expiry dates, and categories.
+ */
+
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 

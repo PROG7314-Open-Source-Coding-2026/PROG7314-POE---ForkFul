@@ -59,6 +59,21 @@ import com.emeris.forkful.ui.components.LoadingState
 import com.emeris.forkful.ui.di.containerViewModel
 import com.emeris.forkful.ui.navigation.Screen
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * User cookbook and saved recipe vault screen.
+ * Displays user-saved recipes and cooked history with category tabs, search filtering,
+ * and grid-based presentation.
+ *
+ * @param onNavigateTo Route navigation handler for bottom tabs
+ * @param onRecipeSelected Handler when a saved recipe card is tapped
+ */
 @Composable
 fun RecipeBoxScreen(
     onNavigateTo: (String) -> Unit,

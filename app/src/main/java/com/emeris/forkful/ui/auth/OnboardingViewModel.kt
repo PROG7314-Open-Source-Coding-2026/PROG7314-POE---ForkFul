@@ -12,7 +12,24 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-//Onboarding state
+/**
+ * Forkful - First-Run User Personalization
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Observable state model representing multi-step onboarding progression and culinary preferences.
+ *
+ * @property step Active onboarding wizard page index (0 = Welcome, 1 = Cuisines, 2 = Dietary, 3 = Confirmation).
+ * @property selectedCuisines Set of preferred culinary cuisines chosen to seed taste profile recommendations.
+ * @property selectedDietary Set of dietary restrictions and allergens (e.g. Vegetarian, Gluten-Free, Halaal).
+ * @property displayName User handle or name displayed in personalized greetings.
+ * @property isSubmitting True while preferences are being saved to remote backend.
+ * @property isComplete True once preferences are committed, allowing entry into main dashboard.
+ * @property errorMessage Error text rendered if preference seeding fails.
+ */
 data class OnboardingUiState(
     val step: Int = 0,
     val selectedCuisines: Set<String> = emptySet(),
@@ -22,6 +39,7 @@ data class OnboardingUiState(
     val isComplete: Boolean = false,
     val errorMessage: String? = null
 ) {
+    /** True if the active step meets mandatory input requirements to proceed. */
     val canContinue: Boolean
         get() = when (step) {
             1 -> selectedCuisines.isNotEmpty()
@@ -29,7 +47,12 @@ data class OnboardingUiState(
         }
 }
 
-//Onboarding ViewModel
+/**
+ * ViewModel orchestrating multi-step initial onboarding, capturing flavor profiles,
+ * dietary constraints, and initializing taste recommendation vectors.
+ *
+ * @property preferencesRepository Repository handling user preferences and profile seeding.
+ */
 class OnboardingViewModel(
     private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {
@@ -40,14 +63,25 @@ class OnboardingViewModel(
     val cuisineChoices = ChoiceCatalog.cuisines
     val dietaryChoices = ChoiceCatalog.dietaryOptions
 
+    /**
+     * Advances to the next onboarding step, capping at the final step.
+     */
     fun nextStep() {
         _state.update { it.copy(step = (it.step + 1).coerceAtMost(3)) }
     }
 
+    /**
+     * Reverts to the previous onboarding step, flooring at zero.
+     */
     fun previousStep() {
         _state.update { it.copy(step = (it.step - 1).coerceAtLeast(0)) }
     }
 
+    /**
+     * Toggles inclusion of a culinary preference tag.
+     *
+     * @param key Unique cuisine key string.
+     */
     fun toggleCuisine(key: String) {
         _state.update { current ->
             val next = current.selectedCuisines.toMutableSet()
@@ -56,6 +90,11 @@ class OnboardingViewModel(
         }
     }
 
+    /**
+     * Toggles inclusion of a dietary allergy or restriction option.
+     *
+     * @param option The dietary restriction name.
+     */
     fun toggleDietary(option: String) {
         _state.update { current ->
             val next = current.selectedDietary.toMutableSet()
@@ -64,6 +103,9 @@ class OnboardingViewModel(
         }
     }
 
+    /**
+     * Persists chosen cuisines and dietary requirements, marking onboarding as completed.
+     */
     fun submit() {
         val snapshot = _state.value
         if (snapshot.isSubmitting) return

@@ -14,7 +14,26 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// Swipe deck state
+/**
+ * Forkful - Tinder-Style Recipe Swipe Deck
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Observable UI state encapsulating the active card stack and interaction metrics.
+ *
+ * @property isLoading True when the deck is being fetched from the database or API.
+ * @property errorMessage Descriptive error text if the swipe query encounters failure.
+ * @property deck The list of recipes matching the selected mood shelf.
+ * @property currentIndex Pointer to the top card currently awaiting gesture input.
+ * @property moodKey Identifier of the active mood filter (e.g., "comfort", "vegan", "quick").
+ * @property isSwiping Concurrency guard preventing multiple simultaneous swipe actions.
+ * @property lastTagPoints Adaptive machine learning vector updates generated from user preference swipes.
+ * @property sessionCount Total number of swipes completed in the active session.
+ * @property reachedEnd True when all cards in the stack have been swiped.
+ */
 data class SwipeUiState(
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
@@ -26,17 +45,30 @@ data class SwipeUiState(
     val sessionCount: Int = 0,
     val reachedEnd: Boolean = false
 ) {
+    /** The recipe card currently positioned at the top of the stack. */
     val currentRecipe: Recipe? get() = deck.getOrNull(currentIndex)
+
+    /** Human-readable counter of remaining unswiped dishes. */
     val stackLabel: String get() = "${(deck.size - currentIndex).coerceAtLeast(0)} dishes in this stack"
 }
 
-// Swipe ViewModel
+/**
+ * ViewModel managing gesture-driven recipe cards, mood-specific deck filtration,
+ * optimistic stack advancement, and preference profile learning.
+ *
+ * @property recipeRepository Repository providing card retrieval, swipe recording, and preference syncing.
+ */
 class SwipeViewModel(
     private val recipeRepository: RecipeRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(SwipeUiState())
     val state: StateFlow<SwipeUiState> = _state.asStateFlow()
 
+    /**
+     * Loads a curated recipe deck for a given mood key, filtering out incompatible categories.
+     *
+     * @param moodKey The culinary mood or dietary filter key to populate.
+     */
     fun loadDeck(moodKey: String) {
         _state.update { it.copy(moodKey = moodKey, isLoading = true, errorMessage = null, reachedEnd = false) }
         viewModelScope.launch {
@@ -76,13 +108,18 @@ class SwipeViewModel(
         }
     }
 
-    // Record swipe
+    /**
+     * Records a swipe decision (Left: Dislike, Right: Like/Save, Up: Cook/Details),
+     * optimistically advancing the stack and updating taste preference vectors.
+     *
+     * @param direction Swipe direction gesture detected by the UI.
+     */
     fun swipe(direction: SwipeDirection) {
         val snapshot = _state.value
         val recipe = snapshot.currentRecipe ?: return
         if (snapshot.isSwiping) return
 
-        // Optimistic advance
+        // Optimistic advance: immediately increment card pointer
         _state.update {
             it.copy(
                 isSwiping = true,
@@ -106,6 +143,9 @@ class SwipeViewModel(
         }
     }
 
+    /**
+     * Reloads the current mood deck from scratch.
+     */
     fun reload() {
         loadDeck(_state.value.moodKey)
     }

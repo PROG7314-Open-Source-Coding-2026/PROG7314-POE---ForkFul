@@ -73,6 +73,20 @@ private val cuisineIcons: Map<String, ImageVector> = mapOf(
     "vegan" to Icons.Default.Eco
 )
 
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Initial user onboarding wizard screen.
+ * Guides newly registered users through selecting dietary preferences (Vegan, Vegetarian, Halal, etc.)
+ * and favored cuisines (Italian, Asian, Mexican, Braai, etc.) to seed personalized recommendation algorithms.
+ *
+ * @param onCompleted Callback triggered once onboarding preferences are saved to Supabase
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun OnboardingScreen(

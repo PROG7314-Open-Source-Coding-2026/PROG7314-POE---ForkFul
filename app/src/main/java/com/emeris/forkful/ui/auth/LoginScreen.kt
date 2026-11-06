@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -61,6 +62,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
+import com.emeris.forkful.R
 import com.emeris.forkful.core.designsystem.DarkAuthBackground
 import com.emeris.forkful.core.designsystem.DarkAuthBorder
 import com.emeris.forkful.core.designsystem.ForestGreen
@@ -78,25 +80,12 @@ fun ForkfulLogoBadge(modifier: Modifier = Modifier) {
             .background(ForestGreen),
         contentAlignment = Alignment.Center
     ) {
-        Canvas(modifier = Modifier.size(38.dp)) {
-            val strokeW = 3.5f
-            val forkX = size.width * 0.35f
-            val knifeX = size.width * 0.65f
-
-            drawLine(Color.White, Offset(forkX - 7f, 8f), Offset(forkX - 7f, 26f), strokeW)
-            drawLine(Color.White, Offset(forkX, 8f), Offset(forkX, 26f), strokeW)
-            drawLine(Color.White, Offset(forkX + 7f, 8f), Offset(forkX + 7f, 26f), strokeW)
-            drawLine(Color.White, Offset(forkX - 7f, 26f), Offset(forkX + 7f, 26f), strokeW)
-            drawLine(Color.White, Offset(forkX, 26f), Offset(forkX, size.height - 8f), strokeW + 2f)
-
-            val knifePath = Path().apply {
-                moveTo(knifeX, 8f)
-                cubicTo(knifeX + 14f, 10f, knifeX + 14f, 28f, knifeX, 34f)
-                close()
-            }
-            drawPath(knifePath, Color.White)
-            drawLine(Color.White, Offset(knifeX, 32f), Offset(knifeX, size.height - 8f), strokeW + 2f)
-        }
+        Icon(
+            painter = painterResource(R.drawable.ic_forkful_logo),
+            contentDescription = "Forkful Logo",
+            tint = Color.White,
+            modifier = Modifier.size(44.dp)
+        )
     }
 }
 

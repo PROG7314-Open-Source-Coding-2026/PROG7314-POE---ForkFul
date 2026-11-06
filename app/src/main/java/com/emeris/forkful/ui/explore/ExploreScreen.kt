@@ -282,77 +282,11 @@ fun ExploreScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(26.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = if (uiState.selectedCuisine != null) {
-                                "${uiState.selectedCuisine?.replaceFirstChar { it.uppercase() }} dishes"
-                            } else {
-                                "Matches for you"
-                            },
-                            fontFamily = FontFamily.Serif,
-                            fontSize = 22.sp,
-                            color = TextCharcoal
-                        )
-
-                        // Only show Swipe This Stack when there are at least 5 recipes to swipe
-                        if (uiState.selectedCuisine != null && uiState.feed.size >= 5) {
-                            Text(
-                                text = "Swipe this stack",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = ForestGreen,
-                                modifier = Modifier.clickable { onStackSelected(uiState.selectedCuisine!!) }
-                            )
-                        } else if (uiState.selectedCuisine == null) {
-                            Text(
-                                text = "See all",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = ForestGreen,
-                                modifier = Modifier.clickable { onNavigateTo(Screen.RecipeBox.route) }
-                            )
-                        }
-                    }
-                }
-            }
-
-            when {
-                uiState.isLoading -> item { LoadingState("Finding your matches...") }
-                uiState.errorMessage != null -> item {
-                ErrorState(message = uiState.errorMessage.orEmpty(), onRetry = viewModel::loadFeed)
-            }
-                uiState.feed.isEmpty() -> item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 40.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No recipes match your filters.\nTry clearing them.",
-                            fontSize = 14.sp,
-                            color = TextMuted,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
-                    }
-                }
-                else -> items(uiState.feed) { recipe ->
-                    RecipeMatchCard(
-                        recipe = recipe,
-                        onClick = { onRecipeSelected(recipe.id) },
-                        onSave = { viewModel.saveRecipe(recipe) }
-                    )
                 }
             }
 
             item {
-                Column(modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 12.dp)) {
+                Column(modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 12.dp)) {
                     Text(
                         text = "Your mood today",
                         fontFamily = FontFamily.Serif,
@@ -383,6 +317,80 @@ fun ExploreScreen(
                         )
                     }
                 }
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = if (uiState.selectedCuisine != null) {
+                            "${uiState.selectedCuisine?.replaceFirstChar { it.uppercase() }} dishes"
+                        } else {
+                            "Matches for you"
+                        },
+                        fontFamily = FontFamily.Serif,
+                        fontSize = 22.sp,
+                        color = TextCharcoal
+                    )
+
+                    // Only show Swipe This Stack when there are at least 5 recipes to swipe
+                    if (uiState.selectedCuisine != null && uiState.feed.size >= 5) {
+                        Text(
+                            text = "Swipe this stack",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = ForestGreen,
+                            modifier = Modifier.clickable { onStackSelected(uiState.selectedCuisine!!) }
+                        )
+                    } else if (uiState.selectedCuisine == null) {
+                        Text(
+                            text = "See all",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = ForestGreen,
+                            modifier = Modifier.clickable { onNavigateTo(Screen.RecipeBox.route) }
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            when {
+                uiState.isLoading -> item { LoadingState("Finding your matches...") }
+                uiState.errorMessage != null -> item {
+                    ErrorState(message = uiState.errorMessage.orEmpty(), onRetry = viewModel::loadFeed)
+                }
+                uiState.feed.isEmpty() -> item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 40.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No recipes match your filters.\nTry clearing them.",
+                            fontSize = 14.sp,
+                            color = TextMuted,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                }
+                else -> items(uiState.feed) { recipe ->
+                    RecipeMatchCard(
+                        recipe = recipe,
+                        onClick = { onRecipeSelected(recipe.id) },
+                        onSave = { viewModel.saveRecipe(recipe) }
+                    )
+                }
+            }
+
+            item {
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }

@@ -1,4 +1,14 @@
-//Auth SSO function
+/**
+ * PROG7314 - Mobile Application Development (POE)
+ * Group Members:
+ * - Jamie Abrahams (ST10434047)
+ * - Isabelle Devlin (ST10445500)
+ * - Justin Fussell (ST10280758)
+ * - Matteo Nusca (ST10440432)
+ *
+ * Auth SSO edge function managing Single Sign-On and email authentication.
+ * Automatically confirms user registrations to eliminate email verification requirements.
+ */
 
 import { anonClient, errorResponse, handleOptions, json, respondToError, serviceClient } from "../_shared/forkful.ts";
 
@@ -10,6 +20,7 @@ Deno.serve(async (req: Request) => {
     const body = await req.json();
     const provider = String(body.ssoProvider ?? "").toLowerCase();
     const supabase = await anonClient();
+    const admin = await serviceClient();
 
     let session: {
       access_token: string;
@@ -57,30 +68,58 @@ Deno.serve(async (req: Request) => {
       if (password.length < 6) return errorResponse("Password must be at least 6 characters", 400);
 
       if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({
+        // Auto-confirm user email upon registration without email verification barrier
+        const { data: createData, error: createError } = await admin.auth.admin.createUser({
           email,
           password,
-          options: { data: { full_name: body.displayName ?? null } },
+          email_confirm: true,
+          user_metadata: { full_name: body.displayName ?? null },
         });
-        if (error) return errorResponse(error.message, 400);
-        if (!data.session) {
-          return errorResponse("Check your inbox to confirm your email address, then sign in", 403);
+
+        if (createError) {
+          return errorResponse(createError.message, 400);
         }
+
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (signInError || !signInData.session) {
+          return errorResponse(signInError?.message ?? "Sign-in following registration failed", 401);
+        }
+
         session = {
-          access_token: data.session.access_token,
-        refresh_token: data.session.refresh_token,
-        expires_at: data.session.expires_at ?? null,
-          user: { id: data.user.id, email: data.user.email },
+          access_token: signInData.session.access_token,
+          refresh_token: signInData.session.refresh_token,
+          expires_at: signInData.session.expires_at ?? null,
+          user: { id: signInData.user.id, email: signInData.user.email },
         };
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error || !data.session) {
-          return errorResponse("Invalid email or password", 401);
+        let { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+        // If legacy account has an unconfirmed email, automatically confirm it and retry
+        if (error && error.message.toLowerCase().includes("email not confirmed")) {
+          const { data: userList } = await admin.auth.admin.listUsers();
+          const existingUser = userList?.users?.find(
+            (u) => u.email?.toLowerCase() === email.toLowerCase(),
+          );
+          if (existingUser) {
+            await admin.auth.admin.updateUserById(existingUser.id, { email_confirm: true });
+            const retry = await supabase.auth.signInWithPassword({ email, password });
+            data = retry.data;
+            error = retry.error;
+          }
         }
+
+        if (error || !data?.session) {
+          return errorResponse(error?.message ?? "Invalid email or password", 401);
+        }
+
         session = {
           access_token: data.session.access_token,
-        refresh_token: data.session.refresh_token,
-        expires_at: data.session.expires_at ?? null,
+          refresh_token: data.session.refresh_token,
+          expires_at: data.session.expires_at ?? null,
           user: { id: data.user.id, email: data.user.email },
         };
       }
@@ -90,8 +129,6 @@ Deno.serve(async (req: Request) => {
 
     const displayName =
       (body.displayName as string | undefined) ?? session.user.email?.split("@")[0] ?? "Forkful cook";
-
-    const admin = await serviceClient();
 
     const { data: existing } = await admin
       .from("users")

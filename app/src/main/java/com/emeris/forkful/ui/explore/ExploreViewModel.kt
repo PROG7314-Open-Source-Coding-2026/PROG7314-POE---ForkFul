@@ -82,7 +82,7 @@ class ExploreViewModel(
     init {
         loadFeed()
         viewModelScope.launch {
-            // Debounce user keystrokes by 350ms to minimize database/network load
+            // Debounce user keystrokes by 350ms to minimise database/network load
             searchInput.debounce(350).collect { query ->
                 if (query != _state.value.searchQuery) {
                     _state.update { it.copy(searchQuery = query) }

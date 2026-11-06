@@ -83,7 +83,7 @@ private val cuisineIcons: Map<String, ImageVector> = mapOf(
  *
  * Initial user onboarding wizard screen.
  * Guides newly registered users through selecting dietary preferences (Vegan, Vegetarian, Halal, etc.)
- * and favored cuisines (Italian, Asian, Mexican, Braai, etc.) to seed personalized recommendation algorithms.
+ * and favored cuisines (Italian, Asian, Mexican, Braai, etc.) to seed personalised recommendation algorithms.
  *
  * @param onCompleted Callback triggered once onboarding preferences are saved to Supabase
  */

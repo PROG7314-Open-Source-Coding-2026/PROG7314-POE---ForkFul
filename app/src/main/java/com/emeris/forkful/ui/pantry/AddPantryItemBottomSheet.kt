@@ -81,7 +81,7 @@ import com.emeris.forkful.domain.model.PantryItem
  *
  * @param sheetState Bottom sheet animation and expansion state.
  * @param onDismiss Invoked when the user closes or dismisses the bottom sheet.
- * @param onConfirm Invoked with sanitized values when the user saves or updates the item.
+ * @param onConfirm Invoked with sanitised values when the user saves or updates the item.
  * @param editingItem If present, pre-populates fields to edit an existing pantry entity; null for new items.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)

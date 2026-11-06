@@ -37,7 +37,7 @@ object NotificationHelper {
     const val CHANNEL_DESC = "Real-time updates for pantry expirations, recipe timers, and smart suggestions"
 
     /**
-     * Initializes the notification channel on Android 8.0 (API 26) and above.
+     * Initialises the notification channel on Android 8.0 (API 26) and above.
      * Configures high importance, vibration, and application badge display.
      *
      * @param context Application or activity context

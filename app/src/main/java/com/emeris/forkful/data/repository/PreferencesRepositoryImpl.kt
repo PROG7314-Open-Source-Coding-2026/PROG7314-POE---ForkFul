@@ -9,7 +9,7 @@ package com.emeris.forkful.data.repository
  * - Justin Fussell (ST10280758)
  * - Matteo Nusca (ST10440432)
  *
- * Synchronizes user theme, language, dietary restrictions, and biometric lock configurations.
+ * Synchronises user theme, language, dietary restrictions, and biometric lock configurations.
  */
 
 import com.emeris.forkful.core.logging.ForkfulLogger

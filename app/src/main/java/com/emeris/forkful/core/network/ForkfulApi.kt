@@ -9,7 +9,7 @@ package com.emeris.forkful.core.network
  * - Justin Fussell (ST10280758)
  * - Matteo Nusca (ST10440432)
  *
- * Declares network endpoints for authentication, recipe discovery, swipes, pantry tracking, and grocery synchronization.
+ * Declares network endpoints for authentication, recipe discovery, swipes, pantry tracking, and grocery synchronisation.
  */
 
 import com.emeris.forkful.data.remote.dto.AddGroceryItemRequest

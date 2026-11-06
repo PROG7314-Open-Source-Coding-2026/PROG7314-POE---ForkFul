@@ -26,7 +26,7 @@ import java.time.format.DateTimeFormatter
  * - Matteo Nusca (ST10440432)
  *
  * Immutable state model for the Pantry screen.
- * Captures network loading states, offline synchronization, active pantry items,
+ * Captures network loading states, offline synchronisation, active pantry items,
  * and computed recipe matches.
  */
 data class PantryUiState(
@@ -55,7 +55,7 @@ data class PantryUiState(
 /**
  * ViewModel managing pantry inventory operations.
  * Implements an offline-first architecture by observing the Room database [LocalPantryRepository],
- * synchronizing live updates with the remote Supabase API [PantryRepository], and computing
+ * synchronising live updates with the remote Supabase API [PantryRepository], and computing
  * pantry-matched recipes.
  */
 class PantryViewModel(

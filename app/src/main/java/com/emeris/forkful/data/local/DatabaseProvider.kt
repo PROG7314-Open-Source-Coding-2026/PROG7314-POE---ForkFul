@@ -9,7 +9,7 @@ package com.emeris.forkful.data.local
  * - Justin Fussell (ST10280758)
  * - Matteo Nusca (ST10440432)
  *
- * Thread-safe provider initializing and supplying the Room AppDatabase instance.
+ * Thread-safe provider initialising and supplying the Room AppDatabase instance.
  */
 
 import android.content.Context

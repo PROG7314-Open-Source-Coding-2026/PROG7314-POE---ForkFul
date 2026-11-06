@@ -9,7 +9,7 @@ package com.emeris.forkful.data.repository
  * - Justin Fussell (ST10280758)
  * - Matteo Nusca (ST10440432)
  *
- * Implements pantry inventory management, recipe match calculations, and remote synchronization.
+ * Implements pantry inventory management, recipe match calculations, and remote synchronisation.
  */
 
 import com.emeris.forkful.core.logging.ForkfulLogger

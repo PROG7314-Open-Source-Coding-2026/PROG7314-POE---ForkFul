@@ -10,7 +10,7 @@ import android.util.Log
  * - Justin Fussell (ST10280758)
  * - Matteo Nusca (ST10440432)
  *
- * Centralized logging utility for auditing screen lifecycle events,
+ * Centralised logging utility for auditing screen lifecycle events,
  * user interactions, and network API communications across the app.
  */
 object ForkfulLogger {

@@ -44,7 +44,7 @@ data class RecipeBoxUiState(
 }
 
 /**
- * ViewModel managing the user's personal Recipe Box, providing bookmark organization,
+ * ViewModel managing the user's personal Recipe Box, providing bookmark organisation,
  * cooked status filtering, and local in-memory text search.
  *
  * @property recipeRepository Repository handling recipe query and bookmark persistence.

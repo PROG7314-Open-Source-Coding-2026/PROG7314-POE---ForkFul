@@ -9,7 +9,7 @@ package com.emeris.forkful.data.remote.dto
  * - Justin Fussell (ST10280758)
  * - Matteo Nusca (ST10440432)
  *
- * Data transfer schemas for remote user preferences and synchronization payloads.
+ * Data transfer schemas for remote user preferences and synchronisation payloads.
  */
 
 import kotlinx.serialization.Serializable

@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
  *
  * @property isLoading True when initially querying preferences from data persistence.
  * @property isSaving True while an asynchronous preference update is in-flight.
- * @property errorMessage Error text rendered if preference synchronization fails.
+ * @property errorMessage Error text rendered if preference synchronisation fails.
  * @property infoMessage Informational notification displayed upon preference mutation success.
  * @property preferences Active user configuration snapshot (theme, biometric locks, notifications, dietary tags).
  * @property loggedOut True once sign-out completes, signaling navigation back to authentication.
@@ -125,7 +125,7 @@ class SettingsViewModel(
     }
 
     /**
-     * Updates the application language localization preference.
+     * Updates the application language localisation preference.
      *
      * @param languageKey BCP 47 language code (e.g., "en", "af", "zu").
      */

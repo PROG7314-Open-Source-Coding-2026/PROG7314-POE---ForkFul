@@ -18,7 +18,7 @@ import java.util.UUID
  * Provides offline caching, pending sync tracking, and emits reactive flows
  * to support seamless offline operation.
  *
- * @param context Application context used to initialize [AppDatabase]
+ * @param context Application context used to initialise [AppDatabase]
  */
 class LocalPantryRepository(context: Context) {
 
@@ -64,12 +64,12 @@ class LocalPantryRepository(context: Context) {
     }
 
     /**
-     * Retrieves all locally added records awaiting remote synchronization with Supabase.
+     * Retrieves all locally added records awaiting remote synchronisation with Supabase.
      */
     suspend fun getPendingSync(): List<PantryItemEntity> = dao.getPendingSync()
 
     /**
-     * Marks a local record as synchronized after successful remote post.
+     * Marks a local record as synchronised after successful remote post.
      *
      * @param id The entity UUID
      */

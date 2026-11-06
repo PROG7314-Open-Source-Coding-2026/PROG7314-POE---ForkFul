@@ -80,7 +80,7 @@ import com.emeris.forkful.ui.navigation.Screen
  *
  * User settings and preferences screen.
  * Handles dietary filters, biometric security enrollment, notification preferences,
- * theme switching (system/light/dark), language localization, and account logout.
+ * theme switching (system/light/dark), language localisation, and account logout.
  *
  * @param onNavigateTo Route navigation handler for bottom tabs
  * @param onLogout Callback triggered upon successful session termination

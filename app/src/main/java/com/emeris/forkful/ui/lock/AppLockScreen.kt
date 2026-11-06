@@ -45,7 +45,7 @@ import com.emeris.forkful.core.security.BiometricHelper
  *
  * Fullscreen biometric security challenge gate.
  * Displayed upon cold launch or returning from background when biometric lock is enabled.
- * Prompts fingerprint or face recognition, allowing authorized entry or session termination.
+ * Prompts fingerprint or face recognition, allowing authorised entry or session termination.
  *
  * @param onUnlocked Callback invoked upon successful biometric verification
  * @param onLogout Callback invoked if the user opts to log out instead of unlocking

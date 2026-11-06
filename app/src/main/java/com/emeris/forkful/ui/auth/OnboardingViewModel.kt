@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * Forkful - First-Run User Personalization
+ * Forkful - First-Run User Personalisation
  * Group Members:
  * - Jamie Abrahams (ST10434047)
  * - Isabelle Devlin (ST10445500)
@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
  * @property step Active onboarding wizard page index (0 = Welcome, 1 = Cuisines, 2 = Dietary, 3 = Confirmation).
  * @property selectedCuisines Set of preferred culinary cuisines chosen to seed taste profile recommendations.
  * @property selectedDietary Set of dietary restrictions and allergens (e.g. Vegetarian, Gluten-Free, Halaal).
- * @property displayName User handle or name displayed in personalized greetings.
+ * @property displayName User handle or name displayed in personalised greetings.
  * @property isSubmitting True while preferences are being saved to remote backend.
  * @property isComplete True once preferences are committed, allowing entry into main dashboard.
  * @property errorMessage Error text rendered if preference seeding fails.
@@ -49,7 +49,7 @@ data class OnboardingUiState(
 
 /**
  * ViewModel orchestrating multi-step initial onboarding, capturing flavor profiles,
- * dietary constraints, and initializing taste recommendation vectors.
+ * dietary constraints, and initialising taste recommendation vectors.
  *
  * @property preferencesRepository Repository handling user preferences and profile seeding.
  */

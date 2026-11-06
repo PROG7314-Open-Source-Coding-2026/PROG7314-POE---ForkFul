@@ -9,7 +9,7 @@ package com.emeris.forkful
  * - Justin Fussell (ST10280758)
  * - Matteo Nusca (ST10440432)
  *
- * Initializes global application state, configures logging callbacks, notification channels, and manual DI tree.
+ * Initialises global application state, configures logging callbacks, notification channels, and manual DI tree.
  */
 
 import android.app.Activity

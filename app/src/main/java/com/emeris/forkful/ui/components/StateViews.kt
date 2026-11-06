@@ -9,7 +9,7 @@ package com.emeris.forkful.ui.components
  * - Justin Fussell (ST10280758)
  * - Matteo Nusca (ST10440432)
  *
- * Standardized reusable Compose components for displaying spinners, error messages, and empty list placeholders.
+ * Standardised reusable Compose components for displaying spinners, error messages, and empty list placeholders.
  */
 
 import androidx.compose.foundation.layout.Arrangement

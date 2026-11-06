@@ -62,7 +62,7 @@ data class BasketUiState(
 
 /**
  * ViewModel managing grocery basket items, optimistic UI updates, aisle grouping,
- * pantry deduction feedback, and real-time backend synchronization.
+ * pantry deduction feedback, and real-time backend synchronisation.
  *
  * @property groceryRepository Repository providing CRUD operations for grocery items and sync.
  */

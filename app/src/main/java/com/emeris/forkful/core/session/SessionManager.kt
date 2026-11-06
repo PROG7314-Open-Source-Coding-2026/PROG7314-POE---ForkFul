@@ -188,7 +188,7 @@ class SessionManager(private val context: Context) : TokenStore {
         val notifications = prefs[KEY_NOTIFICATIONS] ?: current.notificationsEnabled
         val biometric = prefs[KEY_BIOMETRIC] ?: current.biometricLockEnabled
 
-        // Keep fast cache synchronized with DataStore disk emissions
+        // Keep fast cache synchronised with DataStore disk emissions
         securePrefs.edit()
             .putString(KEY_THEME_FAST, theme)
             .putString(KEY_LANGUAGE_FAST, language)

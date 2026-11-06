@@ -71,7 +71,7 @@ object BiometricHelper {
      * @param subtitle Explanatory prompt subtitle
      * @param onSuccess Invoked upon successful identity verification
      * @param onError Invoked upon fatal sensor failure or user cancellation
-     * @param onFailed Invoked when a biometric sample is rejected (e.g. unrecognized finger)
+     * @param onFailed Invoked when a biometric sample is rejected (e.g. unrecognised finger)
      */
     fun authenticate(
         activity: FragmentActivity,

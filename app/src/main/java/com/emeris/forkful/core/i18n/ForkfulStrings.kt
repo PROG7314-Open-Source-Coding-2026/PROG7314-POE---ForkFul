@@ -1,7 +1,7 @@
 package com.emeris.forkful.core.i18n
 
 /**
- * Forkful - Localization & Multilingual String Provider
+ * Forkful - Localisation & Multilingual String Provider
  * Module: PROG7314 Portfolio of Evidence (POE)
  * Group Members:
  * - Jamie Abrahams (ST10434047)

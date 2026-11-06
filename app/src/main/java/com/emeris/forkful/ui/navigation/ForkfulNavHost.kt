@@ -210,7 +210,10 @@ fun ForkfulApp() {
 
         composable(Screen.Notifications.route) {
             NotificationsScreen(
-                onDismiss = { navController.popBackStack() }
+                onDismiss = { navController.popBackStack() },
+                onNavigateTo = { targetRoute ->
+                    navController.navigate(targetRoute)
+                }
             )
         }
     }

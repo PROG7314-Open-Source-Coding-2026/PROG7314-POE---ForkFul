@@ -113,7 +113,91 @@ values
      15, 5, 340, 5,
      'https://images.unsplash.com/photo-1504372248769-4b8ba1ddd3b7?q=80&w=800&auto=format&fit=crop',
      'Sweets', 'Easy', 4.7, '{Vegetarian,Gluten-Free}',
-     '["Melt the dark chocolate over a water bath.","Whip the cream to soft peaks.","Fold the chocolate into the cream gently.","Spoon into glasses and chill for 2 hours.","Top with berries before serving."]');
+     '["Melt the dark chocolate over a water bath.","Whip the cream to soft peaks.","Fold the chocolate into the cream gently.","Spoon into glasses and chill for 2 hours.","Top with berries before serving."]),
+    ('Karoo Lamb Potjiekos',
+     'Slow-simmered lamb neck, baby potatoes, carrots, and green beans layered in a cast-iron pot over gentle braai coals.',
+     30, 180, 640, 42,
+     'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop',
+     'Braai', 'Hard', 4.9, '{Halaal,Gluten-Free,No Shellfish}',
+     '["Brown the lamb neck pieces in hot oil inside the potjie pot.","Layer sliced onions and garlic over the meat without stirring.","Add baby potatoes, carrots, and a splash of beef stock.","Cover and simmer undisturbed over low coals for 2.5 hours.","Add green beans for the final 20 minutes before serving."]'),
+
+    ('Cape Apricot Lamb Sosaties',
+     'Skewered lamb cubes marinated overnight in spiced curry, vinegar, bay leaves, and dried apricots, grilled over open coals.',
+     25, 15, 480, 39,
+     'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=800&auto=format&fit=crop',
+     'Braai', 'Medium', 4.8, '{Halaal,Gluten-Free,No Shellfish}',
+     '["Thread marinated lamb cubes, dried apricots, and red onion chunks onto skewers.","Place skewers over hot braai coals.","Grill for 12 to 15 minutes, turning frequently.","Baste with warm marinade during the final 3 minutes.","Rest for 5 minutes and serve with fresh coriander."]'),
+
+    ('Cape Malay Bobotie',
+     'Spiced minced beef baked with sultanas, bay leaves, and a golden savoury egg-custard topping served with yellow rice.',
+     20, 40, 580, 34,
+     'https://images.unsplash.com/photo-1589302168068-964664d93dc0?q=80&w=800&auto=format&fit=crop',
+     'Comfort', 'Medium', 4.8, '{Halaal,No Shellfish}',
+     '["Soften onions and curry paste in butter, then brown the minced beef.","Mix in soaked bread, sultanas, and chutney, then spoon into an oven dish.","Whisk milk and eggs together with a pinch of turmeric and salt.","Pour custard gently over the meat and top with bay leaves.","Bake at 180 C for 35 to 40 minutes until golden."]'),
+
+    ('Spicy Chakalaka with Creamy Pap',
+     'Grated carrots, bell peppers, baked beans, and chillies simmered in aromatic curry spices over fluffy maize porridge.',
+     15, 25, 340, 10,
+     'https://images.unsplash.com/photo-1546549032-9571cd6b27df?q=80&w=800&auto=format&fit=crop',
+     'Comfort', 'Easy', 4.7, '{Vegan,Vegetarian,Gluten-Free,Halaal,No Shellfish}',
+     '["Boil water and stir in maize meal gradually until smooth and thick.","Cover pap and let it steam on very low heat for 20 minutes.","In a saucepan, fry onions, peppers, garlic, and curry powder.","Add grated carrots and baked beans, then simmer for 10 minutes.","Spoon warm chakalaka over steaming bowls of pap."]'),
+
+    ('Creamy Butter Chicken',
+     'Marinated tender chicken thighs simmered in a velvety spiced tomato, cream, and fenugreek gravy.',
+     20, 25, 620, 40,
+     'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?q=80&w=800&auto=format&fit=crop',
+     'Asian', 'Medium', 4.8, '{Halaal,Gluten-Free,No Shellfish}',
+     '["Sear yogurt-marinated chicken strips in butter until lightly charred.","In the same pan, cook tomato puree, garam masala, and garlic.","Pour in double cream and simmer until the sauce thickens.","Fold in chicken pieces and simmer gently for 10 minutes.","Garnish with fresh coriander and serve with warm naan."]'),
+
+    ('Crispy Sesame Tofu Noodle Bowl',
+     'Pan-crisped golden tofu cubes tossed with crunchy cucumber and vermicelli in a rich toasted sesame peanut dressing.',
+     15, 15, 410, 19,
+     'https://images.unsplash.com/photo-1546069901-d72b22070444?q=80&w=800&auto=format&fit=crop',
+     'Asian', 'Easy', 4.6, '{Vegan,Vegetarian,No Shellfish}',
+     '["Press and cube the firm tofu, then dust lightly in cornflour.","Pan-fry in sesame oil until all sides are crisp and golden.","Soak vermicelli noodles in boiling water for 4 minutes and drain.","Whisk peanut butter, soy sauce, lime juice, and sesame oil.","Assemble bowls with noodles, crisp tofu, cucumber, and dressing."]'),
+
+    ('Slow-Braised Beef Birria Tacos',
+     'Tender shredded beef cooked low-and-slow in dried guajillo chilli broth, stuffed into dipped corn tortillas with melted cheese.',
+     30, 150, 650, 44,
+     'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?q=80&w=800&auto=format&fit=crop',
+     'Mexican', 'Hard', 4.9, '{No Shellfish}',
+     '["Sear beef shank in a Dutch oven until browned on all sides.","Blend toasted guajillo chillies with garlic, spices, and broth.","Pour sauce over beef, cover and braise for 2.5 hours until shreddable.","Dip tortillas into the red consomme fat and sear on a hot skillet.","Fill with shredded beef and cheese, fold, and crisp on both sides."]'),
+
+    ('Charred Corn & Black Bean Quesadillas',
+     'Toasted flour tortillas filled with spicy black beans, fire-roasted sweetcorn, melted Monterey Jack, and fresh lime.',
+     10, 10, 440, 18,
+     'https://images.unsplash.com/photo-1618040996337-56904b7850b9?q=80&w=800&auto=format&fit=crop',
+     'Mexican', 'Easy', 4.7, '{Vegetarian,Halaal,No Shellfish}',
+     '["Char sweetcorn in a smoking dry skillet until caramelized.","Mash black beans lightly with ground cumin and lime juice.","Layer beans, charred corn, and shredded cheese on half of each tortilla.","Cook in a pan 2 minutes per side until the shell is crisp and cheese is melted.","Cut into triangles and serve immediately with guacamole."]'),
+
+    ('Creamy Wild Mushroom Polenta',
+     'Slow-cooked coarse polenta with butter and parmesan, crowned with garlicky pan-roasted king oyster and portobello mushrooms.',
+     15, 25, 430, 13,
+     'https://images.unsplash.com/photo-1541832676-9b763b0239ab?q=80&w=800&auto=format&fit=crop',
+     'Italian', 'Medium', 4.8, '{Vegetarian,Gluten-Free,No Shellfish}',
+     '["Whisk polenta into simmering vegetable stock and cook for 20 minutes.","Fold in butter, parmesan cheese, and black pepper until creamy.","In a hot pan, saute sliced wild mushrooms in olive oil until golden.","Add minced garlic, thyme, and a splash of lemon juice to the mushrooms.","Ladle polenta into warm bowls and top with hot roasted mushrooms."]'),
+
+    ('Classic Lasagne al Forno',
+     'Fresh egg pasta sheets layered with slow-cooked beef ragù, silky nutmeg béchamel, and melted aged mozzarella.',
+     45, 75, 680, 38,
+     'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?q=80&w=800&auto=format&fit=crop',
+     'Italian', 'Hard', 4.9, '{No Shellfish}',
+     '["Simmer minced beef, celery, carrot, and crushed tomatoes for 1 hour.","Make bechamel by whisking milk into a butter and flour roux with nutmeg.","Layer ragu, bechamel, pasta sheets, and mozzarella in a baking dish.","Repeat layers and top generously with parmesan cheese.","Bake at 190 C for 35 minutes until bubbling and deeply browned."]'),
+
+    ('Lemon Herb Grilled Salmon',
+     'Crispy-skin Atlantic salmon fillet over roasted tenderstem broccoli and garlic baby potatoes with fresh dill oil.',
+     10, 15, 490, 43,
+     'https://images.unsplash.com/photo-1467003909585-2f8a72700288?q=80&w=800&auto=format&fit=crop',
+     'Healthy', 'Easy', 4.8, '{Halaal,Gluten-Free,No Shellfish}',
+     '["Season salmon skin with sea salt and black pepper.","Sear salmon skin-side down in a hot skillet for 5 minutes until crispy.","Flip carefully, add garlic butter and lemon wedges, and cook 3 minutes.","Steam tenderstem broccoli until vibrant green.","Plate salmon over vegetables and spoon pan juices over top."]'),
+
+    ('No-Bake Dark Chocolate Tart',
+     'Silky dairy-free dark chocolate and coconut cream ganache set in a gluten-free almond date crust topped with sea salt.',
+     20, 0, 390, 7,
+     'https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=800&auto=format&fit=crop',
+     'Sweets', 'Easy', 4.8, '{Vegan,Vegetarian,Gluten-Free,Halaal,No Shellfish}',
+     '["Blitz almonds, pitted dates, and cocoa powder into a crumbly dough.","Press mixture firmly into the bottom and sides of a tart tin.","Gently heat coconut milk and pour over chopped 70% dark chocolate.","Stir ganache until glossy and pour into the tart shell.","Refrigerate for 2 hours until firm, then sprinkle with flaked salt."]');
+
 
 -- ----------------------------------------------------------------------------
 -- Tags: (mood, tag) pairs; the identity tag matches the mood key exactly.
@@ -354,3 +438,150 @@ cross join lateral (values
     ('Berries', 150, 'g', 'Produce')
 ) as i(name, qty, u, aisle)
 where r.title = 'Dark Chocolate Mousse';
+
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Lamb neck', 800, 'g', 'Butchery'),
+    ('Baby potatoes', 500, 'g', 'Produce'),
+    ('Carrots', 4, 'pieces', 'Produce'),
+    ('Green beans', 200, 'g', 'Produce'),
+    ('Onions', 2, 'pieces', 'Produce'),
+    ('Beef stock', 500, 'ml', 'Pantry')
+) as i(name, qty, u, aisle)
+where r.title = 'Karoo Lamb Potjiekos';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Lamb leg cubes', 600, 'g', 'Butchery'),
+    ('Dried apricots', 150, 'g', 'Dry Goods'),
+    ('Red onions', 2, 'pieces', 'Produce'),
+    ('Curry powder', 2, 'tbsp', 'Spices'),
+    ('Brown vinegar', 60, 'ml', 'Condiments')
+) as i(name, qty, u, aisle)
+where r.title = 'Cape Apricot Lamb Sosaties';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Lean minced beef', 500, 'g', 'Butchery'),
+    ('Onions', 2, 'pieces', 'Produce'),
+    ('Sultanas', 50, 'g', 'Baking'),
+    ('Milk', 250, 'ml', 'Dairy'),
+    ('Eggs', 2, 'pieces', 'Dairy'),
+    ('Fruit chutney', 2, 'tbsp', 'Condiments')
+) as i(name, qty, u, aisle)
+where r.title = 'Cape Malay Bobotie';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Maize meal', 300, 'g', 'Dry Goods'),
+    ('Baked beans', 400, 'g', 'Pantry'),
+    ('Carrots', 3, 'pieces', 'Produce'),
+    ('Bell peppers', 2, 'pieces', 'Produce'),
+    ('Curry powder', 1, 'tbsp', 'Spices')
+) as i(name, qty, u, aisle)
+where r.title = 'Spicy Chakalaka with Creamy Pap';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Chicken thighs', 600, 'g', 'Butchery'),
+    ('Tomato puree', 400, 'g', 'Pantry'),
+    ('Double cream', 200, 'ml', 'Dairy'),
+    ('Butter', 50, 'g', 'Dairy'),
+    ('Garam masala', 1, 'tbsp', 'Spices')
+) as i(name, qty, u, aisle)
+where r.title = 'Creamy Butter Chicken';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Firm tofu', 350, 'g', 'Produce'),
+    ('Rice vermicelli', 200, 'g', 'Dry Goods'),
+    ('Cucumber', 1, 'piece', 'Produce'),
+    ('Peanut butter', 3, 'tbsp', 'Pantry'),
+    ('Toasted sesame oil', 1, 'tbsp', 'Condiments')
+) as i(name, qty, u, aisle)
+where r.title = 'Crispy Sesame Tofu Noodle Bowl';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Beef shank', 800, 'g', 'Butchery'),
+    ('Corn tortillas', 8, 'pieces', 'Bakery'),
+    ('Guajillo chillies', 4, 'pieces', 'Spices'),
+    ('Oaxaca cheese', 200, 'g', 'Dairy'),
+    ('Beef broth', 750, 'ml', 'Pantry')
+) as i(name, qty, u, aisle)
+where r.title = 'Slow-Braised Beef Birria Tacos';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Corn tortillas', 6, 'pieces', 'Bakery'),
+    ('Black beans', 400, 'g', 'Pantry'),
+    ('Sweetcorn', 150, 'g', 'Produce'),
+    ('Monterey Jack cheese', 150, 'g', 'Dairy'),
+    ('Fresh coriander', 1, 'bunch', 'Produce')
+) as i(name, qty, u, aisle)
+where r.title = 'Charred Corn & Black Bean Quesadillas';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Coarse polenta', 200, 'g', 'Dry Goods'),
+    ('Wild mushrooms', 300, 'g', 'Produce'),
+    ('Parmesan cheese', 60, 'g', 'Dairy'),
+    ('Butter', 40, 'g', 'Dairy'),
+    ('Garlic', 3, 'cloves', 'Produce')
+) as i(name, qty, u, aisle)
+where r.title = 'Creamy Wild Mushroom Polenta';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Minced beef', 500, 'g', 'Butchery'),
+    ('Lasagne sheets', 250, 'g', 'Dry Goods'),
+    ('Crushed tomatoes', 800, 'g', 'Pantry'),
+    ('Milk', 500, 'ml', 'Dairy'),
+    ('Mozzarella', 200, 'g', 'Dairy')
+) as i(name, qty, u, aisle)
+where r.title = 'Classic Lasagne al Forno';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('Salmon fillets', 2, 'pieces', 'Seafood'),
+    ('Tenderstem broccoli', 200, 'g', 'Produce'),
+    ('Baby potatoes', 300, 'g', 'Produce'),
+    ('Butter', 30, 'g', 'Dairy'),
+    ('Fresh lemon', 1, 'piece', 'Produce')
+) as i(name, qty, u, aisle)
+where r.title = 'Lemon Herb Grilled Salmon';
+
+insert into public.ingredients (recipe_id, name, quantity, unit, aisle_category)
+select recipe_id, i.name, i.qty, i.u, i.aisle
+from public.recipes r
+cross join lateral (values
+    ('70% Dark chocolate', 250, 'g', 'Baking'),
+    ('Coconut cream', 200, 'ml', 'Pantry'),
+    ('Raw almonds', 150, 'g', 'Dry Goods'),
+    ('Medjool dates', 12, 'pieces', 'Produce'),
+    ('Cocoa powder', 2, 'tbsp', 'Baking')
+) as i(name, qty, u, aisle)
+where r.title = 'No-Bake Dark Chocolate Tart';

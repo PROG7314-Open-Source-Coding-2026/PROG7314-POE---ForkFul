@@ -136,6 +136,10 @@ Deno.serve(async (req: Request) => {
           matchPercentage,
           inPantryCount: inPantry,
           totalIngredientsCount: total,
+          ingredients: (recipe.ingredients as Array<{ name: string }> ?? []).map((i) => ({
+            name: i.name,
+            inPantry: pantryNames.some((pantryName) => pantryMatches(pantryName, i.name)),
+          })),
           isSaved: savedIds.has(recipe.recipe_id),
           isCooked: cookedIds.has(recipe.recipe_id),
           _score: mood === "pantry" ? matchPercentage * 10 + score : score,

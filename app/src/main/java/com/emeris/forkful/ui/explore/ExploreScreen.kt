@@ -142,6 +142,13 @@ fun ExploreScreen(
                                     modifier = Modifier.size(28.dp)
                                 )
                             }
+                            Box(
+                                modifier = Modifier
+                                    .padding(top = 8.dp, end = 8.dp)
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(ForestGreen)
+                            )
                         }
                     }
 

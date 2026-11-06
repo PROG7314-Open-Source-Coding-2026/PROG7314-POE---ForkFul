@@ -133,6 +133,37 @@ object MockData {
                 "Build bowls with rice, chicken, avocado and sweetcorn.",
                 "Spoon over extra peri-peri and serve."
             )
+        ),
+        Recipe(
+            id = "r5",
+            title = "Braaibroodjie",
+            description = "The legendary South African braai sandwich: gooey cheddar, tomato, onion and sweet chutney toasted over coals.",
+            imageUrl = "https://images.unsplash.com/photo-1529059997568-3d847b1154c0?q=80&w=800&auto=format&fit=crop",
+            prepTimeMinutes = 10,
+            calories = 430,
+            proteinGrams = 16,
+            matchPercentage = 100,
+            inPantryCount = 5,
+            totalIngredientsCount = 5,
+            rating = 4.8,
+            category = "Braai",
+            isSaved = true,
+            isCooked = false,
+            tags = listOf("Braai +25", "Cheese +18"),
+            ingredients = listOf(
+                Ingredient("White bread", "8 slices", inPantry = true),
+                Ingredient("Cheddar cheese", "200g grated", inPantry = true),
+                Ingredient("Tomatoes", "2 sliced", inPantry = true),
+                Ingredient("Onions", "1 thinly sliced", inPantry = true),
+                Ingredient("Fruit chutney", "3 tbsp", inPantry = true)
+            ),
+            instructions = listOf(
+                "Butter the outsides of thick bread slices.",
+                "Layer cheese, sliced tomato, onion and sweet chutney inside.",
+                "Wrap securely in a closed braai grid or foil over medium coals.",
+                "Turn every 2 minutes until bread is deeply golden and cheese has melted.",
+                "Slice diagonally and serve immediately while hot."
+            )
         )
     )
 

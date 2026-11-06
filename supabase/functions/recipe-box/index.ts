@@ -13,7 +13,7 @@ Deno.serve(async (req: Request) => {
 
       const { data: swipes, error } = await admin
         .from("user_swipes")
-        .select("recipe_id, direction, cooked_at, swiped_at, recipes(*)")
+        .select("recipe_id, direction, cooked_at, swiped_at, recipes(*, ingredients(name))")
         .eq("user_id", userId)
         .eq("direction", "RIGHT")
         .order("swiped_at", { ascending: false });
@@ -28,6 +28,7 @@ Deno.serve(async (req: Request) => {
         })
         .map((row) => {
           const recipe = row.recipes as Record<string, unknown>;
+          const ingredientsList = (recipe.ingredients as Array<{ name: string }> ?? []);
           return {
             recipeId: recipe.recipe_id,
             title: recipe.title,
@@ -43,7 +44,8 @@ Deno.serve(async (req: Request) => {
             topTagPoints: 0,
             matchPercentage: 0,
             inPantryCount: 0,
-            totalIngredientsCount: 0,
+            totalIngredientsCount: ingredientsList.length,
+            ingredients: ingredientsList.map((i) => ({ name: i.name, inPantry: false })),
             isSaved: true,
             isCooked: row.cooked_at != null,
           };

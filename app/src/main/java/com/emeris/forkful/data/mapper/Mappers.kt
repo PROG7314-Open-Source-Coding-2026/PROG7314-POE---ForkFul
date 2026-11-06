@@ -40,7 +40,7 @@ fun RecipeDeckItemDto.toDomain(): Recipe = Recipe(
     isCooked = isCooked,
     dietaryTags = dietaryTags,
     tags = tags,
-    ingredients = emptyList()
+    ingredients = ingredients.map { it.toDomain() }
 )
 
 fun RecipeDetailDto.toDomain(): Recipe = Recipe(

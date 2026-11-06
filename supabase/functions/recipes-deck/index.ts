@@ -1,6 +1,6 @@
 //Recipes deck provider
 
-import { errorResponse, handleOptions, json, respondToError, requireUser } from "../_shared/forkful.ts";
+import { errorResponse, handleOptions, json, pantryMatches, respondToError, requireUser, sanitizeSearch } from "../_shared/forkful.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return handleOptions();
@@ -14,7 +14,10 @@ Deno.serve(async (req: Request) => {
     const maxPrepTime = url.searchParams.get("maxPrepTime");
     const minRating = url.searchParams.get("minRating");
     const difficulty = url.searchParams.get("difficulty");
-    const search = url.searchParams.get("search")?.trim();
+    //User text is stripped of PostgREST filter syntax before it reaches .or()
+    const search = sanitizeSearch(url.searchParams.get("search"));
+    //Swipe stacks hide every recipe already swiped (LEFT or RIGHT)
+    const excludeSwiped = url.searchParams.get("excludeSwiped") === "true";
     const dietaryParam = url.searchParams.get("dietaryTags");
     const dietary = dietaryParam
       ? dietaryParam.split(",").map((tag) => tag.trim()).filter(Boolean)
@@ -64,7 +67,7 @@ Deno.serve(async (req: Request) => {
     if (difficulty) query = query.eq("difficulty", difficulty);
     if (search) {
       query = query.or(
-        `title.ilike.%${search}%,description.ilike.%${search}%`,
+        `title.ilike."%${search}%",description.ilike."%${search}%"`,
       );
     }
 
@@ -78,6 +81,7 @@ Deno.serve(async (req: Request) => {
     const savedIds = new Set(
       (swiped ?? []).filter((row) => row.direction === "RIGHT").map((row) => row.recipe_id),
     );
+    const swipedIds = new Set((swiped ?? []).map((row) => row.recipe_id));
     const cookedIds = new Set(
       (swiped ?? [])
         .filter((row) => row.cooked_at !== null && row.cooked_at !== undefined)
@@ -95,7 +99,7 @@ Deno.serve(async (req: Request) => {
 
     const scored = (recipes ?? [])
       .filter((recipe) => matchesDietary(recipe.dietary_tags as string[] | null))
-      .filter((recipe) => !savedIds.has(recipe.recipe_id))
+      .filter((recipe) => !(excludeSwiped ? swipedIds : savedIds).has(recipe.recipe_id))
       .map((recipe) => {
         const moodTags = (recipe.recipe_tags as Array<{ mood_profile_key: string; tag_name: string }>)
           .filter((tag) => tag.mood_profile_key === mood)
@@ -103,11 +107,9 @@ Deno.serve(async (req: Request) => {
         const score = moodTags.reduce((sum, tag) => sum + (pointsByTag.get(tag) ?? 0), 0);
 
         const ingredients = (recipe.ingredients as Array<{ name: string }>).map((row) => row.name);
+        //Same matching rule as pantry-match, recipe-detail and swipes
         const inPantry = ingredients.filter((name) =>
-          pantryNames.some((pantryName) =>
-            pantryName.toLowerCase().includes(name.toLowerCase().split(" ")[0]) ||
-            name.toLowerCase().includes(pantryName.toLowerCase())
-          )
+          pantryNames.some((pantryName) => pantryMatches(pantryName, name))
         ).length;
         const total = ingredients.length;
         const matchPercentage = total === 0 ? 0 : Math.round((inPantry / total) * 100);

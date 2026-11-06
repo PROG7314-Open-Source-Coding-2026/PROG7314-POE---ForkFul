@@ -112,9 +112,20 @@ class SettingsViewModel(
     }
 
     fun logout() {
+        //Onboarding flag is kept so returning users skip onboarding
         authRepository.signOut()
-        sessionManager.setOnboarded(false)
         _state.update { it.copy(loggedOut = true) }
+    }
+
+    //Debug builds only: force the token states used in the expiry tests
+    fun debugExpireAccessToken() {
+        sessionManager.debugBreakAccessToken()
+        load() //Next call 401s, refreshes and succeeds
+    }
+
+    fun debugExpireSession() {
+        sessionManager.debugBreakAllTokens()
+        load() //Refresh is rejected and the app returns to Login
     }
 
     fun consumeMessages() {

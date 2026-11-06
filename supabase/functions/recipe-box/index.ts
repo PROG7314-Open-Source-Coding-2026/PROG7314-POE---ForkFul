@@ -1,6 +1,6 @@
 //Recipe box management
 
-import { errorResponse, handleOptions, json, respondToError, requireUser } from "../_shared/forkful.ts";
+import { errorResponse, handleOptions, isUuid, json, respondToError, requireUser } from "../_shared/forkful.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return handleOptions();
@@ -56,7 +56,7 @@ Deno.serve(async (req: Request) => {
       const body = await req.json();
       const recipeId = String(body.recipeId ?? "");
       const cooked = body.cooked !== false;
-      if (!recipeId) return errorResponse("recipeId is required", 400);
+      if (!isUuid(recipeId)) return errorResponse("recipeId must be a valid id", 400);
 
       const { error } = await admin
         .from("user_swipes")
@@ -68,7 +68,31 @@ Deno.serve(async (req: Request) => {
       return json({ status: "ok" });
     }
 
-    return errorResponse("Use GET or POST", 405);
+    //Unsave: the recipe leaves the Recipe Box and stays out of the deck
+    if (req.method === "DELETE") {
+      const recipeId = new URL(req.url).searchParams.get("recipeId");
+      if (!isUuid(recipeId)) return errorResponse("recipeId must be a valid id", 400);
+
+      const { error } = await admin
+        .from("user_swipes")
+        .update({ direction: "LEFT", cooked_at: null })
+        .eq("user_id", userId)
+        .eq("recipe_id", recipeId);
+      if (error) return errorResponse(error.message, 500);
+
+      //Drop the basket items this recipe added that are not ticked off yet
+      const { error: basketError } = await admin
+        .from("grocery_items")
+        .delete()
+        .eq("user_id", userId)
+        .eq("recipe_id", recipeId)
+        .eq("is_checked", false);
+      if (basketError) return errorResponse(basketError.message, 500);
+
+      return json({ status: "unsaved" });
+    }
+
+    return errorResponse("Use GET, POST or DELETE", 405);
   } catch (error) {
     return respondToError(error);
   }

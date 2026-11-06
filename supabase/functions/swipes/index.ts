@@ -4,7 +4,7 @@
 // Request : { recipeId, moodProfileId, direction: "RIGHT"|"LEFT" }
 // Response: { status, swipeId, updatedTagPoints: [{ moodProfileKey, tagName, points }] }
 
-import { errorResponse, handleOptions, json, pantryMatches, respondToError, requireUser } from "../_shared/forkful.ts";
+import { errorResponse, handleOptions, isUuid, json, normalizeIngredient, pantryMatches, respondToError, requireUser } from "../_shared/forkful.ts";
 
 const RIGHT_DELTA = 2;
 const LEFT_DELTA = -1;
@@ -21,7 +21,7 @@ Deno.serve(async (req: Request) => {
     const recipeId = String(body.recipeId ?? "");
     const moodProfileId = String(body.moodProfileId ?? "comfort").toLowerCase();
     const direction = String(body.direction ?? "").toUpperCase();
-    if (!recipeId) return errorResponse("recipeId is required", 400);
+    if (!isUuid(recipeId)) return errorResponse("recipeId must be a valid id", 400);
     if (direction !== "RIGHT" && direction !== "LEFT") {
       return errorResponse("direction must be RIGHT or LEFT", 400);
     }
@@ -103,8 +103,9 @@ Deno.serve(async (req: Request) => {
         .from("grocery_items")
         .select("ingredient_name")
         .eq("user_id", userId);
+      //Normalised names so "Tomatoes" and "tomato" are not added twice
       const basketNames = new Set(
-        (basket ?? []).map((row) => (row.ingredient_name as string).toLowerCase()),
+        (basket ?? []).map((row) => normalizeIngredient(row.ingredient_name as string)),
       );
 
       const ingredients = recipe.ingredients as Array<{
@@ -118,13 +119,14 @@ Deno.serve(async (req: Request) => {
         const inPantry = pantryNames.some((pantryName) =>
           pantryMatches(pantryName, ingredient.name)
         );
-        const inBasket = basketNames.has(ingredient.name.toLowerCase());
+        const inBasket = basketNames.has(normalizeIngredient(ingredient.name));
         return !inPantry && !inBasket;
       });
 
       if (missing.length > 0) {
         const rows = missing.map((ingredient) => ({
           user_id: userId,
+          recipe_id: recipeId,
           ingredient_name: ingredient.name,
           quantity: ingredient.quantity,
           unit: ingredient.unit,

@@ -1,5 +1,7 @@
 package com.emeris.forkful.core.network
 
+import com.emeris.forkful.data.remote.dto.AddGroceryItemRequest
+import com.emeris.forkful.data.remote.dto.AddGroceryItemResponse
 import com.emeris.forkful.data.remote.dto.AddPantryItemRequest
 import com.emeris.forkful.data.remote.dto.AddPantryItemResponse
 import com.emeris.forkful.data.remote.dto.AuthResponse
@@ -15,6 +17,7 @@ import com.emeris.forkful.data.remote.dto.StatusResponse
 import com.emeris.forkful.data.remote.dto.SwipeRequest
 import com.emeris.forkful.data.remote.dto.SwipeResponse
 import com.emeris.forkful.data.remote.dto.ToggleGroceryItemRequest
+import com.emeris.forkful.data.remote.dto.UpdatePantryItemRequest
 import com.emeris.forkful.data.remote.dto.UpdatePreferencesRequest
 import com.emeris.forkful.data.remote.dto.UserPreferencesDto
 import retrofit2.http.Body
@@ -40,7 +43,8 @@ interface ForkfulApi {
         @Query("maxPrepTime") maxPrepTime: Int? = null,
         @Query("minRating") minRating: Double? = null,
         @Query("difficulty") difficulty: String? = null,
-        @Query("search") search: String? = null
+        @Query("search") search: String? = null,
+        @Query("excludeSwiped") excludeSwiped: Boolean? = null
     ): List<RecipeDeckItemDto>
 
     @GET("functions/v1/recipe-detail")
@@ -56,12 +60,21 @@ interface ForkfulApi {
     @POST("functions/v1/recipe-box")
     suspend fun markCooked(@Body body: MarkCookedRequest): StatusResponse
 
+    @DELETE("functions/v1/recipe-box")
+    suspend fun unsaveRecipe(@Query("recipeId") recipeId: String): StatusResponse
+
     //Pantry (FR-17..20)
     @GET("functions/v1/pantry")
     suspend fun pantry(): List<PantryItemDto>
 
     @POST("functions/v1/pantry")
     suspend fun addPantryItem(@Body body: AddPantryItemRequest): AddPantryItemResponse
+
+    @PUT("functions/v1/pantry")
+    suspend fun updatePantryItem(
+        @Query("pantryItemId") pantryItemId: String,
+        @Body body: UpdatePantryItemRequest
+    ): StatusResponse
 
     @DELETE("functions/v1/pantry")
     suspend fun deletePantryItem(@Query("pantryItemId") pantryItemId: String): StatusResponse
@@ -72,6 +85,15 @@ interface ForkfulApi {
     //Basket (FR-21..24)
     @GET("functions/v1/groceries")
     suspend fun groceries(): List<GroceryAisleDto>
+
+    @POST("functions/v1/groceries")
+    suspend fun addGroceryItem(@Body body: AddGroceryItemRequest): AddGroceryItemResponse
+
+    @DELETE("functions/v1/groceries")
+    suspend fun clearGroceries(@Query("scope") scope: String): StatusResponse
+
+    @DELETE("functions/v1/groceries-item")
+    suspend fun deleteGroceryItem(@Query("itemId") itemId: String): StatusResponse
 
     @PUT("functions/v1/groceries-item")
     suspend fun toggleGroceryItem(

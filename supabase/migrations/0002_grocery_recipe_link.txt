@@ -1,0 +1,15 @@
+-- ============================================================================
+-- Forkful POE - link basket items to the recipe that added them
+-- Run in the Supabase SQL editor after 0001_forkful_init.
+-- Safe to run more than once.
+--
+-- recipe_id is set when a RIGHT swipe adds missing ingredients, so unsaving
+-- that recipe can remove its unticked items. Items added by hand keep NULL.
+-- ============================================================================
+
+alter table public.grocery_items
+    add column if not exists recipe_id uuid
+        references public.recipes (recipe_id) on delete set null;
+
+create index if not exists grocery_items_recipe_idx
+    on public.grocery_items (user_id, recipe_id);

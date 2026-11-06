@@ -17,7 +17,7 @@
 
 ## 🎥 Comprehensive Demonstration Video
 
-* **Video Walkthrough Link**: [Watch the Forkful Final POE Walkthrough on YouTube](https://youtu.be/L_7r36ZJenM)
+* **Part 3 Video Walkthrough Link**: https://youtu.be/zNACuQhb-tI
 * **Device Target**: Demonstrated natively on a physical Android mobile device.
 
 ### Video Verification Points Breakdown

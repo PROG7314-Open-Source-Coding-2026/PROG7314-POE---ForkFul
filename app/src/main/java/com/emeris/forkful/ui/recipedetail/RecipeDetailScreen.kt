@@ -178,30 +178,40 @@ fun RecipeDetailScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Column {
-                                        Text(
-                                            text = recipe.category,
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = AccentGreen
-                                        )
-                                        Text(
-                                            text = "${recipe.ingredients.size} ingredients",
-                                            fontSize = 13.sp,
-                                            color = TextMuted
-                                        )
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .background(CardSurface.copy(alpha = 0.92f))
+                                            .border(1.dp, CardBorder, RoundedCornerShape(14.dp))
+                                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                                    ) {
+                                        Column {
+                                            Text(
+                                                text = recipe.category,
+                                                fontSize = 15.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = AccentGreen
+                                            )
+                                            Text(
+                                                text = "${recipe.ingredients.size} ingredients",
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                color = TextMuted
+                                            )
+                                        }
                                     }
                                     IconButton(
                                         onClick = onClose,
                                         modifier = Modifier
-                                            .size(36.dp)
+                                            .size(38.dp)
                                             .clip(CircleShape)
-                                            .background(Color.Black.copy(alpha = 0.45f))
+                                            .background(CardSurface.copy(alpha = 0.92f))
+                                            .border(1.dp, CardBorder, CircleShape)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Close,
                                             contentDescription = "Close",
-                                            tint = TrueWhite,
+                                            tint = TextCharcoal,
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }

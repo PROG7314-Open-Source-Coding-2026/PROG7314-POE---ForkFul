@@ -166,25 +166,53 @@ class SessionManager(private val context: Context) : TokenStore {
         securePrefs.edit().putBoolean(KEY_BIOMETRIC_LOCK, enabled).apply()
     }
 
+    // Fast synchronous cache for cold-start launch without UI flicker
+    fun getCachedPrefs(): LocalPrefs {
+        val fastTheme = securePrefs.getString(KEY_THEME_FAST, null) ?: "light"
+        val fastLang = securePrefs.getString(KEY_LANGUAGE_FAST, null) ?: "en"
+        val fastNotif = securePrefs.getBoolean(KEY_NOTIFICATIONS_FAST, true)
+        val fastBio = securePrefs.getBoolean(KEY_BIOMETRIC_LOCK, false)
+        return LocalPrefs(
+            theme = fastTheme,
+            language = fastLang,
+            notificationsEnabled = fastNotif,
+            biometricLockEnabled = fastBio
+        )
+    }
+
     //DataStore prefs
     val prefsFlow: Flow<LocalPrefs> = context.prefsDataStore.data.map { prefs ->
+        val current = getCachedPrefs()
+        val theme = prefs[KEY_THEME] ?: current.theme
+        val language = prefs[KEY_LANGUAGE] ?: current.language
+        val notifications = prefs[KEY_NOTIFICATIONS] ?: current.notificationsEnabled
+        val biometric = prefs[KEY_BIOMETRIC] ?: current.biometricLockEnabled
+
+        // Keep fast cache synchronized with DataStore disk emissions
+        securePrefs.edit()
+            .putString(KEY_THEME_FAST, theme)
+            .putString(KEY_LANGUAGE_FAST, language)
+            .putBoolean(KEY_NOTIFICATIONS_FAST, notifications)
+            .putBoolean(KEY_BIOMETRIC_LOCK, biometric)
+            .apply()
+
         LocalPrefs(
-            theme = prefs[KEY_THEME] ?: "light",
-            language = prefs[KEY_LANGUAGE] ?: "en",
-            notificationsEnabled = prefs[KEY_NOTIFICATIONS] ?: true,
-            biometricLockEnabled = prefs[KEY_BIOMETRIC] ?: false
+            theme = theme,
+            language = language,
+            notificationsEnabled = notifications,
+            biometricLockEnabled = biometric
         )
     }
 
     suspend fun updatePrefs(update: (LocalPrefs) -> LocalPrefs) {
-        val current = LocalPrefs() //Default prefs
+        val current = getCachedPrefs()
         context.prefsDataStore.edit { prefs ->
             val next = update(
                 LocalPrefs(
                     theme = prefs[KEY_THEME] ?: current.theme,
                     language = prefs[KEY_LANGUAGE] ?: current.language,
-                    notificationsEnabled = prefs[KEY_NOTIFICATIONS] ?: true,
-                    biometricLockEnabled = prefs[KEY_BIOMETRIC] ?: false
+                    notificationsEnabled = prefs[KEY_NOTIFICATIONS] ?: current.notificationsEnabled,
+                    biometricLockEnabled = prefs[KEY_BIOMETRIC] ?: current.biometricLockEnabled
                 )
             )
             prefs[KEY_THEME] = next.theme
@@ -192,6 +220,14 @@ class SessionManager(private val context: Context) : TokenStore {
             prefs[KEY_NOTIFICATIONS] = next.notificationsEnabled
             prefs[KEY_BIOMETRIC] = next.biometricLockEnabled
             setBiometricLockEnabled(next.biometricLockEnabled)
+
+            // Immediately persist fast cache so synchronous lookups never flash old values
+            securePrefs.edit()
+                .putString(KEY_THEME_FAST, next.theme)
+                .putString(KEY_LANGUAGE_FAST, next.language)
+                .putBoolean(KEY_NOTIFICATIONS_FAST, next.notificationsEnabled)
+                .putBoolean(KEY_BIOMETRIC_LOCK, next.biometricLockEnabled)
+                .apply()
         }
     }
 
@@ -204,6 +240,9 @@ class SessionManager(private val context: Context) : TokenStore {
         const val KEY_EXPIRES_AT = "session_expires_at"
         const val KEY_ONBOARDED = "session_onboarded"
         const val KEY_BIOMETRIC_LOCK = "session_biometric_lock"
+        const val KEY_THEME_FAST = "session_theme_fast"
+        const val KEY_LANGUAGE_FAST = "session_language_fast"
+        const val KEY_NOTIFICATIONS_FAST = "session_notifications_fast"
 
         val SESSION_KEYS = listOf(
             KEY_TOKEN, KEY_USER_ID, KEY_EMAIL, KEY_DISPLAY_NAME, KEY_REFRESH_TOKEN, KEY_EXPIRES_AT

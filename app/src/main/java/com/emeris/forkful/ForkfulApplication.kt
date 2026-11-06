@@ -34,11 +34,11 @@ class AppContainer(context: Context) {
 
     val api = NetworkModule.createApi(sessionManager)
 
-    val authRepository = AuthRepositoryImpl(api, sessionManager)
+    val preferencesRepository = PreferencesRepositoryImpl(api, sessionManager)
+    val authRepository = AuthRepositoryImpl(api, sessionManager, preferencesRepository)
     val recipeRepository = RecipeRepositoryImpl(api)
     val pantryRepository = PantryRepositoryImpl(api)
     val groceryRepository = GroceryRepositoryImpl(api)
-    val preferencesRepository = PreferencesRepositoryImpl(api, sessionManager)
     val localPantryRepository = LocalPantryRepository(context)
 }
 

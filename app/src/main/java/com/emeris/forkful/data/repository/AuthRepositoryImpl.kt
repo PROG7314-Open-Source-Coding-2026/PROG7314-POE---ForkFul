@@ -20,6 +20,7 @@ import com.emeris.forkful.data.remote.dto.AuthResponse
 import com.emeris.forkful.data.remote.dto.SsoAuthRequest
 import com.emeris.forkful.domain.repository.AuthOutcome
 import com.emeris.forkful.domain.repository.AuthRepository
+import com.emeris.forkful.domain.repository.PreferencesRepository
 import com.emeris.forkful.core.session.Session
 import com.emeris.forkful.core.util.Validators
 import kotlinx.serialization.json.Json
@@ -30,7 +31,8 @@ import retrofit2.HttpException
 //Auth repository impl
 class AuthRepositoryImpl(
     private val api: ForkfulApi,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val preferencesRepository: PreferencesRepository? = null
 ) : AuthRepository {
 
     override suspend fun signInWithGoogle(
@@ -58,6 +60,8 @@ class AuthRepositoryImpl(
                     expiresAt = response.expiresAt
                 )
             )
+            // Pre-fetch cloud preferences immediately so theme/settings apply before navigating
+            runCatching { preferencesRepository?.getPreferences() }
             completeSignIn(response)
         } catch (e: HttpException) {
             throw Exception(extractServerError(e), e)
@@ -102,6 +106,8 @@ class AuthRepositoryImpl(
                     expiresAt = response.expiresAt
                 )
             )
+            // Pre-fetch cloud preferences immediately so theme/settings apply before navigating
+            runCatching { preferencesRepository?.getPreferences() }
             completeSignIn(response)
         } catch (e: HttpException) {
             throw Exception(extractServerError(e), e)

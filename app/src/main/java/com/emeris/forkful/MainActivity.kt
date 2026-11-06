@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.lifecycleScope
 import com.emeris.forkful.core.designsystem.ForkfulTheme
 import com.emeris.forkful.core.i18n.LocalForkfulStrings
 import com.emeris.forkful.core.i18n.getForkfulStrings
@@ -19,6 +20,7 @@ import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.core.session.LocalPrefs
 import com.emeris.forkful.ui.lock.AppLockScreen
 import com.emeris.forkful.ui.navigation.ForkfulApp
+import kotlinx.coroutines.launch
 
 /**
  * PROG7314 - Mobile Application Development (POE)
@@ -45,7 +47,16 @@ class MainActivity : FragmentActivity() {
         enableEdgeToEdge()
         ForkfulLogger.logLifecycle("MainActivity", "ON_CREATE")
 
-        val sessionManager = (application as ForkfulApplication).container.sessionManager
+        val container = (application as ForkfulApplication).container
+        val sessionManager = container.sessionManager
+        val preferencesRepository = container.preferencesRepository
+
+        // Immediately sync cloud preferences on cold start if a session exists
+        if (sessionManager.getSession() != null) {
+            lifecycleScope.launch {
+                preferencesRepository.getPreferences()
+            }
+        }
 
         // Cold launch biometric lock check
         if (sessionManager.isBiometricLockEnabled() && sessionManager.getSession() != null) {
@@ -65,7 +76,7 @@ class MainActivity : FragmentActivity() {
         })
 
         setContent {
-            val prefs by sessionManager.prefsFlow.collectAsState(initial = LocalPrefs())
+            val prefs by sessionManager.prefsFlow.collectAsState(initial = sessionManager.getCachedPrefs())
             val isDarkTheme = when (prefs.theme) {
                 "dark" -> true
                 "light" -> false

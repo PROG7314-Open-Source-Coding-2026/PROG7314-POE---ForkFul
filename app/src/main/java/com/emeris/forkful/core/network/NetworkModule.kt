@@ -150,7 +150,7 @@ object NetworkModule {
 
     fun createApi(
         sessionManager: SessionManager,
-        onRefreshRejected: () -> Unit = {}
+        onRefreshRejected: () -> Unit = { sessionManager.expireSession() }
     ): ForkfulApi {
         val client = OkHttpClient.Builder()
             .addInterceptor(AuthInterceptor(sessionManager))

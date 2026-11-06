@@ -32,7 +32,9 @@ class AppContainer(context: Context) {
 
     val sessionManager: SessionManager = SessionManager(context)
 
-    val api = NetworkModule.createApi(sessionManager)
+    val api = NetworkModule.createApi(sessionManager) {
+        sessionManager.expireSession()
+    }
 
     val preferencesRepository = PreferencesRepositoryImpl(api, sessionManager)
     val authRepository = AuthRepositoryImpl(api, sessionManager, preferencesRepository)

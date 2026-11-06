@@ -15,3 +15,5 @@ data class NotificationModel(
     val type: NotificationType,
     val isUnread: Boolean = false
 )
+
+//------------------------------End-Of-File------------------------------//

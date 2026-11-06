@@ -1,5 +1,8 @@
 package com.emeris.forkful.ui.notifications
 
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,7 +24,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.DinnerDining
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -45,6 +52,7 @@ import com.emeris.forkful.core.designsystem.PureWhite
 import com.emeris.forkful.core.designsystem.TextCharcoal
 import com.emeris.forkful.core.designsystem.TextMuted
 import com.emeris.forkful.core.logging.ForkfulLogger
+import com.emeris.forkful.core.notification.NotificationHelper
 import com.emeris.forkful.data.repository.MockData
 import com.emeris.forkful.domain.model.NotificationModel
 import com.emeris.forkful.domain.model.NotificationType
@@ -53,6 +61,19 @@ import com.emeris.forkful.domain.model.NotificationType
 fun NotificationsScreen(
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            NotificationHelper.showNotification(
+                context = context,
+                title = "Forkful Alert: Spinach Expiring!",
+                body = "Your spinach expires today! Tap to view 3 quick recipes to use it up."
+            )
+        }
+    }
+
     LaunchedEffect(Unit) {
         ForkfulLogger.logLifecycle("NotificationsScreen", "ON_CREATE")
     }
@@ -149,7 +170,50 @@ fun NotificationsScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(36.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (NotificationHelper.hasNotificationPermission(context)) {
+                        NotificationHelper.showNotification(
+                            context = context,
+                            title = "Forkful Alert: Spinach Expiring!",
+                            body = "Your spinach expires today! Tap to view 3 quick recipes to use it up."
+                        )
+                    } else {
+                        permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                } else {
+                    NotificationHelper.showNotification(
+                        context = context,
+                        title = "Forkful Alert: Spinach Expiring!",
+                        body = "Your spinach expires today! Tap to view 3 quick recipes to use it up."
+                    )
+                }
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = ForestGreen),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Notifications,
+                contentDescription = null,
+                tint = PureWhite,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Trigger Real-time Notification (FCM/Alert)",
+                color = PureWhite,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -255,3 +319,5 @@ fun RecentNotificationCard(notification: NotificationModel) {
         }
     }
 }
+
+//------------------------------End-Of-File------------------------------//

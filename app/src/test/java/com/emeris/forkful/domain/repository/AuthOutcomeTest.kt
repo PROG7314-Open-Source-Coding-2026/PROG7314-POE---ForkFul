@@ -27,3 +27,5 @@ class AuthOutcomeTest {
         assertFalse(AuthOutcome.from(isNewUser = false, serverOnboarded = null).needsOnboarding)
     }
 }
+
+//------------------------------End-Of-File------------------------------//

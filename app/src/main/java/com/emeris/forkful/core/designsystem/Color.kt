@@ -74,3 +74,5 @@ val PantryBadgeText: Color
 val ButtonGreen: Color
     @Composable
     get() = if (LocalIsDarkTheme.current) Color(0xFF1D784C) else Color(0xFF085434)
+
+//------------------------------End-Of-File------------------------------//

@@ -52,3 +52,5 @@ data class PantryMatchDto(
     val matchPercentage: Int,
     val missingIngredients: List<IngredientDto> = emptyList()
 )
+
+//------------------------------End-Of-File------------------------------//

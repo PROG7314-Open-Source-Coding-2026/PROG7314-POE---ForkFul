@@ -24,3 +24,5 @@ sealed class Screen(val route: String) {
     }
     object Notifications : Screen("notifications")
 }
+
+//------------------------------End-Of-File------------------------------//

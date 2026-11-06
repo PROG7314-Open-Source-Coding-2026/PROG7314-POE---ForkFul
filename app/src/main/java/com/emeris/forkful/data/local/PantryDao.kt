@@ -24,3 +24,5 @@ interface PantryDao {
     @Query("UPDATE pantry_items SET isPendingSync = 0 WHERE id = :id")
     suspend fun markSynced(id: String)
 }
+
+//------------------------------End-Of-File------------------------------//

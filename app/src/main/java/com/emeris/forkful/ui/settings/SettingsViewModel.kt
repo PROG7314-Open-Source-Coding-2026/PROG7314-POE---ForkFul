@@ -35,7 +35,7 @@ data class SettingsUiState(
 class SettingsViewModel(
     private val preferencesRepository: PreferencesRepository,
     private val authRepository: AuthRepository,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager? = null
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsUiState())
@@ -119,12 +119,12 @@ class SettingsViewModel(
 
     //Debug builds only: force the token states used in the expiry tests
     fun debugExpireAccessToken() {
-        sessionManager.debugBreakAccessToken()
+        sessionManager?.debugBreakAccessToken()
         load() //Next call 401s, refreshes and succeeds
     }
 
     fun debugExpireSession() {
-        sessionManager.debugBreakAllTokens()
+        sessionManager?.debugBreakAllTokens()
         load() //Refresh is rejected and the app returns to Login
     }
 
@@ -140,3 +140,5 @@ class SettingsViewModel(
         biometricLockEnabled = update.biometricLockEnabled ?: biometricLockEnabled
     )
 }
+
+//------------------------------End-Of-File------------------------------//

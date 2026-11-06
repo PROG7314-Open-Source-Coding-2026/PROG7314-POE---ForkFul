@@ -65,6 +65,7 @@ import com.emeris.forkful.core.designsystem.SubtleCircleIcon
 import com.emeris.forkful.core.designsystem.TextCharcoal
 import com.emeris.forkful.core.designsystem.TextMuted
 import com.emeris.forkful.core.designsystem.TrueWhite
+import com.emeris.forkful.core.i18n.currentStrings
 import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.domain.model.PantryItem
 import com.emeris.forkful.domain.model.PantryMatch
@@ -81,6 +82,7 @@ fun PantryScreen(
     onNavigateTo: (String) -> Unit,
     onRecipeSelected: (String) -> Unit
 ) {
+    val strings = currentStrings()
     LaunchedEffect(Unit) {
         ForkfulLogger.logLifecycle("PantryScreen", "ON_CREATE")
     }
@@ -166,7 +168,7 @@ fun PantryScreen(
                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
                         ) {
                             Text(
-                                text = "My Pantry",
+                                text = strings.pantryTitle,
                                 fontFamily = FontFamily.Serif,
                                 fontSize = 28.sp,
                                 color = TextCharcoal
@@ -181,9 +183,9 @@ fun PantryScreen(
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = if (uiState.isOffline) {
-                                        "Offline – showing saved items"
+                                        strings.pantryOfflineBanner
                                     } else {
-                                        "Last synced at ${uiState.lastSynced}"
+                                        "${strings.pantrySyncedAt} ${uiState.lastSynced}"
                                     },
                                     fontSize = 12.sp,
                                     color = if (uiState.isOffline) AlertRed else TextMuted
@@ -499,3 +501,5 @@ fun PantryItemRow(
         }
     }
 }
+
+//------------------------------End-Of-File------------------------------//

@@ -77,3 +77,5 @@ class RecipeBoxViewModel(
         searchInput.value = query
     }
 }
+
+//------------------------------End-Of-File------------------------------//

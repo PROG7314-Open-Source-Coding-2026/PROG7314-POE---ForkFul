@@ -20,3 +20,5 @@ inline fun <reified VM : ViewModel> containerViewModel(
         }
     )
 }
+
+//------------------------------End-Of-File------------------------------//

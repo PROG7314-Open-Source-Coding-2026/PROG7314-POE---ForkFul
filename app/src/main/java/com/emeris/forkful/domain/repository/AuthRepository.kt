@@ -24,3 +24,5 @@ interface AuthRepository {
     fun currentSession(): Session?
     fun signOut()
 }
+
+//------------------------------End-Of-File------------------------------//

@@ -53,3 +53,5 @@ data class MarkCookedRequest(
     val recipeId: String,
     val cooked: Boolean = true
 )
+
+//------------------------------End-Of-File------------------------------//

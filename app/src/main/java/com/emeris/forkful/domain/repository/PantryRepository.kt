@@ -11,3 +11,5 @@ interface PantryRepository {
     suspend fun removeItem(pantryItemId: String): Result<Boolean>
     suspend fun getMatches(missingThreshold: Int = 2): Result<List<PantryMatch>>
 }
+
+//------------------------------End-Of-File------------------------------//

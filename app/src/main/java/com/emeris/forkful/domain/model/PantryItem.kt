@@ -12,3 +12,5 @@ data class PantryItem(
     //"500 g" style label for the edit sheet
     val quantityLabel: String get() = listOfNotNull(quantity, unit).joinToString(" ")
 }
+
+//------------------------------End-Of-File------------------------------//

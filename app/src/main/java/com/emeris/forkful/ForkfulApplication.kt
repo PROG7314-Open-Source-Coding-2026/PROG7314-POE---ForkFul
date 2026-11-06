@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import com.emeris.forkful.core.network.NetworkModule
+import com.emeris.forkful.core.notification.NotificationHelper
 import com.emeris.forkful.core.session.SessionManager
 import com.emeris.forkful.data.local.LocalPantryRepository
 import com.emeris.forkful.data.repository.AuthRepositoryImpl
@@ -38,6 +39,7 @@ class ForkfulApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
+        NotificationHelper.createNotificationChannel(this)
         registerActivityLifecycleCallbacks(LifecycleLogger())
         Log.i(TAG, "ForkfulApplication created - DI container ready")
     }
@@ -76,3 +78,5 @@ class ForkfulApplication : Application() {
         private const val TAG = "ForkfulApp"
     }
 }
+
+//------------------------------End-Of-File------------------------------//

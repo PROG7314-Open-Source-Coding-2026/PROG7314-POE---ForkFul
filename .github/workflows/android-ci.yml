@@ -29,11 +29,17 @@ jobs:
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --channel=3 "platforms;android-37.0" > /dev/null
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
 
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest --stacktrace
+
+      - name: Build signed production release APK
+        run: ./gradlew assembleRelease --stacktrace
 
       - name: Upload test reports on failure
         if: failure()

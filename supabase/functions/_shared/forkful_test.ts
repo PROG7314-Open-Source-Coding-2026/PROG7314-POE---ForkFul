@@ -49,3 +49,5 @@ Deno.test("uuid validation", () => {
   assertEquals(isUuid("1 or 1=1"), false, "injection text");
   assertEquals(isUuid(null), false, "null");
 });
+
+//------------------------------End-Of-File------------------------------//

@@ -8,3 +8,5 @@ interface PreferencesRepository {
     suspend fun getPreferences(): Result<UserPreferences>
     suspend fun updatePreferences(update: PreferencesUpdate): Result<Boolean>
 }
+
+//------------------------------End-Of-File------------------------------//

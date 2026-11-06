@@ -13,3 +13,5 @@ data class PantryItemEntity(
     val daysUntilExpiry: Int? = null,
     val isPendingSync: Boolean = false
 )
+
+//------------------------------End-Of-File------------------------------//

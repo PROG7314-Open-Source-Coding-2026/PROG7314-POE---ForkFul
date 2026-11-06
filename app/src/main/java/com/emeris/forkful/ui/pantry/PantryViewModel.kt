@@ -42,7 +42,7 @@ data class PantryUiState(
 
 class PantryViewModel(
     private val pantryRepository: PantryRepository,
-    private val localPantryRepository: LocalPantryRepository
+    private val localPantryRepository: LocalPantryRepository? = null
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PantryUiState())
@@ -62,8 +62,9 @@ class PantryViewModel(
     }
 
     private fun observeLocalPantry() {
+        val localRepo = localPantryRepository ?: return
         viewModelScope.launch {
-            localPantryRepository.getAll().collect { localItems ->
+            localRepo.getAll().collect { localItems ->
                 _state.update { current ->
                     if (current.items.isEmpty() || current.isOffline) {
                         current.copy(items = localItems, isLoading = false)
@@ -108,8 +109,9 @@ class PantryViewModel(
 
     // Send any items that were added offline to the server
     private fun syncPendingItems() {
+        val localRepo = localPantryRepository ?: return
         viewModelScope.launch {
-            val pending = localPantryRepository.getPendingSync()
+            val pending = localRepo.getPendingSync()
             if (pending.isEmpty()) return@launch
 
             ForkfulLogger.logAction("PANTRY", "Syncing ${pending.size} offline items")
@@ -120,7 +122,7 @@ class PantryViewModel(
                     unit = null,
                     expiryDate = null
                 ).onSuccess {
-                    localPantryRepository.markSynced(entity.id)
+                    localRepo.markSynced(entity.id)
                 }.onFailure { error ->
                     ForkfulLogger.logAction("PANTRY", "Failed to sync ${entity.name}: ${error.message}")
                 }
@@ -202,7 +204,7 @@ class PantryViewModel(
         viewModelScope.launch {
             pantryRepository.addItem(name, quantity, unit, expiryDate)
                 .onSuccess { item ->
-                    localPantryRepository.add(item.name, item.category)
+                    localPantryRepository?.add(item.name, item.category)
                     _state.update { current ->
                         current.copy(
                             isAdding = false,
@@ -213,7 +215,7 @@ class PantryViewModel(
                     loadMatches()
                 }
                 .onFailure {
-                    localPantryRepository.add(name.trim(), "Other")
+                    localPantryRepository?.add(name.trim(), "Other")
                     _state.update { current ->
                         current.copy(
                             isAdding = false,
@@ -232,14 +234,14 @@ class PantryViewModel(
         viewModelScope.launch {
             pantryRepository.removeItem(pantryItemId)
                 .onSuccess {
-                    localPantryRepository.remove(pantryItemId)
+                    localPantryRepository?.remove(pantryItemId)
                     _state.update { current ->
                         current.copy(items = current.items.filterNot { it.id == pantryItemId })
                     }
                     loadMatches()
                 }
                 .onFailure {
-                    localPantryRepository.remove(pantryItemId)
+                    localPantryRepository?.remove(pantryItemId)
                     _state.update { current ->
                         current.copy(
                             items = current.items.filterNot { it.id == pantryItemId },
@@ -254,3 +256,5 @@ class PantryViewModel(
         _state.update { it.copy(addSuccessMessage = null, errorMessage = null) }
     }
 }
+
+//------------------------------End-Of-File------------------------------//

@@ -110,3 +110,5 @@ class SwipeViewModel(
         loadDeck(_state.value.moodKey)
     }
 }
+
+//------------------------------End-Of-File------------------------------//

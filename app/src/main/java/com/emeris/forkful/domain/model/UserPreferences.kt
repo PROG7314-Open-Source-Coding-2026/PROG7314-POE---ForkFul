@@ -23,3 +23,5 @@ data class PreferencesUpdate(
     val seedCuisines: List<String>? = null,
     val resetTasteProfiles: Boolean? = null
 )
+
+//------------------------------End-Of-File------------------------------//

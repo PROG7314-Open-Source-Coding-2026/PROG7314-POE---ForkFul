@@ -25,3 +25,5 @@ interface RecipeRepository {
     suspend fun setCooked(recipeId: String, cooked: Boolean): Result<Boolean>
     suspend fun unsaveRecipe(recipeId: String): Result<Boolean>
 }
+
+//------------------------------End-Of-File------------------------------//

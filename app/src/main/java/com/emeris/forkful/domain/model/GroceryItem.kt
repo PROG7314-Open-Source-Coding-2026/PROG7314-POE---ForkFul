@@ -7,3 +7,5 @@ data class GroceryItem(
     val category: String,
     val isChecked: Boolean = false
 )
+
+//------------------------------End-Of-File------------------------------//

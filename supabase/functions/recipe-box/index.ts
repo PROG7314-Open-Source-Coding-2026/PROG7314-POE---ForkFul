@@ -58,12 +58,51 @@ Deno.serve(async (req: Request) => {
       const cooked = body.cooked !== false;
       if (!isUuid(recipeId)) return errorResponse("recipeId must be a valid id", 400);
 
-      const { error } = await admin
+      // Check if user already has a swipe entry for this recipe
+      const { data: existingSwipe, error: checkError } = await admin
         .from("user_swipes")
-        .update({ cooked_at: cooked ? new Date().toISOString() : null })
+        .select("swipe_id, mood_profile_key, direction")
         .eq("user_id", userId)
-        .eq("recipe_id", recipeId);
-      if (error) return errorResponse(error.message, 500);
+        .eq("recipe_id", recipeId)
+        .maybeSingle();
+      if (checkError) return errorResponse(checkError.message, 500);
+
+      const cookedAt = cooked ? new Date().toISOString() : null;
+
+      if (existingSwipe) {
+        // Update existing row: set cooked_at, and promote direction to RIGHT if cooked
+        const updatePayload: Record<string, unknown> = { cooked_at: cookedAt };
+        if (cooked) {
+          updatePayload.direction = "RIGHT";
+        }
+        const { error } = await admin
+          .from("user_swipes")
+          .update(updatePayload)
+          .eq("swipe_id", existingSwipe.swipe_id);
+        if (error) return errorResponse(error.message, 500);
+      } else if (cooked) {
+        // New entry: find mood_profile_key from recipe_tags or default to 'comfort'
+        const { data: recipeTag } = await admin
+          .from("recipe_tags")
+          .select("mood_profile_key")
+          .eq("recipe_id", recipeId)
+          .limit(1)
+          .maybeSingle();
+
+        const moodKey = recipeTag?.mood_profile_key ?? "comfort";
+
+        const { error } = await admin
+          .from("user_swipes")
+          .insert({
+            user_id: userId,
+            recipe_id: recipeId,
+            mood_profile_key: moodKey,
+            direction: "RIGHT",
+            cooked_at: cookedAt,
+            swiped_at: new Date().toISOString(),
+          });
+        if (error) return errorResponse(error.message, 500);
+      }
 
       return json({ status: "ok" });
     }
@@ -97,3 +136,5 @@ Deno.serve(async (req: Request) => {
     return respondToError(error);
   }
 });
+
+//------------------------------End-Of-File------------------------------//

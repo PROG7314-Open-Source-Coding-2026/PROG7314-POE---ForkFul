@@ -62,3 +62,5 @@ class ExploreSearchTest {
         assertEquals("", viewModel.state.value.searchQuery)
     }
 }
+
+//------------------------------End-Of-File------------------------------//

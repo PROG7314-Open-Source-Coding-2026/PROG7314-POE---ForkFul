@@ -147,6 +147,13 @@ class SessionManager(private val context: Context) : TokenStore {
         securePrefs.edit().putBoolean(KEY_ONBOARDED, onboarded).apply()
     }
 
+    //Biometric lock fast synchronous check
+    fun isBiometricLockEnabled(): Boolean = securePrefs.getBoolean(KEY_BIOMETRIC_LOCK, false)
+
+    fun setBiometricLockEnabled(enabled: Boolean) {
+        securePrefs.edit().putBoolean(KEY_BIOMETRIC_LOCK, enabled).apply()
+    }
+
     //DataStore prefs
     val prefsFlow: Flow<LocalPrefs> = context.prefsDataStore.data.map { prefs ->
         LocalPrefs(
@@ -172,6 +179,7 @@ class SessionManager(private val context: Context) : TokenStore {
             prefs[KEY_LANGUAGE] = next.language
             prefs[KEY_NOTIFICATIONS] = next.notificationsEnabled
             prefs[KEY_BIOMETRIC] = next.biometricLockEnabled
+            setBiometricLockEnabled(next.biometricLockEnabled)
         }
     }
 
@@ -183,6 +191,7 @@ class SessionManager(private val context: Context) : TokenStore {
         const val KEY_REFRESH_TOKEN = "session_refresh_token"
         const val KEY_EXPIRES_AT = "session_expires_at"
         const val KEY_ONBOARDED = "session_onboarded"
+        const val KEY_BIOMETRIC_LOCK = "session_biometric_lock"
 
         val SESSION_KEYS = listOf(
             KEY_TOKEN, KEY_USER_ID, KEY_EMAIL, KEY_DISPLAY_NAME, KEY_REFRESH_TOKEN, KEY_EXPIRES_AT
@@ -194,3 +203,5 @@ class SessionManager(private val context: Context) : TokenStore {
         val KEY_BIOMETRIC = booleanPreferencesKey("pref_biometric")
     }
 }
+
+//------------------------------End-Of-File------------------------------//

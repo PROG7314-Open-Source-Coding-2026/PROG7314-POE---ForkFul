@@ -108,3 +108,5 @@ interface ForkfulApi {
     @PUT("functions/v1/user-preferences")
     suspend fun updateUserPreferences(@Body body: UpdatePreferencesRequest): StatusResponse
 }
+
+//------------------------------End-Of-File------------------------------//

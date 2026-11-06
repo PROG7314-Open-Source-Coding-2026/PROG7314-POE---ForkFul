@@ -1,5 +1,6 @@
 package com.emeris.forkful.ui.settings
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -48,10 +49,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import com.emeris.forkful.BuildConfig
 import com.emeris.forkful.core.designsystem.BorderLight
 import com.emeris.forkful.core.designsystem.CreamBackground
@@ -60,6 +63,8 @@ import com.emeris.forkful.core.designsystem.PureWhite
 import com.emeris.forkful.core.designsystem.TextCharcoal
 import com.emeris.forkful.core.designsystem.TextMuted
 import com.emeris.forkful.core.logging.ForkfulLogger
+import com.emeris.forkful.core.security.BiometricHelper
+import com.emeris.forkful.core.security.BiometricStatus
 import com.emeris.forkful.core.session.SessionManager
 import com.emeris.forkful.ui.components.ForkfulBottomBar
 import com.emeris.forkful.ui.di.containerViewModel
@@ -71,6 +76,9 @@ fun SettingsScreen(
     onNavigateTo: (String) -> Unit,
     onLogout: () -> Unit
 ) {
+    val context = LocalContext.current
+    val activity = context as? FragmentActivity
+
     LaunchedEffect(Unit) {
         ForkfulLogger.logLifecycle("SettingsScreen", "ON_CREATE")
     }
@@ -293,7 +301,85 @@ fun SettingsScreen(
                         icon = Icons.Default.Fingerprint,
                         title = "Biometric lock (Final POE)",
                         checked = uiState.preferences.biometricLockEnabled,
-                        onCheckedChange = viewModel::setBiometricLock
+                        onCheckedChange = { targetEnabled ->
+                            if (targetEnabled) {
+                                when (BiometricHelper.checkStatus(context)) {
+                                    BiometricStatus.NO_HARDWARE -> {
+                                        Toast.makeText(
+                                            context,
+                                            "Biometric sensor is not available on this device",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                    BiometricStatus.NOT_ENROLLED -> {
+                                        Toast.makeText(
+                                            context,
+                                            "No biometrics enrolled. Please set up fingerprint or face unlock in Android Settings.",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                    BiometricStatus.UNAVAILABLE -> {
+                                        Toast.makeText(
+                                            context,
+                                            "Biometrics are currently unavailable",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                    BiometricStatus.READY -> {
+                                        if (activity != null) {
+                                            BiometricHelper.authenticate(
+                                                activity = activity,
+                                                title = "Enable Biometric Lock",
+                                                subtitle = "Verify identity to enable biometric security",
+                                                onSuccess = {
+                                                    viewModel.setBiometricLock(true)
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Biometric lock enabled",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                },
+                                                onError = { _, errString ->
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Verification cancelled: $errString",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                            )
+                                        } else {
+                                            viewModel.setBiometricLock(true)
+                                        }
+                                    }
+                                }
+                            } else {
+                                if (activity != null && BiometricHelper.checkStatus(context) == BiometricStatus.READY) {
+                                    BiometricHelper.authenticate(
+                                        activity = activity,
+                                        title = "Disable Biometric Lock",
+                                        subtitle = "Verify identity to disable biometric security",
+                                        onSuccess = {
+                                            viewModel.setBiometricLock(false)
+                                            Toast.makeText(
+                                                context,
+                                                "Biometric lock disabled",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        },
+                                        onError = { _, errString ->
+                                            Toast.makeText(
+                                                context,
+                                                "Verification cancelled: $errString",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    )
+                                } else {
+                                    viewModel.setBiometricLock(false)
+                                    Toast.makeText(context, "Biometric lock disabled", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
                     )
                 }
             }
@@ -503,3 +589,5 @@ private fun SettingsExpansionItem(
         )
     }
 }
+
+//------------------------------End-Of-File------------------------------//

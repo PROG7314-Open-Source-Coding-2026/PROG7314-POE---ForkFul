@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.google.services)
     id("com.google.devtools.ksp")
 }
 
@@ -38,9 +39,19 @@ android {
         )
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("release-key.jks")
+            storePassword = "forkful2026"
+            keyAlias = "forkful"
+            keyPassword = "forkful2026"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -84,10 +95,12 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.kotlinx.serialization.json)
 
-    //Google SSO
+    //Google SSO & Biometrics
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services)
     implementation(libs.google.id)
+    implementation(libs.androidx.biometric)
+    implementation(libs.firebase.messaging)
 
     //Session & prefs storage
     implementation(libs.androidx.datastore.preferences)
@@ -105,3 +118,5 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
+
+//------------------------------End-Of-File------------------------------//

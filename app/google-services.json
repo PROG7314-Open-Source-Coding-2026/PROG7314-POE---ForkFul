@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "631211122978",
+    "project_id": "cravematch-b6204",
+    "storage_bucket": "cravematch-b6204.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:631211122978:android:64d98b91f83b3a9d51c57b",
+        "android_client_info": {
+          "package_name": "com.appcraftstudios.cravematch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "631211122978-ut6c73iouplcodrgpn6u8r8d62m3ipsd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.appcraftstudios.cravematch",
+            "certificate_hash": "5f25f1898b8474fec8dc3811ac84edb6a2d674d7"
+          }
+        },
+        {
+          "client_id": "631211122978-rolrj333dkoehq3ugl7uno6efnpgl3r3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzb0hy8lHXDaArLqruJryGg2mlRmsSwBM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "631211122978-rolrj333dkoehq3ugl7uno6efnpgl3r3.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "631211122978-3puafjij3864sf3jmim7ur1lv33n1q2b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.appcraftstudios.cravematch"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:631211122978:android:440e7e631ea740f851c57b",
+        "android_client_info": {
+          "package_name": "com.emeris.forkful"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "631211122978-nm1p5nicutbslmnkfntbp4pg7m73hq04.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.emeris.forkful",
+            "certificate_hash": "5f25f1898b8474fec8dc3811ac84edb6a2d674d7"
+          }
+        },
+        {
+          "client_id": "631211122978-rolrj333dkoehq3ugl7uno6efnpgl3r3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzb0hy8lHXDaArLqruJryGg2mlRmsSwBM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "631211122978-rolrj333dkoehq3ugl7uno6efnpgl3r3.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "631211122978-3puafjij3864sf3jmim7ur1lv33n1q2b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.appcraftstudios.cravematch"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -26,3 +26,5 @@ data class Recipe(
     val ingredients: List<Ingredient> = emptyList(),
     val instructions: List<String> = emptyList()
 )
+
+//------------------------------End-Of-File------------------------------//

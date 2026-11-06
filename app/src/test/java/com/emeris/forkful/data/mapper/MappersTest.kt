@@ -96,3 +96,5 @@ class MappersTest {
         assertTrue(recipe.ingredients.first().inPantry)
     }
 }
+
+//------------------------------End-Of-File------------------------------//

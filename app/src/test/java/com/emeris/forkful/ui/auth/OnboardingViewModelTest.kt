@@ -174,3 +174,5 @@ class FakeAuthRepository : com.emeris.forkful.domain.repository.AuthRepository {
 
     override fun signOut() = Unit
 }
+
+//------------------------------End-Of-File------------------------------//

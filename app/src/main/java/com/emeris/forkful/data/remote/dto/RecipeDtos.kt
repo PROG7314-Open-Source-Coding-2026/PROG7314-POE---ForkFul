@@ -84,3 +84,5 @@ data class RecipeDetailDto(
     val inPantryCount: Int = 0,
     val totalIngredientsCount: Int = 0
 )
+
+//------------------------------End-Of-File------------------------------//

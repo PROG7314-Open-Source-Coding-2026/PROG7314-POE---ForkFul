@@ -25,3 +25,5 @@ data class SwipeResponse(
     val swipeId: String,
     val updatedTagPoints: List<TagPointDto> = emptyList()
 )
+
+//------------------------------End-Of-File------------------------------//

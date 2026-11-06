@@ -32,6 +32,7 @@ import com.emeris.forkful.core.designsystem.BorderLight
 import com.emeris.forkful.core.designsystem.ForestGreen
 import com.emeris.forkful.core.designsystem.PureWhite
 import com.emeris.forkful.core.designsystem.TextMuted
+import com.emeris.forkful.core.i18n.currentStrings
 import com.emeris.forkful.ui.navigation.Screen
 
 data class BottomNavItem(
@@ -45,12 +46,13 @@ fun ForkfulBottomBar(
     currentRoute: String,
     onNavigateTo: (String) -> Unit
 ) {
+    val strings = currentStrings()
     val items = listOf(
-        BottomNavItem(Screen.Explore.route, "Explore", Icons.Outlined.Explore),
-        BottomNavItem(Screen.RecipeBox.route, "Recipe Box", Icons.Outlined.AutoStories),
-        BottomNavItem(Screen.Pantry.route, "Pantry", Icons.Outlined.AllInbox),
-        BottomNavItem(Screen.Basket.route, "Basket", Icons.Outlined.ShoppingBasket),
-        BottomNavItem(Screen.Settings.route, "Settings", Icons.Outlined.Settings)
+        BottomNavItem(Screen.Explore.route, strings.navExplore, Icons.Outlined.Explore),
+        BottomNavItem(Screen.RecipeBox.route, strings.navRecipeBox, Icons.Outlined.AutoStories),
+        BottomNavItem(Screen.Pantry.route, strings.navPantry, Icons.Outlined.AllInbox),
+        BottomNavItem(Screen.Basket.route, strings.navBasket, Icons.Outlined.ShoppingBasket),
+        BottomNavItem(Screen.Settings.route, strings.navSettings, Icons.Outlined.Settings)
     )
 
     Column(
@@ -108,3 +110,5 @@ fun ForkfulBottomBar(
         }
     }
 }
+
+//------------------------------End-Of-File------------------------------//

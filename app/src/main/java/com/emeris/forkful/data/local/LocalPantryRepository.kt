@@ -39,3 +39,5 @@ class LocalPantryRepository(context: Context) {
 
     suspend fun markSynced(id: String) = dao.markSynced(id)
 }
+
+//------------------------------End-Of-File------------------------------//

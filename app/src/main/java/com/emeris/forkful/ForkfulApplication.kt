@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import com.emeris.forkful.core.network.NetworkModule
 import com.emeris.forkful.core.session.SessionManager
+import com.emeris.forkful.data.local.LocalPantryRepository
 import com.emeris.forkful.data.repository.AuthRepositoryImpl
 import com.emeris.forkful.data.repository.GroceryRepositoryImpl
 import com.emeris.forkful.data.repository.PantryRepositoryImpl
@@ -18,13 +19,14 @@ class AppContainer(context: Context) {
 
     val sessionManager: SessionManager = SessionManager(context)
 
-    val api = NetworkModule.createApi(sessionManager) { sessionManager.expireSession() }
+    val api = NetworkModule.createApi(sessionManager)
 
     val authRepository = AuthRepositoryImpl(api, sessionManager)
     val recipeRepository = RecipeRepositoryImpl(api)
     val pantryRepository = PantryRepositoryImpl(api)
     val groceryRepository = GroceryRepositoryImpl(api)
     val preferencesRepository = PreferencesRepositoryImpl(api, sessionManager)
+    val localPantryRepository = LocalPantryRepository(context)
 }
 
 //App entry point

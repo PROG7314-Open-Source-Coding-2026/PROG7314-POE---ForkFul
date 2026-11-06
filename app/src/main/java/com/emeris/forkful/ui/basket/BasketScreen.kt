@@ -30,8 +30,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -401,7 +399,7 @@ fun BasketScreen(
     }
 
     if (showAddDialog) {
-        AddBasketItemDialog(
+        AddBasketItemBottomSheet(
             isSubmitting = uiState.isSubmitting,
             onDismiss = { showAddDialog = false },
             onConfirm = { name, quantity ->
@@ -431,79 +429,6 @@ fun BasketScreen(
             containerColor = PureWhite
         )
     }
-}
-
-@Composable
-private fun AddBasketItemDialog(
-    isSubmitting: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: (name: String, quantity: String) -> Unit
-) {
-    var name by remember { mutableStateOf("") }
-    var quantity by remember { mutableStateOf("") }
-    var showError by remember { mutableStateOf(false) }
-    val fieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = TextCharcoal,
-        unfocusedTextColor = TextCharcoal,
-        focusedBorderColor = ForestGreen,
-        unfocusedBorderColor = BorderLight,
-        focusedLabelColor = ForestGreen,
-        unfocusedLabelColor = TextMuted,
-        cursorColor = ForestGreen
-    )
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Add to basket", fontFamily = FontFamily.Serif, color = TextCharcoal) },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = {
-                        name = it.take(80)
-                        showError = false
-                    },
-                    label = { Text("Item (e.g. Dish soap, Bread)") },
-                    singleLine = true,
-                    isError = showError,
-                    supportingText = if (showError) {
-                        { Text("Please enter an item name") }
-                    } else {
-                        null
-                    },
-                    colors = fieldColors,
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = quantity,
-                    onValueChange = { quantity = it.take(30) },
-                    label = { Text("Amount (optional, e.g. 2 tins)") },
-                    singleLine = true,
-                    colors = fieldColors,
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                enabled = !isSubmitting,
-                onClick = {
-                    if (name.isBlank()) showError = true else onConfirm(name, quantity)
-                }
-            ) {
-                Text(if (isSubmitting) "Adding..." else "Add", color = ForestGreen)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel", color = TextMuted)
-            }
-        },
-        containerColor = PureWhite
-    )
 }
 
 //------------------------------End-Of-File------------------------------//

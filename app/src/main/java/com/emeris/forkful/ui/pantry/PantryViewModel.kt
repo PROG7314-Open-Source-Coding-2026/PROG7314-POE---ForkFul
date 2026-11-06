@@ -84,9 +84,14 @@ class PantryViewModel(
         viewModelScope.launch {
             localRepo.getAll().collect { localItems ->
                 _state.update { current ->
-                    if (current.items.isEmpty() || current.isOffline) {
+                    if (localItems.isNotEmpty()) {
+                        // Display cached offline stock immediately and dismiss loading spinner
+                        current.copy(items = localItems, isLoading = false)
+                    } else if (current.isOffline) {
+                        // Confirmed offline with zero cached items: display empty pantry state
                         current.copy(items = localItems, isLoading = false)
                     } else {
+                        // Local room is empty but remote fetch is in-flight: keep loading indicator active
                         current
                     }
                 }
@@ -95,7 +100,7 @@ class PantryViewModel(
     }
 
     fun loadPantry() {
-        _state.update { it.copy(isLoading = true, errorMessage = null, isOffline = false) }
+        _state.update { it.copy(isLoading = it.items.isEmpty(), errorMessage = null, isOffline = false) }
         viewModelScope.launch {
             pantryRepository.getPantry()
                 .onSuccess { items ->

@@ -4,8 +4,17 @@ import com.emeris.forkful.core.session.Session
 
 //Auth outcome model
 data class AuthOutcome(
-    val isNewUser: Boolean
-)
+    val isNewUser: Boolean,
+    val needsOnboarding: Boolean = isNewUser
+) {
+    companion object {
+        //Server flag wins; older backends only send isNewUser
+        fun from(isNewUser: Boolean, serverOnboarded: Boolean?): AuthOutcome = AuthOutcome(
+            isNewUser = isNewUser,
+            needsOnboarding = serverOnboarded?.not() ?: isNewUser
+        )
+    }
+}
 
 //Auth repository contract
 interface AuthRepository {

@@ -23,6 +23,15 @@ data class AddPantryItemRequest(
     val expiryDate: String? = null
 )
 
+//Edit pantry item req (null fields are left unchanged)
+@Serializable
+data class UpdatePantryItemRequest(
+    val name: String,
+    val quantity: String? = null,
+    val unit: String? = null,
+    val expiryDate: String? = null
+)
+
 //Add pantry item res
 @Serializable
 data class AddPantryItemResponse(

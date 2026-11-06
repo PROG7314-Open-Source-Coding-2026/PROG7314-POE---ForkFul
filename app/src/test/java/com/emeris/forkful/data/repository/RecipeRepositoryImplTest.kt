@@ -134,4 +134,33 @@ class RecipeRepositoryImplTest {
         assertTrue(body.contains("\"recipeId\":\"r-3\""))
         assertTrue(body.contains("\"cooked\":true"))
     }
+
+    @Test
+    fun `unsaveRecipe sends DELETE to recipe-box`() = runTest {
+        server.enqueue(MockResponse().setBody("""{ "status": "unsaved" }"""))
+
+        assertTrue(repository.unsaveRecipe("r-4").getOrThrow())
+
+        val request = server.takeRequest()
+        assertEquals("DELETE", request.method)
+        assertEquals("/functions/v1/recipe-box?recipeId=r-4", request.path)
+    }
+
+    @Test
+    fun `swipe stack deck query asks to exclude swiped recipes`() = runTest {
+        server.enqueue(MockResponse().setBody("[]"))
+
+        repository.getDeck(DeckQuery(mood = "asian", limit = 50, excludeSwiped = true)).getOrThrow()
+
+        assertTrue(server.takeRequest().path!!.contains("excludeSwiped=true"))
+    }
+
+    @Test
+    fun `explore deck query does not exclude swiped recipes`() = runTest {
+        server.enqueue(MockResponse().setBody("[]"))
+
+        repository.getDeck(DeckQuery(mood = "asian")).getOrThrow()
+
+        assertTrue(!server.takeRequest().path!!.contains("excludeSwiped"))
+    }
 }

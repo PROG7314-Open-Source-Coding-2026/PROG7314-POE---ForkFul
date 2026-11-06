@@ -25,6 +25,22 @@ data class ToggleGroceryItemRequest(
     val isChecked: Boolean
 )
 
+//Manual basket item req
+@Serializable
+data class AddGroceryItemRequest(
+    val name: String,
+    val quantity: String? = null,
+    val unit: String? = null
+)
+
+//Manual basket item res
+@Serializable
+data class AddGroceryItemResponse(
+    val itemId: String,
+    val aisle: String? = null,
+    val status: String
+)
+
 //Status res
 @Serializable
 data class StatusResponse(

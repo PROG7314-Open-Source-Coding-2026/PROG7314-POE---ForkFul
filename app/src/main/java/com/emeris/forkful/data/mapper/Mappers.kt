@@ -80,7 +80,10 @@ fun PantryItemDto.toDomain(): PantryItem = PantryItem(
     id = pantryItemId,
     name = name,
     category = category ?: "Other",
-    daysUntilExpiry = PantryUtils.daysUntilExpiry(expiryDate)
+    daysUntilExpiry = PantryUtils.daysUntilExpiry(expiryDate),
+    quantity = quantity,
+    unit = unit,
+    expiryDate = expiryDate
 )
 
 fun PantryMatchDto.toDomain(): PantryMatch = PantryMatch(

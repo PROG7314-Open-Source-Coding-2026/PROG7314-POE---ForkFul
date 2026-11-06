@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.core.util.PantryUtils
+import com.emeris.forkful.data.local.LocalPantryRepository
 import com.emeris.forkful.domain.model.PantryItem
 import com.emeris.forkful.domain.model.PantryMatch
 import com.emeris.forkful.domain.repository.PantryRepository
@@ -13,14 +14,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 data class PantryUiState(
     val isLoading: Boolean = true,
     val isAdding: Boolean = false,
+    val isUpdating: Boolean = false,
     val errorMessage: String? = null,
     val items: List<PantryItem> = emptyList(),
     val matches: List<PantryMatch> = emptyList(),
-    val addSuccessMessage: String? = null
+    val addSuccessMessage: String? = null,
+    val isOffline: Boolean = false,
+    val lastSynced: String? = null
 ) {
     @Suppress("unused")
     val expiringSoon: List<PantryItem>
@@ -35,11 +41,14 @@ data class PantryUiState(
 }
 
 class PantryViewModel(
-    private val pantryRepository: PantryRepository
+    private val pantryRepository: PantryRepository,
+    private val localPantryRepository: LocalPantryRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PantryUiState())
     val state: StateFlow<PantryUiState> = _state.asStateFlow()
+
+    private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     @Suppress("unused")
     val quickAddSuggestions = listOf(
@@ -48,22 +57,79 @@ class PantryViewModel(
     )
 
     init {
+        observeLocalPantry()
         loadPantry()
     }
 
+    private fun observeLocalPantry() {
+        viewModelScope.launch {
+            localPantryRepository.getAll().collect { localItems ->
+                _state.update { current ->
+                    if (current.items.isEmpty() || current.isOffline) {
+                        current.copy(items = localItems, isLoading = false)
+                    } else {
+                        current
+                    }
+                }
+            }
+        }
+    }
+
     fun loadPantry() {
-        _state.update { it.copy(isLoading = true, errorMessage = null) }
+        _state.update { it.copy(isLoading = true, errorMessage = null, isOffline = false) }
         viewModelScope.launch {
             pantryRepository.getPantry()
                 .onSuccess { items ->
-                    _state.update { it.copy(isLoading = false, items = items) }
+                    val now = LocalDateTime.now().format(timeFormatter)
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            items = items,
+                            isOffline = false,
+                            lastSynced = now
+                        )
+                    }
+                    // Sync any offline changes now that we are online
+                    syncPendingItems()
                     loadMatches()
                 }
                 .onFailure { error ->
                     _state.update {
-                        it.copy(isLoading = false, errorMessage = error.message ?: "Could not load your pantry")
+                        it.copy(
+                            isLoading = false,
+                            isOffline = true,
+                            errorMessage = null
+                        )
                     }
+                    ForkfulLogger.logAction("PANTRY", "Using local data (offline): ${error.message}")
                 }
+        }
+    }
+
+    // Send any items that were added offline to the server
+    private fun syncPendingItems() {
+        viewModelScope.launch {
+            val pending = localPantryRepository.getPendingSync()
+            if (pending.isEmpty()) return@launch
+
+            ForkfulLogger.logAction("PANTRY", "Syncing ${pending.size} offline items")
+            pending.forEach { entity ->
+                pantryRepository.addItem(
+                    name = entity.name,
+                    quantity = null,
+                    unit = null,
+                    expiryDate = null
+                ).onSuccess {
+                    localPantryRepository.markSynced(entity.id)
+                }.onFailure { error ->
+                    ForkfulLogger.logAction("PANTRY", "Failed to sync ${entity.name}: ${error.message}")
+                }
+            }
+            // Refresh from server after sync
+            pantryRepository.getPantry().onSuccess { items ->
+                val now = LocalDateTime.now().format(timeFormatter)
+                _state.update { it.copy(items = items, lastSynced = now, isOffline = false) }
+            }
         }
     }
 
@@ -81,10 +147,53 @@ class PantryViewModel(
 
     fun addPantryItem(name: String, quantity: String, category: String, daysUntilExpiry: Int) {
         val expiryDate = LocalDate.now().plusDays(daysUntilExpiry.toLong()).toString()
-        val parts = quantity.trim().split(" ", limit = 2)
-        val qty = parts.getOrNull(0)
-        val unit = parts.getOrNull(1)
+        val (qty, unit) = splitQuantity(quantity)
         addItem(name = name, quantity = qty, unit = unit, expiryDate = expiryDate)
+    }
+
+    fun updatePantryItem(item: PantryItem, name: String, quantity: String, daysUntilExpiry: Int?) {
+        if (_state.value.isUpdating) return
+        val (qty, unit) = splitQuantity(quantity)
+        val expiryDate = daysUntilExpiry?.let { LocalDate.now().plusDays(it.toLong()).toString() }
+            ?: item.expiryDate
+        _state.update { it.copy(isUpdating = true, errorMessage = null) }
+        viewModelScope.launch {
+            pantryRepository.updateItem(item.id, name, qty, unit, expiryDate)
+                .onSuccess {
+                    ForkfulLogger.logAction("PANTRY", "Updated ${item.name} -> $name")
+                    _state.update { current ->
+                        current.copy(
+                            isUpdating = false,
+                            items = current.items.map { existing ->
+                                if (existing.id != item.id) existing else existing.copy(
+                                    name = name.trim(),
+                                    quantity = qty,
+                                    unit = unit,
+                                    expiryDate = expiryDate,
+                                    daysUntilExpiry = PantryUtils.daysUntilExpiry(expiryDate)
+                                )
+                            },
+                            addSuccessMessage = "${name.trim()} updated"
+                        )
+                    }
+                    loadMatches()
+                }
+                .onFailure { error ->
+                    _state.update {
+                        it.copy(isUpdating = false, addSuccessMessage = error.message ?: "Could not update item")
+                    }
+                }
+        }
+    }
+
+    private fun splitQuantity(quantity: String): Pair<String?, String?> {
+        val parts = quantity.trim().split(Regex("\\s+"), limit = 2).filter { it.isNotBlank() }
+        val first = parts.getOrNull(0) ?: return null to null
+        return if (first.replace(",", ".").toDoubleOrNull() != null) {
+            first to parts.getOrNull(1)
+        } else {
+            null to quantity.trim()
+        }
     }
 
     fun addItem(name: String, quantity: String?, unit: String?, expiryDate: String?) {
@@ -93,6 +202,7 @@ class PantryViewModel(
         viewModelScope.launch {
             pantryRepository.addItem(name, quantity, unit, expiryDate)
                 .onSuccess { item ->
+                    localPantryRepository.add(item.name, item.category)
                     _state.update { current ->
                         current.copy(
                             isAdding = false,
@@ -102,9 +212,14 @@ class PantryViewModel(
                     }
                     loadMatches()
                 }
-                .onFailure { error ->
-                    _state.update {
-                        it.copy(isAdding = false, errorMessage = error.message ?: "Could not add item")
+                .onFailure {
+                    localPantryRepository.add(name.trim(), "Other")
+                    _state.update { current ->
+                        current.copy(
+                            isAdding = false,
+                            isOffline = true,
+                            addSuccessMessage = "$name saved locally (will sync later)"
+                        )
                     }
                 }
         }
@@ -117,14 +232,19 @@ class PantryViewModel(
         viewModelScope.launch {
             pantryRepository.removeItem(pantryItemId)
                 .onSuccess {
+                    localPantryRepository.remove(pantryItemId)
                     _state.update { current ->
                         current.copy(items = current.items.filterNot { it.id == pantryItemId })
                     }
                     loadMatches()
                 }
-                .onFailure { error ->
-                    _state.update {
-                        it.copy(errorMessage = error.message ?: "Could not remove item")
+                .onFailure {
+                    localPantryRepository.remove(pantryItemId)
+                    _state.update { current ->
+                        current.copy(
+                            items = current.items.filterNot { it.id == pantryItemId },
+                            isOffline = true
+                        )
                     }
                 }
         }

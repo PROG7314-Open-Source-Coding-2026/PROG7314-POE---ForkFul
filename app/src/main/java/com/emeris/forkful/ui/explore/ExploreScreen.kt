@@ -163,14 +163,14 @@ fun ExploreScreen(
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         BasicTextField(
-                            value = uiState.searchQuery,
+                            value = uiState.searchText,
                             onValueChange = viewModel::onSearchInput,
                             textStyle = TextStyle(fontSize = 15.sp, color = TextCharcoal),
                             singleLine = true,
                             modifier = Modifier.weight(1f),
                             decorationBox = { innerTextField ->
                                 Box(contentAlignment = Alignment.CenterStart) {
-                                    if (uiState.searchQuery.isEmpty()) {
+                                    if (uiState.searchText.isEmpty()) {
                                         Text(
                                             text = "Search recipes, ingredients...",
                                             color = TextMuted,
@@ -181,7 +181,7 @@ fun ExploreScreen(
                                 }
                             }
                         )
-                        if (uiState.searchQuery.isNotEmpty()) {
+                        if (uiState.searchText.isNotEmpty()) {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Clear search",

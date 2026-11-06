@@ -6,6 +6,7 @@ import com.emeris.forkful.core.util.PantryUtils
 import com.emeris.forkful.data.mapper.toDomain
 import com.emeris.forkful.data.remote.dto.AddPantryItemRequest
 import com.emeris.forkful.data.remote.dto.PantryMatchRequest
+import com.emeris.forkful.data.remote.dto.UpdatePantryItemRequest
 import com.emeris.forkful.domain.model.PantryItem
 import com.emeris.forkful.domain.model.PantryMatch
 import com.emeris.forkful.domain.repository.PantryRepository
@@ -43,6 +44,27 @@ class PantryRepositoryImpl(
             category = "Other",
             daysUntilExpiry = PantryUtils.daysUntilExpiry(expiryDate)
         )
+    }
+
+    override suspend fun updateItem(
+        pantryItemId: String,
+        name: String,
+        quantity: String?,
+        unit: String?,
+        expiryDate: String?
+    ): Result<Boolean> = runCatching {
+        require(Validators.isNotBlank(name)) { "Ingredient name cannot be empty." }
+        ForkfulLogger.logNetwork("pantry", "PUT id=$pantryItemId name=$name")
+        api.updatePantryItem(
+            pantryItemId,
+            UpdatePantryItemRequest(
+                name = name.trim(),
+                quantity = quantity?.trim()?.takeIf { it.isNotEmpty() },
+                unit = unit?.trim()?.takeIf { it.isNotEmpty() },
+                expiryDate = expiryDate?.trim()?.takeIf { it.isNotEmpty() }
+            )
+        )
+        true
     }
 
     override suspend fun removeItem(pantryItemId: String): Result<Boolean> = runCatching {

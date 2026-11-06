@@ -29,11 +29,14 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -80,7 +83,16 @@ fun RecipeDetailScreen(
         viewModel.load(recipeId)
     }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(uiState.actionMessage) {
+        uiState.actionMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.consumeActionMessage()
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             ForkfulBottomBar(
                 currentRoute = Screen.Explore.route,
@@ -217,6 +229,7 @@ fun RecipeDetailScreen(
                                     )
                                     IconButton(
                                         onClick = { viewModel.toggleSave() },
+                                        enabled = !uiState.isSaving,
                                         modifier = Modifier
                                             .size(42.dp)
                                             .clip(CircleShape)
@@ -225,7 +238,7 @@ fun RecipeDetailScreen(
                                     ) {
                                         Icon(
                                             imageVector = if (recipe.isSaved) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                            contentDescription = "Save recipe",
+                                            contentDescription = if (recipe.isSaved) "Remove from Recipe Box" else "Save recipe",
                                             tint = if (recipe.isSaved) Color(0xFFE57373) else TextMuted
                                         )
                                     }

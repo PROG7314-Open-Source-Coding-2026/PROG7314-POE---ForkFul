@@ -19,7 +19,8 @@ data class RecipeBoxUiState(
     val errorMessage: String? = null,
     val filter: RecipeBoxFilter = RecipeBoxFilter.ALL,
     val allRecipes: List<Recipe> = emptyList(),
-    val searchQuery: String = ""
+    val searchQuery: String = "",
+    val searchText: String = ""
 ) {
     val displayedRecipes: List<Recipe>
         get() = allRecipes.filter { it.title.contains(searchQuery, ignoreCase = true) }
@@ -33,6 +34,7 @@ class RecipeBoxViewModel(
     val state: StateFlow<RecipeBoxUiState> = _state.asStateFlow()
 
     private val searchInput = MutableStateFlow("")
+    private var hasBeenShown = false
 
     init {
         load()
@@ -59,6 +61,11 @@ class RecipeBoxViewModel(
         }
     }
 
+    //Reload when returning from a recipe that may have been unsaved
+    fun onScreenShown() {
+        if (hasBeenShown) load() else hasBeenShown = true
+    }
+
     fun setFilter(filter: RecipeBoxFilter) {
         if (_state.value.filter == filter) return
         _state.update { it.copy(filter = filter) }
@@ -66,6 +73,7 @@ class RecipeBoxViewModel(
     }
 
     fun onSearchInput(query: String) {
+        _state.update { it.copy(searchText = query) }
         searchInput.value = query
     }
 }

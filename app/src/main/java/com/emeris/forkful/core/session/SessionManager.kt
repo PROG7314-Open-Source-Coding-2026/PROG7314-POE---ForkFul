@@ -12,6 +12,9 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.emeris.forkful.core.logging.ForkfulLogger
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 
 //Auth session model
@@ -19,7 +22,9 @@ data class Session(
     val token: String,
     val userId: String,
     val email: String?,
-    val displayName: String?
+    val displayName: String?,
+    val refreshToken: String? = null,
+    val expiresAt: Long? = null //Unix seconds
 )
 
 //App preferences model
@@ -34,8 +39,15 @@ private val Context.prefsDataStore: DataStore<Preferences> by preferencesDataSto
     name = "forkful_prefs"
 )
 
+//Token access used by the network layer
+interface TokenStore {
+    fun getToken(): String?
+    fun getRefreshToken(): String?
+    fun updateTokens(token: String, refreshToken: String, expiresAt: Long?)
+}
+
 //Session & prefs store
-class SessionManager(private val context: Context) {
+class SessionManager(private val context: Context) : TokenStore {
 
     private val securePrefs: SharedPreferences by lazy {
         val masterKey = MasterKey.Builder(context)
@@ -51,7 +63,7 @@ class SessionManager(private val context: Context) {
     }
 
     //Session methods
-    fun getToken(): String? = securePrefs.getString(KEY_TOKEN, null)
+    override fun getToken(): String? = securePrefs.getString(KEY_TOKEN, null)
 
     fun getSession(): Session? {
         val token = securePrefs.getString(KEY_TOKEN, null) ?: return null
@@ -60,9 +72,13 @@ class SessionManager(private val context: Context) {
             token = token,
             userId = userId,
             email = securePrefs.getString(KEY_EMAIL, null),
-            displayName = securePrefs.getString(KEY_DISPLAY_NAME, null)
+            displayName = securePrefs.getString(KEY_DISPLAY_NAME, null),
+            refreshToken = securePrefs.getString(KEY_REFRESH_TOKEN, null),
+            expiresAt = securePrefs.getLong(KEY_EXPIRES_AT, 0L).takeIf { it > 0L }
         )
     }
+
+    override fun getRefreshToken(): String? = securePrefs.getString(KEY_REFRESH_TOKEN, null)
 
     fun saveSession(session: Session) {
         securePrefs.edit()
@@ -70,13 +86,58 @@ class SessionManager(private val context: Context) {
             .putString(KEY_USER_ID, session.userId)
             .putString(KEY_EMAIL, session.email)
             .putString(KEY_DISPLAY_NAME, session.displayName)
+            .putString(KEY_REFRESH_TOKEN, session.refreshToken)
+            .putLong(KEY_EXPIRES_AT, session.expiresAt ?: 0L)
             .apply()
         ForkfulLogger.logAction("SESSION", "Session saved for user ${session.userId}")
     }
 
+    //Swap in refreshed tokens
+    override fun updateTokens(token: String, refreshToken: String, expiresAt: Long?) {
+        securePrefs.edit()
+            .putString(KEY_TOKEN, token)
+            .putString(KEY_REFRESH_TOKEN, refreshToken)
+            .putLong(KEY_EXPIRES_AT, expiresAt ?: 0L)
+            .commit()
+        ForkfulLogger.logAction("SESSION", "Access token refreshed")
+    }
+
+    //Clears credentials only - the onboarding flag survives logout
     fun clearSession() {
-        securePrefs.edit().clear().apply()
+        securePrefs.edit().apply {
+            SESSION_KEYS.forEach { remove(it) }
+        }.apply()
         ForkfulLogger.logAction("SESSION", "Session cleared (logout)")
+    }
+
+    //Expired-session event: the app listens and routes back to Login
+    private val _sessionExpired = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val sessionExpired: SharedFlow<Unit> = _sessionExpired.asSharedFlow()
+
+    @Volatile
+    private var pendingLoginMessage: String? = null
+
+    fun expireSession() {
+        if (getToken() == null) return
+        clearSession()
+        pendingLoginMessage = "Your session has expired. Please sign in again."
+        ForkfulLogger.logAction("SESSION", "Session expired - routing to login")
+        _sessionExpired.tryEmit(Unit)
+    }
+
+    //One-shot message for the Login screen
+    fun consumeLoginMessage(): String? = pendingLoginMessage.also { pendingLoginMessage = null }
+
+    //Debug-build helpers for testing expiry on a device
+    fun debugBreakAccessToken() {
+        securePrefs.edit().putString(KEY_TOKEN, "expired-access-token").commit()
+    }
+
+    fun debugBreakAllTokens() {
+        securePrefs.edit()
+            .putString(KEY_TOKEN, "expired-access-token")
+            .putString(KEY_REFRESH_TOKEN, "revoked-refresh-token")
+            .commit()
     }
 
     //Onboarding flag
@@ -119,7 +180,13 @@ class SessionManager(private val context: Context) {
         const val KEY_USER_ID = "session_user_id"
         const val KEY_EMAIL = "session_email"
         const val KEY_DISPLAY_NAME = "session_display_name"
+        const val KEY_REFRESH_TOKEN = "session_refresh_token"
+        const val KEY_EXPIRES_AT = "session_expires_at"
         const val KEY_ONBOARDED = "session_onboarded"
+
+        val SESSION_KEYS = listOf(
+            KEY_TOKEN, KEY_USER_ID, KEY_EMAIL, KEY_DISPLAY_NAME, KEY_REFRESH_TOKEN, KEY_EXPIRES_AT
+        )
 
         val KEY_THEME = stringPreferencesKey("pref_theme")
         val KEY_LANGUAGE = stringPreferencesKey("pref_language")

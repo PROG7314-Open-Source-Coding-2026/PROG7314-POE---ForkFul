@@ -26,8 +26,14 @@ class FakeRecipeRepository : RecipeRepository {
     var deck: List<Recipe> = emptyList()
     var lastSwipeDirection: SwipeDirection? = null
     var lastSwipeMood: String? = null
+    var lastDeckQuery: DeckQuery? = null
+    var unsavedIds = mutableListOf<String>()
+    var failUnsave = false
 
-    override suspend fun getDeck(query: DeckQuery): Result<List<Recipe>> = Result.success(deck)
+    override suspend fun getDeck(query: DeckQuery): Result<List<Recipe>> {
+        lastDeckQuery = query
+        return Result.success(deck)
+    }
 
     override suspend fun getRecipeDetail(recipeId: String): Result<Recipe> =
         Result.success(deck.first { it.id == recipeId })
@@ -47,6 +53,12 @@ class FakeRecipeRepository : RecipeRepository {
 
     override suspend fun setCooked(recipeId: String, cooked: Boolean): Result<Boolean> =
         Result.success(true)
+
+    override suspend fun unsaveRecipe(recipeId: String): Result<Boolean> {
+        if (failUnsave) return Result.failure(Exception("Network down"))
+        unsavedIds += recipeId
+        return Result.success(true)
+    }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -105,6 +117,13 @@ class SwipeViewModelTest {
     }
 
     @Test
+    fun `swipe stack asks the server to hide already-swiped recipes`() = runTest {
+        viewModel.loadDeck("italian")
+
+        assertEquals(true, repository.lastDeckQuery?.excludeSwiped)
+    }
+
+    @Test
     fun `swipe failures still advance the visible card`() = runTest {
         repository.deck = listOf(recipe("r-1", "Only dish"))
         viewModel.loadDeck("comfort")
@@ -127,7 +146,7 @@ class SwipeViewModelTest {
         inPantryCount = 3,
         totalIngredientsCount = 5,
         rating = 4.5,
-        category = "Test",
+        category = "Italian",
         tags = listOf("Fresh +5"),
         ingredients = listOf(Ingredient("Something", "1 cup", inPantry = true))
     )

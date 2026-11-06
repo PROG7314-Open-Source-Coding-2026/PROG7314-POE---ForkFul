@@ -4,6 +4,7 @@ import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.core.network.ForkfulApi
 import com.emeris.forkful.core.session.SessionManager
 import com.emeris.forkful.data.mapper.toDomain
+import com.emeris.forkful.data.remote.dto.AuthResponse
 import com.emeris.forkful.data.remote.dto.SsoAuthRequest
 import com.emeris.forkful.domain.repository.AuthOutcome
 import com.emeris.forkful.domain.repository.AuthRepository
@@ -36,9 +37,16 @@ class AuthRepositoryImpl(
                 )
             )
             sessionManager.saveSession(
-                Session(response.token, response.userId, email, displayName)
+                Session(
+                    token = response.token,
+                    userId = response.userId,
+                    email = email,
+                    displayName = displayName,
+                    refreshToken = response.refreshToken,
+                    expiresAt = response.expiresAt
+                )
             )
-            AuthOutcome(response.isNewUser)
+            completeSignIn(response)
         } catch (e: HttpException) {
             throw Exception(extractServerError(e), e)
         }
@@ -72,11 +80,27 @@ class AuthRepositoryImpl(
                     mode = mode
                 )
             )
-            sessionManager.saveSession(Session(response.token, response.userId, email, displayName))
-            AuthOutcome(response.isNewUser)
+            sessionManager.saveSession(
+                Session(
+                    token = response.token,
+                    userId = response.userId,
+                    email = email,
+                    displayName = displayName,
+                    refreshToken = response.refreshToken,
+                    expiresAt = response.expiresAt
+                )
+            )
+            completeSignIn(response)
         } catch (e: HttpException) {
             throw Exception(extractServerError(e), e)
         }
+    }
+
+    //Keep the local onboarding flag in step with the signed-in account
+    private fun completeSignIn(response: AuthResponse): AuthOutcome {
+        val outcome = AuthOutcome.from(response.isNewUser, response.onboarded)
+        sessionManager.setOnboarded(!outcome.needsOnboarding)
+        return outcome
     }
 
     private fun extractServerError(e: HttpException): String {

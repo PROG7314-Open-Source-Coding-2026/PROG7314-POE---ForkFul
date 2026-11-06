@@ -59,24 +59,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
-import androidx.credentials.CredentialManager
-import androidx.credentials.CustomCredential
-import androidx.credentials.GetCredentialRequest
-import androidx.credentials.exceptions.GetCredentialCancellationException
-import com.emeris.forkful.BuildConfig
 import com.emeris.forkful.core.designsystem.DarkAuthBackground
 import com.emeris.forkful.core.designsystem.DarkAuthBorder
 import com.emeris.forkful.core.designsystem.ForestGreen
 import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.core.util.Validators
 import com.emeris.forkful.ui.di.containerViewModel
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.launch
 
 @Composable
 fun SignUpScreen(
-    onAuthenticated: (isNewUser: Boolean) -> Unit,
+    onAuthenticated: (needsOnboarding: Boolean) -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
     val view = LocalView.current
@@ -111,7 +104,7 @@ fun SignUpScreen(
     LaunchedEffect(uiState) {
         val current = uiState
         if (current is LoginUiState.Authenticated) {
-            onAuthenticated(current.isNewUser)
+            onAuthenticated(current.needsOnboarding)
             viewModel.consumeState()
         }
     }
@@ -130,36 +123,15 @@ fun SignUpScreen(
     }
 
     val launchGoogleSignIn: () -> Unit = {
-        if (activity == null) {
-            ForkfulLogger.logAction("SIGN_UP", "Credential Manager needs an Activity context")
-        } else {
-            coroutineScope.launch {
-                try {
-                    val credentialManager = CredentialManager.create(activity)
-                    val googleIdOption = GetGoogleIdOption.Builder()
-                        .setServerClientId(BuildConfig.GOOGLE_SERVER_CLIENT_ID)
-                        .setFilterByAuthorizedAccounts(false)
-                        .build()
-                    val request = GetCredentialRequest.Builder()
-                        .addCredentialOption(googleIdOption)
-                        .build()
-                    val response = credentialManager.getCredential(activity, request)
-                    val credential = response.credential
-                    if (credential is CustomCredential &&
-                        credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
-                    ) {
-                        val googleCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                        viewModel.signInWithGoogle(
-                            idToken = googleCredential.idToken,
-                            email = googleCredential.id,
-                            displayName = googleCredential.displayName
-                        )
-                    }
-                } catch (_: GetCredentialCancellationException) {
-                    ForkfulLogger.logAction("SIGN_UP", "Google sign-in cancelled by user")
-                } catch (e: Exception) {
-                    ForkfulLogger.logAction("SIGN_UP", "Credential Manager error: ${e.message}")
-                }
+        coroutineScope.launch {
+            when (val result = GoogleSignInLauncher.requestIdToken(activity, "SIGN_UP")) {
+                is GoogleSignInResult.Success -> viewModel.signInWithGoogle(
+                    idToken = result.idToken,
+                    email = result.email,
+                    displayName = result.displayName
+                )
+                is GoogleSignInResult.Failure -> viewModel.showError(result.message)
+                GoogleSignInResult.Cancelled -> Unit
             }
         }
     }

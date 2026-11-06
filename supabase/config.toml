@@ -5,6 +5,9 @@ project_id = "forkful-poe"
 [functions.auth-sso]
 verify_jwt = true
 
+[functions.auth-refresh]
+verify_jwt = true
+
 [functions.recipes-deck]
 verify_jwt = true
 

@@ -17,7 +17,9 @@ data class BasketUiState(
     val errorMessage: String? = null,
     val aisles: List<GroceryAisle> = emptyList(),
     val pendingItemId: String? = null,
-    val bannerText: String? = "Items are added automatically whenever you save a recipe - anything already in your pantry is subtracted."
+    val isSubmitting: Boolean = false,
+    val snackbarMessage: String? = null,
+    val bannerText: String? = "Items are added automatically whenever you save a recipe - anything already in your pantry is subtracted. Tap + to add your own."
 ) {
     val totalItemCount: Int get() = aisles.sumOf { it.items.size }
     val checkedItemCount: Int get() = aisles.sumOf { aisle -> aisle.items.count { it.isChecked } }
@@ -60,6 +62,15 @@ class BasketViewModel(
         }
     }
 
+    //Quiet reload after a change, keeps the list on screen
+    private fun refresh() {
+        viewModelScope.launch {
+            groceryRepository.getBasket().onSuccess { aisles ->
+                _state.update { it.copy(aisles = aisles) }
+            }
+        }
+    }
+
     fun setChecked(itemId: String, isChecked: Boolean) {
         _state.update { current ->
             current.copy(
@@ -85,7 +96,88 @@ class BasketViewModel(
         }
     }
 
+    //Remove one item (optimistic, restored on failure)
+    fun removeItem(itemId: String) {
+        val before = _state.value.aisles
+        val removed = before.flatMap { it.items }.firstOrNull { it.id == itemId } ?: return
+        _state.update { current ->
+            current.copy(aisles = current.aisles.withoutItems { it.id == itemId })
+        }
+        viewModelScope.launch {
+            groceryRepository.removeItem(itemId)
+                .onSuccess {
+                    _state.update { it.copy(snackbarMessage = "${removed.name} removed") }
+                }
+                .onFailure { error ->
+                    _state.update {
+                        it.copy(aisles = before, snackbarMessage = error.message ?: "Could not remove ${removed.name}")
+                    }
+                }
+        }
+    }
+
+    //Manual add from the Add item dialog
+    fun addItem(name: String, quantity: String, onAdded: () -> Unit = {}) {
+        if (_state.value.isSubmitting) return
+        if (name.isBlank()) {
+            _state.update { it.copy(snackbarMessage = "Please enter an item name") }
+            return
+        }
+        _state.update { it.copy(isSubmitting = true) }
+        viewModelScope.launch {
+            groceryRepository.addItem(name.trim(), quantity.trim().ifBlank { null })
+                .onSuccess {
+                    _state.update {
+                        it.copy(isSubmitting = false, snackbarMessage = "${name.trim()} added to your basket")
+                    }
+                    onAdded()
+                    refresh()
+                }
+                .onFailure { error ->
+                    _state.update {
+                        it.copy(isSubmitting = false, snackbarMessage = error.message ?: "Could not add ${name.trim()}")
+                    }
+                }
+        }
+    }
+
+    fun clearCollected() = clear(checkedOnly = true)
+
+    fun clearAll() = clear(checkedOnly = false)
+
+    private fun clear(checkedOnly: Boolean) {
+        val before = _state.value.aisles
+        if (checkedOnly && _state.value.checkedItemCount == 0) return
+        _state.update { current ->
+            current.copy(
+                aisles = if (checkedOnly) current.aisles.withoutItems { it.isChecked } else emptyList()
+            )
+        }
+        viewModelScope.launch {
+            groceryRepository.clearItems(checkedOnly)
+                .onSuccess {
+                    _state.update {
+                        it.copy(snackbarMessage = if (checkedOnly) "Collected items removed" else "Basket cleared")
+                    }
+                }
+                .onFailure { error ->
+                    _state.update {
+                        it.copy(aisles = before, snackbarMessage = error.message ?: "Could not update your basket")
+                    }
+                }
+        }
+    }
+
+    fun consumeSnackbar() {
+        _state.update { it.copy(snackbarMessage = null) }
+    }
+
     fun dismissBanner() {
         _state.update { it.copy(bannerText = null) }
     }
+
+    private fun List<GroceryAisle>.withoutItems(
+        predicate: (com.emeris.forkful.domain.model.GroceryItem) -> Boolean
+    ): List<GroceryAisle> = map { aisle -> aisle.copy(items = aisle.items.filterNot(predicate)) }
+        .filter { it.items.isNotEmpty() }
 }

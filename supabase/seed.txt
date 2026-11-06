@@ -48,7 +48,7 @@ values
     ('Braaibroodjie',
      'The legendary South African braai sandwich: gooey cheese, tomato, onion and chutney grilled over coals.',
      10, 8, 430, 16,
-     'https://images.unsplash.com/photo-1529059997568-3d847b1154c0?q=80&w=800&auto=format&fit=crop',
+     'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?q=80&w=800&auto=format&fit=crop',
      'Braai', 'Easy', 4.8, '{Vegetarian}',
      '["Butter the outsides of thick bread slices.","Layer cheese, tomato, onion and chutney inside.","Wrap in foil and toast over medium coals.","Turn every 2 minutes until golden.","Unwrap, slice and serve hot."]'),
 
@@ -83,7 +83,7 @@ values
     ('Chicken Enchiladas',
      'Rolled tortillas stuffed with shredded chicken, blanketed in a rich red sauce and melted cheese.',
      30, 25, 580, 38,
-     'https://images.unsplash.com/photo-1565122932893-18b4dbd7c786?q=80&w=800&auto=format&fit=crop',
+     'https://images.unsplash.com/photo-1534352956036-cd81e27dd615?q=80&w=800&auto=format&fit=crop',
      'Mexican', 'Medium', 4.7, '{}',
      '["Mix shredded chicken with half the enchilada sauce.","Roll the filling into tortillas and pack into a dish.","Pour over the remaining sauce and cheese.","Bake at 190 C for 20 minutes.","Rest 5 minutes, then serve with coriander."]'),
 
@@ -111,7 +111,7 @@ values
     ('Dark Chocolate Mousse',
      'Three-ingredient indulgent mousse topped with berries - make it ahead and chill.',
      15, 5, 340, 5,
-     'https://images.unsplash.com/photo-1504372248769-4b8ba1ddd3b7?q=80&w=800&auto=format&fit=crop',
+     'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?q=80&w=800&auto=format&fit=crop',
      'Sweets', 'Easy', 4.7, '{Vegetarian,Gluten-Free}',
      '["Melt the dark chocolate over a water bath.","Whip the cream to soft peaks.","Fold the chocolate into the cream gently.","Spoon into glasses and chill for 2 hours.","Top with berries before serving."]),
     ('Karoo Lamb Potjiekos',
@@ -152,7 +152,7 @@ values
     ('Crispy Sesame Tofu Noodle Bowl',
      'Pan-crisped golden tofu cubes tossed with crunchy cucumber and vermicelli in a rich toasted sesame peanut dressing.',
      15, 15, 410, 19,
-     'https://images.unsplash.com/photo-1546069901-d72b22070444?q=80&w=800&auto=format&fit=crop',
+     'https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=800&auto=format&fit=crop',
      'Asian', 'Easy', 4.6, '{Vegan,Vegetarian,No Shellfish}',
      '["Press and cube the firm tofu, then dust lightly in cornflour.","Pan-fry in sesame oil until all sides are crisp and golden.","Soak vermicelli noodles in boiling water for 4 minutes and drain.","Whisk peanut butter, soy sauce, lime juice, and sesame oil.","Assemble bowls with noodles, crisp tofu, cucumber, and dressing."]'),
 

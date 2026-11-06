@@ -58,6 +58,7 @@ import com.emeris.forkful.core.designsystem.MintLight
 import com.emeris.forkful.core.designsystem.PureWhite
 import com.emeris.forkful.core.designsystem.TextCharcoal
 import com.emeris.forkful.core.designsystem.TextMuted
+import com.emeris.forkful.core.designsystem.TrueWhite
 import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.domain.model.Recipe
 import com.emeris.forkful.ui.components.ErrorState
@@ -233,7 +234,7 @@ fun ExploreScreen(
                                         text = cat.name.take(1),
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 18.sp,
-                                        color = if (cat.name == "Braai") PureWhite else ForestGreen
+                                        color = if (cat.name == "Braai") TrueWhite else ForestGreen
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(6.dp))
@@ -414,7 +415,7 @@ private fun FilterPill(
         Text(
             text = label,
             fontSize = 13.sp,
-            color = if (selected) PureWhite else TextCharcoal
+            color = if (selected) TrueWhite else TextCharcoal
         )
     }
 }
@@ -539,12 +540,12 @@ fun MoodCard(
                 fontFamily = FontFamily.Serif,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = PureWhite
+                color = TrueWhite
             )
             Text(
                 text = subtitle,
                 fontSize = 12.sp,
-                color = PureWhite.copy(alpha = 0.85f)
+                color = TrueWhite.copy(alpha = 0.85f)
             )
         }
     }

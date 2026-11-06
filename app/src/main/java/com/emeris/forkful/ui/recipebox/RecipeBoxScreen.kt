@@ -50,6 +50,7 @@ import com.emeris.forkful.core.designsystem.MintLight
 import com.emeris.forkful.core.designsystem.PureWhite
 import com.emeris.forkful.core.designsystem.TextCharcoal
 import com.emeris.forkful.core.designsystem.TextMuted
+import com.emeris.forkful.core.designsystem.TrueWhite
 import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.domain.model.Recipe
 import com.emeris.forkful.domain.model.RecipeBoxFilter
@@ -187,7 +188,7 @@ fun RecipeBoxScreen(
                             text = label,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
-                            color = if (isTabSelected) PureWhite else TextCharcoal
+                            color = if (isTabSelected) TrueWhite else TextCharcoal
                         )
                     }
                 }

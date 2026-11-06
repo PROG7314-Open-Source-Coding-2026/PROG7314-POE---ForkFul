@@ -57,6 +57,7 @@ import com.emeris.forkful.core.designsystem.MintLight
 import com.emeris.forkful.core.designsystem.PureWhite
 import com.emeris.forkful.core.designsystem.TextCharcoal
 import com.emeris.forkful.core.designsystem.TextMuted
+import com.emeris.forkful.core.designsystem.TrueWhite
 import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.domain.model.SwipeDirection
 import com.emeris.forkful.ui.components.ErrorState
@@ -413,7 +414,7 @@ private fun StackExhaustedState(
                         .clickable { onReload() }
                         .padding(horizontal = 24.dp, vertical = 12.dp)
                 ) {
-                    Text(text = "Deal again", color = PureWhite, fontWeight = FontWeight.SemiBold)
+                    Text(text = "Deal again", color = TrueWhite, fontWeight = FontWeight.SemiBold)
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Box(

@@ -61,6 +61,7 @@ import com.emeris.forkful.core.designsystem.ForestGreen
 import com.emeris.forkful.core.designsystem.PureWhite
 import com.emeris.forkful.core.designsystem.TextCharcoal
 import com.emeris.forkful.core.designsystem.TextMuted
+import com.emeris.forkful.core.designsystem.TrueWhite
 import com.emeris.forkful.core.logging.ForkfulLogger
 import com.emeris.forkful.core.security.BiometricHelper
 import com.emeris.forkful.core.security.BiometricStatus
@@ -220,7 +221,7 @@ fun SettingsScreen(
                                     Text(
                                         text = option,
                                         fontSize = 12.sp,
-                                        color = if (selected) PureWhite else TextCharcoal
+                                        color = if (selected) TrueWhite else TextCharcoal
                                     )
                                 }
                             }

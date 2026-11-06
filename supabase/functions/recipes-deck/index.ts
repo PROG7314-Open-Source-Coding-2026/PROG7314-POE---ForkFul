@@ -97,10 +97,26 @@ Deno.serve(async (req: Request) => {
     const matchesDietary = (recipeDietary: string[] | null) =>
       !recipeDietary?.some((tag) => activeDietary.includes(tag));
 
-    const scored = (recipes ?? [])
-      .filter((recipe) => matchesDietary(recipe.dietary_tags as string[] | null))
-      .filter((recipe) => !(excludeSwiped ? swipedIds : savedIds).has(recipe.recipe_id))
-      .map((recipe) => {
+    let candidateRecipes = (recipes ?? [])
+      .filter((recipe) => matchesDietary(recipe.dietary_tags as string[] | null));
+
+    if (excludeSwiped) {
+      const unswiped = candidateRecipes.filter((r) => !swipedIds.has(r.recipe_id));
+      // Prioritise unswiped recipes. If all dishes have been swiped,
+      // fallback to un-saved dishes so the user is never stuck with an empty stack.
+      if (unswiped.length > 0) {
+        candidateRecipes = unswiped;
+      } else {
+        candidateRecipes = candidateRecipes.filter((r) => !savedIds.has(r.recipe_id));
+        if (candidateRecipes.length === 0) {
+          candidateRecipes = (recipes ?? []).filter((recipe) => matchesDietary(recipe.dietary_tags as string[] | null));
+        }
+      }
+    } else {
+      candidateRecipes = candidateRecipes.filter((r) => !savedIds.has(r.recipe_id));
+    }
+
+    const scored = candidateRecipes.map((recipe) => {
         const moodTags = (recipe.recipe_tags as Array<{ mood_profile_key: string; tag_name: string }>)
           .filter((tag) => tag.mood_profile_key === mood)
           .map((tag) => tag.tag_name);

@@ -510,14 +510,18 @@ fun RecipeMatchCard(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
-                        .background(MintLight)
+                        .background(if (recipe.matchPercentage > 0) MintLight else Color(0xFFF1EDE4))
                         .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
                     Text(
-                        text = "${recipe.matchPercentage}% MATCH",
+                        text = if (recipe.matchPercentage > 0) {
+                            "${recipe.matchPercentage}% PANTRY MATCH"
+                        } else {
+                            recipe.category.uppercase()
+                        },
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = ForestGreen
+                        color = if (recipe.matchPercentage > 0) ForestGreen else TextMuted
                     )
                 }
             }
